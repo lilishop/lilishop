@@ -15,6 +15,10 @@ import java.io.Serializable;
 public class OrderSetting implements Serializable {
 
     private static final long serialVersionUID = -2628613596000114786L;
+
+    @Schema(description = "微信小程序订单自动上报开关，默认开启，包含发货上报和收货通知")
+    private Boolean wechatOrderAutoUploadEnabled = true;
+
     @Schema(description = "自动取消 分钟")
     private Integer autoCancel;
 

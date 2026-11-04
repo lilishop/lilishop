@@ -10,6 +10,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dto.*;
 import cn.lili.modules.system.entity.dto.connect.ConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
@@ -52,6 +53,7 @@ public class SettingManagerController {
 
 
     @DemoSite
+    @SystemLogPoint(description = "更新系统配置", customerLog = "'配置项: [' + #key + ']'")
     @Operation(summary = "更新配置")
     @Parameter(name = "key", description = "配置key", required = true)
     @Parameter(name = "configValue", description = "配置值", required = true)

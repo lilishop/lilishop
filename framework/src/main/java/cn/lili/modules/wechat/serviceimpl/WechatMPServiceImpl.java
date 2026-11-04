@@ -18,6 +18,7 @@ import cn.lili.modules.order.order.service.OrderPackageService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.OrderSetting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
@@ -86,6 +87,10 @@ public class WechatMPServiceImpl implements WechatMPService {
      */
     @Override
     public void uploadShippingInfo(String orderSn) {
+
+        if (!isOrderAutoUploadEnabled()) {
+            return;
+        }
 
         Order order = orderService.getBySn(orderSn);
         //是否是微信小程序订单 && 微信支付
@@ -208,6 +213,9 @@ public class WechatMPServiceImpl implements WechatMPService {
      */
     @Override
     public void notifyConfirmReceive(String orderSn) {
+        if (!isOrderAutoUploadEnabled()) {
+            return;
+        }
         Order order = orderService.getBySn(orderSn);
 
         //是否是微信小程序订单 && 微信支付
@@ -233,10 +241,18 @@ public class WechatMPServiceImpl implements WechatMPService {
         this.doPostWithJson(confirmReceiveUrl, map);
     }
 
-    /**
-     * 是否已开通发货信息管理服务
-     * https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/order-shipping/order-shipping.html#%E4%B8%83%E3%80%81%E6%9F%A5%E8%AF%A2%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%98%AF%E5%90%A6%E5%B7%B2%E5%BC%80%E9%80%9A%E5%8F%91%E8%B4%A7%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E6%9C%8D%E5%8A%A1
-     */
+    /** 是否允许自动上报；每次读取配置，保存后下次调用生效。 */
+    private boolean isOrderAutoUploadEnabled() {
+        Setting setting = settingService.get(SettingEnum.ORDER_SETTING.name());
+        if (setting == null || CharSequenceUtil.isBlank(setting.getSettingValue())) {
+            return true;
+        }
+        OrderSetting orderSetting = JSON.parseObject(setting.getSettingValue(), OrderSetting.class);
+        // 旧配置缺少开关或为 null 时保留原有上报行为，仅显式关闭时停用。
+        return orderSetting == null || !Boolean.FALSE.equals(orderSetting.getWechatOrderAutoUploadEnabled());
+    }
+
+    /** 查询微信侧是否已开通发货信息管理服务。 */
     private Boolean isTradeManaged() {
 
         Setting systemSetting = settingService.get(SettingEnum.WECHAT_PAYMENT.name());
