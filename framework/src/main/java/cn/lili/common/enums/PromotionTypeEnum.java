@@ -21,6 +21,10 @@ public enum PromotionTypeEnum {
     COUPON("优惠券"),
     PLATFORM_COUPON("平台优惠券"),
     FULL_DISCOUNT("满减"),
+    PAID_MEMBER("平台付费会员优惠"),
+    /** 已移除，仅保留历史订单价格详情反序列化兼容。 */
+    @Deprecated
+    MEMBER_BENEFIT("会员折扣"),
     POINTS_GOODS("积分商品"),
     KANJIA("砍价"),
     COUPON_ACTIVITY("优惠券活动");
@@ -68,7 +72,7 @@ public enum PromotionTypeEnum {
      * 已下线的活动不再参与促销展示、库存及计价。
      */
     public static boolean isRetired(String promotionType) {
-        return !isValid(promotionType);
+        return !isValid(promotionType) || MEMBER_BENEFIT.name().equals(promotionType);
     }
 
     /**

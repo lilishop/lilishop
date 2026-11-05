@@ -5,7 +5,9 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.member.entity.dos.*;
 import cn.lili.modules.member.mapper.MemberBenefitDeliveryMapper;
+import cn.lili.modules.member.mapper.MemberBenefitMapper;
 import cn.lili.modules.member.mapper.MemberGradeBenefitGrantMapper;
+import cn.lili.modules.member.mapper.PaidMemberOrderMapper;
 import cn.lili.modules.member.service.MemberBenefitDeliveryService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.util.MemberBenefitRules;
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
- * 客户权益逐项发放服务，处理普通等级的赠送积分、一次性券礼包和周期券礼包。
+ * 客户权益逐项发放服务，统一处理普通等级及付费会员的赠送积分、一次性券礼包和周期券礼包。
  * 按客户、来源类型、来源记录、权益及周期生成防重账本；每项发放独立提交，失败另开事务记录原因。
  *
  * @author Bulbasaur
@@ -40,6 +42,10 @@ public class MemberBenefitDeliveryServiceImpl extends ServiceImpl<MemberBenefitD
     private MemberService memberService;
     @Autowired
     private PlatformTransactionManager transactionManager;
+    @Autowired
+    private PaidMemberOrderMapper paidOrders;
+    @Autowired
+    private MemberBenefitMapper benefits;
 
     /**
      * 创建 REQUIRES_NEW 事务模板，挂起调用方事务并独立提交或回滚。
@@ -130,6 +136,33 @@ public class MemberBenefitDeliveryServiceImpl extends ServiceImpl<MemberBenefitD
         return record;
     }
 
+    /**
+     * 按付费会员订单来源生成并发放当前周期权益，周期锚点为订单有效期开始日期（上海时区）。
+     * 调用方提供已生效订单及可用权益，实际执行前再次校验付费资格；不同续费订单分别去重。
+     * 已成功或尝试次数达到10的记录不自动重发，预占已存在记录时保留原配置快照。
+     *
+     * @param order    来源会员订单，需包含客户、主键及有效期开始时间
+     * @param benefits 按订单配置关联并过滤当前开启状态的权益
+     * @param grant    在单项独立事务内执行的实际发放回调
+     */
+    @Override
+    public void deliverPaid(PaidMemberOrder order, List<MemberBenefit> benefits, BiConsumer<Member, MemberBenefit> grant) {
+        ZoneId zone = ZoneId.of("Asia/Shanghai");
+        for (MemberBenefit benefit : benefits) {
+            if (!"GIFT_POINT".equals(benefit.getBenefitType()) && !"COUPON_PACKAGE".equals(benefit.getBenefitType()))
+                continue;
+            String cycle = "GIFT_POINT".equals(benefit.getBenefitType()) ? "ONCE" : MemberBenefitRules.cycle(
+                    MemberBenefitRules.config(benefit.getBenefitConfig()), order.getStartTime().toInstant().atZone(zone).toLocalDate(), LocalDate.now(zone));
+            if (cycle == null) continue;
+            MemberBenefitDelivery record = snapshot(order.getMemberId(), order.getId(), benefit, cycle);
+            record.setSourceType("PAID_MEMBER");
+            record.setId(DigestUtil.md5Hex(order.getMemberId() + "|PAID_MEMBER|" + order.getId() + "|" + benefit.getId() + "|" + cycle));
+            MemberBenefitDelivery previous = getById(record.getId());
+            if (previous != null && ("SUCCESS".equals(previous.getStatus()) || previous.getAttempts() >= 10)) continue;
+            transaction().executeWithoutResult(tx -> baseMapper.reserve(record));
+            execute(record.getId(), grant);
+        }
+    }
 
     /**
      * 重试指定发放明细，沿用首次预占的权益配置快照。
@@ -161,7 +194,15 @@ public class MemberBenefitDeliveryServiceImpl extends ServiceImpl<MemberBenefitD
                 if (record == null || "SUCCESS".equals(record.getStatus())) return;
                 Member member = memberService.getOne(new LambdaQueryWrapper<Member>().eq(Member::getId, record.getMemberId()).last("FOR UPDATE"));
                 if (member == null) throw new ServiceException(ResultCode.USER_NOT_EXIST);
-
+                if ("PAID_MEMBER".equals(record.getSourceType())) {
+                    var order = paidOrders.selectById(record.getSourceRef());
+                    var currentBenefit = benefits.selectById(record.getBenefitId());
+                    java.util.Date now = new java.util.Date();
+                    if (order == null || !order.getMemberId().equals(record.getMemberId()) || !"PAID".equals(order.getStatus()) || order.getStartTime().after(now) || !order.getEndTime().after(now)
+                            || currentBenefit == null || !"OPEN".equals(currentBenefit.getBenefitState())
+                            || !cn.hutool.json.JSONUtil.toBean(order.getConfigSnapshot(), cn.lili.modules.system.entity.dto.PaidMemberSetting.class).getBenefitIds().contains(record.getBenefitId()))
+                        throw new ServiceException(ResultCode.PARAMS_ERROR, "付费会员权益已失效");
+                }
                 MemberBenefit benefit = new MemberBenefit();
                 benefit.setId(record.getBenefitId());
                 benefit.setBenefitName(record.getBenefitName());

@@ -4,6 +4,8 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.WithdrawalSetting;
 import cn.lili.modules.system.entity.dto.BaseSetting;
+import cn.lili.modules.system.entity.dto.PaidMemberSetting;
+import cn.lili.modules.member.service.PaidMemberService;
 import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.cache.Cache;
@@ -100,7 +102,17 @@ class SettingConfigServiceTest {
         assertThat(service.getConfig(SettingEnum.BASE_SETTING)).isInstanceOf(BaseSetting.class);
     }
 
-
+    /** 付费会员的读写继续经过专用服务，不能直接绕过关联商家及商品校验。 */
+    @Test void paidMemberDelegatesToBusinessService() {
+        var paidMembers = mock(PaidMemberService.class);
+        ReflectionTestUtils.setField(service, "paidMemberService", paidMembers);
+        var config = new PaidMemberSetting();
+        when(paidMembers.config()).thenReturn(config);
+        assertThat(service.getConfig(SettingEnum.PAID_MEMBER_SETTING)).isSameAs(config);
+        service.saveConfig(SettingEnum.PAID_MEMBER_SETTING, "{}");
+        verify(paidMembers).saveConfig(any(PaidMemberSetting.class));
+        verify(settings, never()).saveUpdate(any());
+    }
 
     /** 分销过滤继续调用已有规则，保存仍复用底层配置存储及缓存失效。 */
     @Test void distributionKeepsExistingNormalization() {

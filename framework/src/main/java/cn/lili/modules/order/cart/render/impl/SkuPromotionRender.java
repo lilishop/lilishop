@@ -87,15 +87,15 @@ public class SkuPromotionRender implements CartRenderStep {
     }
 
     /**
-     * 基础价格渲染
+     * 基础价格渲染：商品金额保留会员优惠前基数，会员补贴计入优惠总额，不重复从商品基数中扣除。
      *
-     * @param tradeDTO
+     * @param tradeDTO 交易数据
      */
     private void renderBasePrice(TradeDTO tradeDTO) {
         tradeDTO.getCartList().forEach(
                 cartVO -> cartVO.getCheckedSkuList().forEach(cartSkuVO -> {
                     PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
-                    priceDetailDTO.setGoodsPrice(cartSkuVO.getSubTotal());
+                    priceDetailDTO.setGoodsPrice(CurrencyUtil.add(cartSkuVO.getSubTotal(), priceDetailDTO.getPaidMemberSubsidy()));
                     priceDetailDTO.setDiscountPrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), cartSkuVO.getSubTotal()));
                 })
         );
@@ -217,7 +217,8 @@ public class SkuPromotionRender implements CartRenderStep {
                             }
                             PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], promotionsObj.getString("id"));
                             cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
-                            cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
+                            // subTotal 已是会员实付小计，补回平台补贴保留结算基数，避免再次扣减会员优惠。
+                            cartSkuVO.getPriceDetailDTO().setGoodsPrice(CurrencyUtil.add(cartSkuVO.getSubTotal(), cartSkuVO.getPriceDetailDTO().getPaidMemberSubsidy()));
 
                             cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
 

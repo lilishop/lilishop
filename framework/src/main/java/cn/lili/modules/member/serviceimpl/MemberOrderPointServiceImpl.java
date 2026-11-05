@@ -114,7 +114,7 @@ public class MemberOrderPointServiceImpl implements MemberOrderPointService {
 
     /**
      * 按发放时的当前积分设置及权益倍率计算，仅扣除已完成售后的实际退款，拒绝和取消不扣减。
-     * 配置变更、等级变化会影响尚未赠送的订单；退款超过原金额按零计算。
+     * 配置变更、等级变化和付费会员到期会影响尚未赠送的订单；退款超过原金额按零计算。
      *
      * @param order 持久化订单，流水金额单位元，客户 ID 用于查询当前权益倍率
      * @param refunds 已核验全部终结的售后记录，实际退款金额单位元

@@ -120,7 +120,7 @@ public interface MemberBenefitService extends IService<MemberBenefit> {
     IPage<MemberBenefitGrantRecordVO> pageBenefitGrantRecords(String mobile, String gradeId, PageVO page);
 
     /**
-     * 获取普通等级权益中的最高积分倍率，同类权益不叠乘。
+     * 获取普通等级与当前有效付费会员权益中的最高积分倍率，同类权益不叠乘。
      *
      * @param memberId 客户ID
      * @return 最高积分倍率，无倍率权益时为1
@@ -128,17 +128,24 @@ public interface MemberBenefitService extends IService<MemberBenefit> {
     java.math.BigDecimal getPointMultiplier(String memberId);
 
     /**
-     * 扫描客户当前普通等级，生成并发放当前应享的权益。
+     * 扫描有效付费会员订单及客户当前等级，生成并发放当前应享的权益。
      * 恢复待发放记录，并自动重试仍有领取资格且尝试次数小于10的失败记录；不追补未生成的历史周期。
      */
     void processScheduledBenefits();
 
     /**
-     * 手动补发失败的逐项权益记录，发放前重新检查当前等级资格及权益开启状态。
+     * 手动补发失败的逐项权益记录，发放前重新检查等级或付费订单资格及权益开启状态。
      *
      * @param id li_member_benefit_delivery 发放明细主键
      * @throws cn.lili.common.exception.ServiceException 记录不存在、状态非FAILED或客户不再享有该权益
      */
     void retryBenefitGrant(String id);
 
+    /**
+     * 按付费会员订单的配置快照发放仍处于开启状态的权益，订单须已支付且处于有效区间。
+     * 未来生效的续费区间暂不发放，一次性及周期权益由发放账本分别去重。
+     *
+     * @param orderId li_paid_member_order 订单主键，不是业务订单号
+     */
+    void deliverPaidMemberBenefits(String orderId);
 }

@@ -90,7 +90,11 @@ public class AliPayPlugin implements Payment {
             payModel.setPassbackParams(java.net.URLEncoder.encode(BeanUtil.formatKeyValuePair(payParam), "UTF-8"));
 
             log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
-            AliPayRequest.wapPay(response, payModel, callbackUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY),
+            String returnUrl = callbackUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY);
+            if ("PAID_MEMBER".equals(String.valueOf(payParam.getOrderType()))) {
+                returnUrl += "?paidMemberSn=" + java.net.URLEncoder.encode(payParam.getSn(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            AliPayRequest.wapPay(response, payModel, returnUrl,
                     notifyUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
             log.error("H5支付异常", e);
@@ -282,7 +286,10 @@ public class AliPayPlugin implements Payment {
 
             ConnectSetting connectSetting = JSONUtil.toBean(
                     settingService.get(SettingEnum.CONNECT_SETTING.name()).getSettingValue(), ConnectSetting.class);
-            ThreadContextHolder.getHttpResponse().sendRedirect(connectSetting.getWap() + "/pages/order/myOrder?status=0");
+            String paidMemberSn = request.getParameter("paidMemberSn");
+            String target = paidMemberSn != null && paidMemberSn.matches("PM[0-9]+")
+                    ? "/pages/mine/paidMember?payment_sn=" + paidMemberSn : "/pages/order/myOrder?status=0";
+            ThreadContextHolder.getHttpResponse().sendRedirect(connectSetting.getWap() + target);
         } catch (Exception e) {
             log.error("支付回调同步通知异常", e);
         }

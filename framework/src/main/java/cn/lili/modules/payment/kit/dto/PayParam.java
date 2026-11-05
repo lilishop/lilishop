@@ -17,7 +17,7 @@ public class PayParam {
 
 
     @NotNull
-    @Schema(description = "交易类型", allowableValues = "TRADE,ORDER,RECHARGE")
+    @Schema(description = "交易类型", allowableValues = "TRADE,ORDER,RECHARGE,PAID_MEMBER")
     private String orderType;
 
     @NotNull

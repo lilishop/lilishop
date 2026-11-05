@@ -19,5 +19,7 @@ public enum CashierEnum {
     /**
      * 充值
      */
-    RECHARGE
+    RECHARGE,
+    /** 付费会员购买 */
+    PAID_MEMBER
 }

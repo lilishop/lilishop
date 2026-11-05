@@ -78,6 +78,8 @@ public enum SettingEnum {
     SECURITY_SETTING,
     //分类页设置
     CATEGORY_PAGE_SETTING,
+    //付费会员设置
+    PAID_MEMBER_SETTING,
     //敏感词过滤设置
     SENSITIVE_WORDS_SETTING,
 }

@@ -4,6 +4,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberBenefit;
 import cn.lili.modules.member.entity.dos.MemberBenefitDelivery;
+import cn.lili.modules.member.entity.dos.PaidMemberOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -29,6 +30,16 @@ public interface MemberBenefitDeliveryService extends IService<MemberBenefitDeli
     void deliverGrade(String memberId, String gradeId, List<MemberBenefit> benefits,
                              BiConsumer<Member, MemberBenefit> grant);
 
+    /**
+     * 按付费会员订单来源生成并发放当前周期权益，周期锚点为订单有效期开始日期（上海时区）。
+     * 调用方提供已生效订单及可用权益，实际执行前再次校验付费资格；不同续费订单分别去重。
+     * 已成功或尝试次数达到10的记录不自动重发，预占已存在记录时保留原配置快照。
+     *
+     * @param order 来源会员订单，需包含客户、主键及有效期开始时间
+     * @param benefits 按订单配置关联并过滤当前开启状态的权益
+     * @param grant 在单项独立事务内执行的实际发放回调
+     */
+    void deliverPaid(PaidMemberOrder order, List<MemberBenefit> benefits, BiConsumer<Member, MemberBenefit> grant);
 
     /**
      * 重试指定发放明细，沿用首次预占的权益配置快照。

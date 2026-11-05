@@ -6,6 +6,7 @@ import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.distribution.support.DistributionSettingSupport;
+import cn.lili.modules.member.service.PaidMemberService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.*;
 import cn.lili.modules.system.entity.dto.connect.*;
@@ -22,7 +23,7 @@ import java.util.Collections;
 
 /**
  * 系统配置应用服务，统一处理配置读取、类型转换、业务校验和保存。
- * 底层 SettingService 负责配置持久化及缓存失效，本服务协调分销等专用业务规则，避免循环依赖。
+ * 底层 SettingService 负责配置持久化及缓存失效，本服务协调付费会员、分销等专用业务规则，避免循环依赖。
  * @author Bulbasaur
  * @since 2026-11-05
  */
@@ -33,18 +34,23 @@ public class SettingConfigServiceImpl implements SettingConfigService {
     @Autowired
     private Validator validator;
     @Autowired
+    private PaidMemberService paidMemberService;
+    @Autowired
     private Cache<String> cache;
     @Autowired
     private DistributionSettingSupport distributionSettingSupport;
 
     /**
-     * 保存前统一执行配置转换及校验；按配置类型执行专用业务规则，复用现有存储与缓存失效。
+     * 保存前统一执行配置转换及校验；付费会员委托专用业务服务，其他配置复用现有存储与缓存失效。
      * @param settingEnum 配置类型，对应 li_setting.id
      * @param configValue 提交的配置 JSON
      */
     @Override
     public void saveConfig(SettingEnum settingEnum, String configValue) {
-
+        if (settingEnum == SettingEnum.PAID_MEMBER_SETTING) {
+            paidMemberService.saveConfig(JSONUtil.toBean(configValue, PaidMemberSetting.class));
+            return;
+        }
         //获取系统配置
         Setting setting = settingService.getById(settingEnum.name());
         if (setting == null) {
@@ -244,6 +250,8 @@ public class SettingConfigServiceImpl implements SettingConfigService {
                 return setting == null ?
                         new CategoryPageSetting() :
                         JSONUtil.toBean(setting.getSettingValue(), CategoryPageSetting.class);
+            case PAID_MEMBER_SETTING:
+                return paidMemberService.config();
             case  SENSITIVE_WORDS_SETTING:
                 return setting == null ?
                         new SensitiveWordsSetting() :

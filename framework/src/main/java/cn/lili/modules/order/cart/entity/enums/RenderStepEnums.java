@@ -12,6 +12,7 @@ public enum RenderStepEnums {
     CHECKED_FILTER("选择商品过滤"),
     COUPON("优惠券价格渲染"),
     SKU_PROMOTION("商品促销计算"),
+    PAID_MEMBER("平台付费会员优惠"),
     FULL_DISCOUNT("满减计算"),
     GIFT_CARD("礼品卡计算"),
     SKU_FREIGHT("运费计算"),

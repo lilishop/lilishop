@@ -7,6 +7,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.payment.entity.enums.CashierEnum;
 import cn.lili.modules.payment.entity.enums.PaymentClientEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.dto.PayParam;
@@ -188,10 +189,12 @@ public class CashierSupport {
                 throw new ServiceException(ResultCode.PAY_UN_WANTED);
             }
             cashierParam.setSupport(support(payParam.getClientType()));
+            if (CashierEnum.PAID_MEMBER.name().equals(payParam.getOrderType())) cashierParam.setSupport(cashierParam.getSupport().stream()
+                    .filter(method -> java.util.List.of("WECHAT", "ALIPAY", "WALLET").contains(method)).toList());
             cashierParam.setWalletValue(memberWalletService.getMemberWallet(UserContext.getCurrentUser().getId()).getMemberWallet());
             OrderSetting orderSetting = JSONUtil.toBean(settingService.get(SettingEnum.ORDER_SETTING.name()).getSettingValue(), OrderSetting.class);
             Integer minute = orderSetting.getAutoCancel();
-            cashierParam.setAutoCancel(cashierParam.getCreateTime().getTime() + minute * 1000 * 60);
+            if (cashierParam.getAutoCancel() == null) cashierParam.setAutoCancel(cashierParam.getCreateTime().getTime() + minute * 1000 * 60);
             return cashierParam;
         }
         log.error("错误的支付请求:{}", payParam.toString());

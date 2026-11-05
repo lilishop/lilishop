@@ -39,7 +39,7 @@ import java.util.*;
 
 /**
  * 客户权益服务实现，负责权益配置校验、当前等级及成长进度查询、自动权益发放和失败补发。
- * 计算当前普通等级权益的最高积分倍率，逐项发放事务及防重交由权益发放服务处理。
+ * 统一普通等级与付费会员权益的积分倍率计算，逐项发放事务及防重交由权益发放服务处理。
  *
  * @author Bulbasaur
  * @since 2026-11-04
@@ -76,6 +76,8 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
     private MemberGradeBenefitGrantMapper memberGradeBenefitGrantMapper;
     @Autowired
     private MemberBenefitDeliveryService deliveryService;
+    @Autowired
+    private PaidMemberService paidMembers;
     @Autowired
     private MemberBenefitQueryService benefitQueries;
 
@@ -383,12 +385,25 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
     }
 
     /**
-     * 按主键游标每批扫描200条，处理客户当前普通等级权益。
+     * 按主键游标每批扫描200条，先处理有效付费订单，再处理客户当前普通等级。
      * 随后恢复PENDING及尝试次数小于10的FAILED明细，重试前重新检查来源资格。
      * 成功记录由账本防重；仅生成当前应发周期，不追补尚未生成的历史周期。
      */
     @Override
     public void processScheduledBenefits() {
+        String paidCursor = "";
+        while (true) {
+            var paidOrders = paidMembers.activeOrders(paidCursor);
+            if (paidOrders.isEmpty()) break;
+            for (var order : paidOrders) {
+                try {
+                    deliverPaidMemberBenefits(order.getId());
+                } catch (Exception e) {
+                    log.warn("付费会员权益发放失败 orderId={}", order.getId(), e);
+                }
+            }
+            paidCursor = paidOrders.get(paidOrders.size() - 1).getId();
+        }
         String cursor = "";
         while (true) {
             List<Member> members = memberService.list(new LambdaQueryWrapper<Member>()
@@ -416,7 +431,9 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
             for (var record : pending) {
                 try {
                     var current = getCurrentMemberBenefits(record.getMemberId());
-                    boolean eligible = "GRADE".equals(record.getSourceType()) && record.getSourceRef().equals(current.getGradeId()) && current.getBenefits().stream().anyMatch(b -> b.getId().equals(record.getBenefitId()));
+                    boolean eligible = "PAID_MEMBER".equals(record.getSourceType())
+                            ? paidMembers.isBenefitEligible(record.getMemberId(), record.getSourceRef(), record.getBenefitId())
+                            : record.getSourceRef().equals(current.getGradeId()) && current.getBenefits().stream().anyMatch(b -> b.getId().equals(record.getBenefitId()));
                     if (eligible) {
                         deliveryService.retry(record, this::grantBenefitToMember);
                     }
@@ -429,7 +446,7 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
     }
 
     /**
-     * 手动补发FAILED明细，重新检查当前等级及权益开启状态。
+     * 手动补发FAILED明细，按来源重新检查有效付费订单或当前等级及权益开启状态。
      * 实际发放沿用账本快照，手动入口不应用自动任务的10次尝试上限。
      *
      * @param id li_member_benefit_delivery发放明细主键
@@ -442,7 +459,9 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
             throw new ServiceException(ResultCode.PARAMS_ERROR, "仅失败记录可重试");
         }
         MemberCurrentBenefitVO current = getCurrentMemberBenefits(record.getMemberId());
-        boolean eligible = "GRADE".equals(record.getSourceType()) && record.getSourceRef().equals(current.getGradeId())
+        boolean eligible = "PAID_MEMBER".equals(record.getSourceType())
+                ? paidMembers.isBenefitEligible(record.getMemberId(), record.getSourceRef(), record.getBenefitId())
+                : "GRADE".equals(record.getSourceType()) && record.getSourceRef().equals(current.getGradeId())
                 && current.getBenefits().stream().anyMatch(b -> b.getId().equals(record.getBenefitId()));
         if (!eligible) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "会员已不再享有该权益，不能补发");
@@ -451,19 +470,31 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
     }
 
     /**
-     * 获取普通等级当前有效权益中的最高积分倍率，取最高值而不叠乘。
+     * 合并普通等级与当前有效付费权益中的积分倍率，取最高值而不叠乘。
      *
      * @param memberId 客户主键
      * @return 最高倍率，无倍率权益时为1
      */
     @Override
     public java.math.BigDecimal getPointMultiplier(String memberId) {
-        return getCurrentMemberBenefits(memberId).getBenefits().stream()
+        return java.util.stream.Stream.concat(getCurrentMemberBenefits(memberId).getBenefits().stream(), paidMembers.activeBenefits(memberId).stream())
                 .filter(b -> MemberBenefitTypeEnum.POINT_MULTIPLIER.name().equals(b.getBenefitType()))
                 .map(b -> cn.lili.modules.member.util.MemberBenefitRules.config(b.getBenefitConfig()).getBigDecimal("multiplier", java.math.BigDecimal.ONE))
                 .max(java.math.BigDecimal::compareTo).orElse(java.math.BigDecimal.ONE);
     }
 
+    /**
+     * 按已支付且处于有效区间的付费订单快照发放仍开启的权益，未来续费区间暂不发放。
+     * 来源订单和周期防重、事务及发放前再次核验由逐项发放服务执行。
+     *
+     * @param orderId li_paid_member_order主键，不是业务订单号
+     */
+    @Override
+    public void deliverPaidMemberBenefits(String orderId) {
+        var order = paidMembers.findById(orderId);
+        if (order == null || !paidMembers.isActive(order)) return;
+        deliveryService.deliverPaid(order, this.listByIdList(paidMembers.snapshot(order).getBenefitIds(), true), this::grantBenefitToMember);
+    }
 
     /**
      * 执行单项自动权益回调：赠送积分或逐份领取券礼包，其他类型不执行自动履约。

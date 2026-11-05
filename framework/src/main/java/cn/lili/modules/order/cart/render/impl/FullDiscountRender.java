@@ -81,7 +81,7 @@ public class FullDiscountRender implements CartRenderStep {
                         if (PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(fullDiscountVO.getScopeType()) && fullDiscountVO.getScopeId() != null && !fullDiscountVO.getScopeId().contains(cartSkuVO.getGoodsSku().getId())) {
                             continue;
                         }
-                        skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
+                        skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.sub(cartSkuVO.getPriceDetailDTO().getGoodsPrice(), cartSkuVO.getPriceDetailDTO().getPaidMemberSubsidy()));
                     }
                     if (!skuPriceDetail.isEmpty()) {
                         //记录参与满减活动的sku
@@ -125,7 +125,7 @@ public class FullDiscountRender implements CartRenderStep {
             PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
 
 
-            Double discountPrice = CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(),
+            Double discountPrice = CurrencyUtil.mul(CurrencyUtil.sub(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getPaidMemberSubsidy()),
                     CurrencyUtil.sub(1, rate)
             );
             //优惠金额=旧的优惠金额+商品金额*商品折扣比例

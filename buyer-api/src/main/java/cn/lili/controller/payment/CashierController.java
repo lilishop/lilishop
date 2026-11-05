@@ -64,7 +64,7 @@ public class CashierController {
         try {
             return cashierSupport.payment(paymentMethodEnum, paymentClientEnum, request, response, payParam);
         } catch (ServiceException se) {
-            log.info("支付异常", se);
+            log.info("支付未完成：订单号={}，支付方式={}，原因={}", payParam.getSn(), paymentMethodEnum, se.getMsg());
             throw se;
         } catch (Exception e) {
             log.error("收银台支付错误", e);

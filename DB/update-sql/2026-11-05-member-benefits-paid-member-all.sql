@@ -1,13 +1,17 @@
--- 客户等级、客户权益升级脚本（MySQL 8）
+-- 客户等级、客户权益与付费会员合并升级脚本（MySQL 8）
 -- @author Bulbasaur
 -- @since 2026-11-05
--- 在已安装基础表的目标业务库内执行，不指定库名，不包含 USE。
--- 前置：li_member_grade（含等级背景字段）、li_order、li_after_sale、li_store_flow、li_menu、li_timed_task 已存在。
--- 可重复执行；默认数据不覆盖已有配置，请检查 defaults_allowed。
--- DDL 隐式提交，整份脚本不能作为单一事务整体回滚。
--- 不新增权益发放明细菜单，不处理 li_role_menu。
--- 同一脚本后续版本将补充付费会员升级内容。
+-- 在已安装 Lilishop 基础表的目标业务库内执行；不指定库名、不包含 USE。
+-- 前置：li_member_grade（含 grade_background 等等级字段）、li_order、li_after_sale、li_store_flow、
+-- li_menu、li_timed_task、li_setting 已存在；本脚本不是完整建库脚本。
+-- 原六份独立脚本已合并移除，统一执行本文件。
+-- 结构和菜单按原脚本支持重复执行；默认数据遇已有配置可能整套跳过，
+-- 请检查 defaults_allowed，跳过不代表执行失败，也不会覆盖既有配置。
+-- DDL 会隐式提交，不能将整份脚本视为一个可整体回滚的事务。
+-- 数据修改保留各原脚本的事务边界；执行中遇错应停止并检查。
+-- 不新增“权益发放明细”菜单；付费页面名称为“付费会员”“付费记录”。
 
+-- ============================================================
 -- 1. 客户权益表结构及周期任务
 -- ============================================================
 -- 客户权益结构升级；默认数据在第4节初始化。MySQL 8。
@@ -48,6 +52,35 @@ SELECT 'MemberBenefitExecute','客户权益周期发放','客户任务','memberB
 WHERE NOT EXISTS (SELECT 1 FROM li_timed_task WHERE id='MemberBenefitExecute');
 
 -- ============================================================
+-- 2. 付费会员表结构及结算字段
+-- ============================================================
+-- 单一付费会员，无等级/套餐；平台承担商品会员优惠。MySQL 8。
+-- 付费会员配置统一存储于 li_setting，key 为 PAID_MEMBER_SETTING。
+-- 兼容已执行旧版脚本的环境：仅在新 key 不存在时迁入旧配置，不覆盖现有设置、不删除旧表。
+SET @paid_member_ddl = (SELECT IF(COUNT(*)>0,
+ 'INSERT INTO li_setting (id,create_by,create_time,delete_flag,update_by,update_time,setting_value) SELECT ''PAID_MEMBER_SETTING'',create_by,create_time,delete_flag,update_by,update_time,config_json FROM li_paid_member_setting WHERE id=''DEFAULT'' AND delete_flag=0 AND NOT EXISTS (SELECT 1 FROM li_setting WHERE id=''PAID_MEMBER_SETTING'')',
+ 'SELECT 1') FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='li_paid_member_setting');
+PREPARE paid_member_stmt FROM @paid_member_ddl; EXECUTE paid_member_stmt; DEALLOCATE PREPARE paid_member_stmt;
+
+CREATE TABLE IF NOT EXISTS li_paid_member_order (
+ id varchar(64) PRIMARY KEY, create_by varchar(64), create_time datetime DEFAULT CURRENT_TIMESTAMP,
+ update_by varchar(64), update_time datetime DEFAULT CURRENT_TIMESTAMP, delete_flag bit(1) DEFAULT b'0',
+ sn varchar(64) NOT NULL, member_id varchar(64) NOT NULL, member_name varchar(255), request_id varchar(64) NOT NULL,
+ amount decimal(18,2) NOT NULL, months int NOT NULL, status varchar(16) NOT NULL,
+ config_snapshot MEDIUMTEXT NOT NULL, config_version varchar(64) NOT NULL, pay_deadline datetime NOT NULL,
+ pay_time datetime, start_time datetime, end_time datetime, payment_method varchar(32), receivable_no varchar(128),
+ UNIQUE KEY uk_paid_sn(sn), UNIQUE KEY uk_paid_request(member_id,request_id),
+ KEY idx_paid_active(member_id,status,start_time,end_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET @paid_member_ddl = (SELECT IF(COUNT(*)=0, 'ALTER TABLE li_store_flow ADD COLUMN paid_member_subsidy_price decimal(18,2) NOT NULL DEFAULT 0', 'SELECT 1') FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='li_store_flow' AND COLUMN_NAME='paid_member_subsidy_price');
+PREPARE paid_member_stmt FROM @paid_member_ddl; EXECUTE paid_member_stmt; DEALLOCATE PREPARE paid_member_stmt;
+
+
+
+
+-- ============================================================
+-- 已执行旧版脚本的 paid_member_order_id 列及其索引保留，不自动删除；新代码不再读写。
 -- 3. 兼容旧版：停用普通客户等级折扣权益
 -- ============================================================
 -- 仅用于已执行过旧版客户权益SQL的环境；新环境不需要新增等级折扣字段。
@@ -148,3 +181,45 @@ WHERE name IN ('memberBenefitManage','member-benefit') AND delete_flag=b'0'
 ORDER BY level,sort_order;
 
 -- ============================================================
+-- 6. 付费会员二级菜单及付费记录
+-- ============================================================
+-- 客户模块下新增二级「付费会员」，下设设置、记录页面。
+-- 兼容旧版脚本：保留页面 ID，迁移到新分组；可重复执行。
+-- @author Bulbasaur
+-- @since 2026-11-05
+START TRANSACTION;
+INSERT INTO li_menu
+ (id,create_by,create_time,delete_flag,update_by,update_time,description,front_route,icon,level,name,parent_id,path,sort_order,title,front_component,permission)
+SELECT 2121558191760000003,'Bulbasaur',NOW(),b'0','Bulbasaur',NOW(),'付费会员管理','Main','ios-card',1,
+ 'paidMemberManage',source_group.parent_id,'/',COALESCE(source_group.sort_order,0)+1,'付费会员',NULL,NULL
+FROM li_menu source_group
+JOIN (SELECT * FROM li_menu WHERE delete_flag=b'0' AND level=2 AND (name IN ('member-grade','memberGrade') OR title IN ('等级列表','客户等级')) ORDER BY (title='等级列表') DESC LIMIT 1) source
+ ON source.parent_id=CAST(source_group.id AS CHAR)
+WHERE source_group.delete_flag=b'0' AND source_group.level=1
+ AND NOT EXISTS(SELECT 1 FROM li_menu WHERE name='paidMemberManage');
+
+INSERT INTO li_menu
+ (id,create_by,create_time,delete_flag,update_by,update_time,description,front_route,icon,level,name,parent_id,path,sort_order,title,front_component,permission)
+SELECT 2121558191760000001,'Bulbasaur',NOW(),b'0','Bulbasaur',NOW(),'单一付费会员配置','member/paid/settings','ios-card',source.level,
+ 'paid-member-settings',source.parent_id,'paid-member-settings',COALESCE(source.sort_order,0)+10,'付费会员',source.front_component,source.permission
+FROM (SELECT * FROM li_menu WHERE delete_flag=b'0' AND (name IN ('member-grade','memberGrade') OR title IN ('等级列表','客户等级')) ORDER BY (title='等级列表') DESC LIMIT 1) source
+WHERE NOT EXISTS(SELECT 1 FROM li_menu WHERE name='paid-member-settings');
+INSERT INTO li_menu
+ (id,create_by,create_time,delete_flag,update_by,update_time,description,front_route,icon,level,name,parent_id,path,sort_order,title,front_component,permission)
+SELECT 2121558191760000002,'Bulbasaur',NOW(),b'0','Bulbasaur',NOW(),'付费会员订单记录','member/paid/records','ios-list',source.level,
+ 'paid-member-records',source.parent_id,'paid-member-records',COALESCE(source.sort_order,0)+11,'付费记录',source.front_component,source.permission
+FROM (SELECT * FROM li_menu WHERE delete_flag=b'0' AND (name IN ('member-grade','memberGrade') OR title IN ('等级列表','客户等级')) ORDER BY (title='等级列表') DESC LIMIT 1) source
+WHERE NOT EXISTS(SELECT 1 FROM li_menu WHERE name='paid-member-records');
+
+-- 旧环境已经存在页面时，只调整归属，不重建页面。
+UPDATE li_menu page
+JOIN li_menu group_menu ON group_menu.name='paidMemberManage' AND group_menu.delete_flag=b'0'
+SET page.parent_id=CAST(group_menu.id AS CHAR),page.level=2,
+ page.title=CASE page.name WHEN 'paid-member-settings' THEN '付费会员' ELSE '付费记录' END,
+ page.sort_order=CASE page.name WHEN 'paid-member-settings' THEN 0 ELSE 1 END,
+ page.update_by='Bulbasaur',page.update_time=NOW()
+WHERE page.name IN ('paid-member-settings','paid-member-records') AND page.delete_flag=b'0';
+
+COMMIT;
+-- 应返回三行，设置/记录的 parent_id 均为付费会员分组 ID。
+SELECT id,name,title,level,parent_id,front_route FROM li_menu WHERE name IN ('paidMemberManage','paid-member-settings','paid-member-records') AND delete_flag=b'0' ORDER BY level,sort_order;

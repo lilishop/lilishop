@@ -113,6 +113,9 @@ public class StoreFlow extends BaseIdEntity {
 
     @Schema(description = "礼品卡平台补贴金额（抵扣金额，由平台承担）")
     private Double giftCardSubsidyPrice;
+    @Schema(description = "平台承担的付费会员优惠金额，退款流水记录冲回金额")
+    private Double paidMemberSubsidyPrice;
+    public Double getPaidMemberSubsidyPrice() { return paidMemberSubsidyPrice == null ? 0D : paidMemberSubsidyPrice; }
 
     @Schema(description = "单品分销返现支出")
     private Double distributionRebate;
@@ -200,10 +203,9 @@ public class StoreFlow extends BaseIdEntity {
          */
         double giftCardSubsidy = priceDetailDTO.getGiftCardPrice();
         this.setGiftCardSubsidyPrice(giftCardSubsidy);
+        this.setPaidMemberSubsidyPrice(priceDetailDTO.getPaidMemberSubsidy());
         this.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
-        this.setSettlementBasePrice(giftCardSubsidy > 0
-                ? CurrencyUtil.add(this.getFinalPrice(), giftCardSubsidy)
-                : this.getFinalPrice());
+        this.setSettlementBasePrice(CurrencyUtil.add(this.getFinalPrice(), giftCardSubsidy, this.getPaidMemberSubsidyPrice()));
         this.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
         this.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
         this.setBillPrice(item.getPriceDetailDTO().getBillPrice());

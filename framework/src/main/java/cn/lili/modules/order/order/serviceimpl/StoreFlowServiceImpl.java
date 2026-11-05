@@ -42,8 +42,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 商家订单流水业务层实现
@@ -140,7 +140,13 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
      * @param afterSale 售后单
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
     public void refundOrder(AfterSale afterSale) {
+        // 串行锁定同一商品支付流水，防止并发售后重复回收平台补贴。
+        StoreFlow payStoreFlow = this.getOne(new LambdaQueryWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn())
+                .eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name()).last("FOR UPDATE"));
+        // 会员补贴按原支付流水分摊；同一售后单不能重复生成冲回流水。
+        if (this.count(new LambdaQueryWrapper<StoreFlow>().eq(StoreFlow::getRefundSn, afterSale.getSn()).eq(StoreFlow::getFlowType, FlowTypeEnum.REFUND.name())) > 0) return;
         StoreFlow storeFlow = new StoreFlow();
         //退款
         storeFlow.setFlowType(FlowTypeEnum.REFUND.name());
@@ -161,9 +167,14 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
 
         //获取付款信息
-        StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn())
-                .eq(StoreFlow::getFlowType, FlowTypeEnum.PAY));
+        if (payStoreFlow == null) throw new cn.lili.common.exception.ServiceException(cn.lili.common.enums.ResultCode.PARAMS_ERROR, "订单支付流水不存在");
         //申请商品退款数量
+        if (payStoreFlow.getPaidMemberSubsidyPrice() > 0) {
+            Integer priorQuantity = this.baseMapper.getRefundNum(payStoreFlow.getOrderItemSn());
+            var subsidy = cn.lili.modules.member.util.PaidMemberRules.refundSubsidy(
+                    java.math.BigDecimal.valueOf(payStoreFlow.getPaidMemberSubsidyPrice()), payStoreFlow.getNum(), priorQuantity == null ? 0 : priorQuantity, afterSale.getNum());
+            storeFlow.setPaidMemberSubsidyPrice(subsidy.doubleValue());
+        }
         storeFlow.setNum(afterSale.getNum());
         //分类ID
         storeFlow.setCategoryId(payStoreFlow.getCategoryId());
@@ -194,6 +205,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setBillPrice(
                 CurrencyUtil.add(
                         afterSale.getActualRefundPrice(),
+                        storeFlow.getPaidMemberSubsidyPrice(),
                         storeFlow.getSiteCouponCommission(),
                         -storeFlow.getCommissionPrice(),
                         -storeFlow.getDistributionRebate()
@@ -248,7 +260,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
                 storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.mul(
                         CurrencyUtil.add(
                                 payStoreFlow.getSiteCouponCommission() == null ? 0 : payStoreFlow.getSiteCouponCommission(),
-                                payStoreFlow.getGiftCardSubsidyPrice() == null ? 0 : payStoreFlow.getGiftCardSubsidyPrice()),
+                                payStoreFlow.getGiftCardSubsidyPrice() == null ? 0 : payStoreFlow.getGiftCardSubsidyPrice(), payStoreFlow.getPaidMemberSubsidyPrice()),
                         proportion));
                 storeFlowProfitSharingDTO.setDistributionPrice(CurrencyUtil.mul(payStoreFlow.getDistributionRebate(), proportion));
             }
@@ -408,7 +420,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         // 平台补差（站点优惠券 + 礼品卡补贴）
         storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.add(
                 storeFlow.getSiteCouponCommission() == null ? 0 : storeFlow.getSiteCouponCommission(),
-                storeFlow.getGiftCardSubsidyPrice() == null ? 0 : storeFlow.getGiftCardSubsidyPrice()));
+                storeFlow.getGiftCardSubsidyPrice() == null ? 0 : storeFlow.getGiftCardSubsidyPrice(), storeFlow.getPaidMemberSubsidyPrice()));
         //分账详情
         storeFlow.setProfitSharing(JSONUtil.toJsonStr(storeFlowProfitSharingDTO));
         //分账状态

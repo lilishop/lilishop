@@ -29,11 +29,11 @@ public class MemberBenefitDelivery extends BaseEntity {
     @Schema(description = "客户ID")
     private String memberId;
 
-    /** 权益来源类型：GRADE 为普通客户等级。 */
-    @Schema(description = "来源类型：GRADE")
+    /** 权益来源类型：GRADE 为普通客户等级，PAID_MEMBER 为付费会员订单。 */
+    @Schema(description = "来源类型：GRADE/PAID_MEMBER")
     private String sourceType;
 
-    /** 来源记录 ID：GRADE 对应客户等级 ID。 */
+    /** 来源记录 ID：GRADE 对应等级 ID，PAID_MEMBER 对应会员费订单 ID（非订单号 sn）。 */
     @Schema(description = "来源ID：等级ID或会员费订单ID")
     private String sourceRef;
 
