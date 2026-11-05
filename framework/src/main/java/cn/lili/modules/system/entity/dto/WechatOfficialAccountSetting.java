@@ -1,6 +1,11 @@
 package cn.lili.modules.system.entity.dto;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.beans.Transient;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 
@@ -32,6 +37,7 @@ public class WechatOfficialAccountSetting implements Serializable {
     /**
      * 引导关注的公众号文章链接
      */
+    @Pattern(regexp = "https://mp\\.weixin\\.qq\\.com/.*", message = "引导关注文章链接必须是 https://mp.weixin.qq.com/ 开头的公众号文章地址")
     private String articleUrl;
 
     /**
@@ -42,10 +48,21 @@ public class WechatOfficialAccountSetting implements Serializable {
     /**
      * 公众号「服务器配置」中的消息加解密密钥 EncodingAESKey（明文模式可不填）
      */
+    @Size(min = 43, max = 43, message = "EncodingAESKey 长度必须为 43 位")
     private String encodingAesKey;
 
     /**
      * 关注公众号后的自动回复内容
      */
     private String subscribeReply;
+    /**
+     * 开启入口时必须填写文章链接；仅用于保存校验，不属于持久化或接口展示字段。
+     * @return 未开启或已经配置文章链接时返回 true
+     */
+    @AssertTrue(message = "开启公众号通知时必须配置引导关注文章链接")
+    @JsonIgnore
+    @Transient
+    public boolean isArticleConfigured() {
+        return !Boolean.TRUE.equals(enabled) || (articleUrl != null && !articleUrl.isBlank());
+    }
 }
