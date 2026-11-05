@@ -15,7 +15,6 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.service.GoodsSearchParamService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -77,7 +76,6 @@ class GoodsServiceImplTest {
     private StoreService storeService;
     private Cache<GoodsVO> cache;
     private CategoryService categoryService;
-    private WholesaleService wholesaleService;
 
     /**
      * 初始化商品实体的MyBatis-Plus元数据，支持测试中生成Lambda查询及更新条件
@@ -101,7 +99,6 @@ class GoodsServiceImplTest {
         storeService = mock(StoreService.class);
         cache = mock(Cache.class);
         categoryService = mock(CategoryService.class);
-        wholesaleService = mock(WholesaleService.class);
 
         ReflectionTestUtils.setField(goodsService, "goodsSearchParamService", goodsSearchParamService);
         ReflectionTestUtils.setField(goodsService, "goodsSkuService", goodsSkuService);
@@ -110,7 +107,6 @@ class GoodsServiceImplTest {
         ReflectionTestUtils.setField(goodsService, "storeService", storeService);
         ReflectionTestUtils.setField(goodsService, "cache", cache);
         ReflectionTestUtils.setField(goodsService, "categoryService", categoryService);
-        ReflectionTestUtils.setField(goodsService, "wholesaleService", wholesaleService);
 
         GoodsSetting goodsSetting = new GoodsSetting();
         goodsSetting.setGoodsCheck(false);
@@ -318,7 +314,6 @@ class GoodsServiceImplTest {
         when(goodsGalleryService.goodsGalleryList(GOODS_ID)).thenReturn(Collections.emptyList());
         when(goodsSkuService.getGoodsListByGoodsId(GOODS_ID)).thenReturn(Collections.emptyList());
         when(categoryService.getCategoryNamesByPath(any())).thenReturn(Collections.emptyList());
-        when(wholesaleService.findByGoodsId(GOODS_ID)).thenReturn(Collections.emptyList());
 
         GoodsVO vo = goodsService.getGoodsVO(GOODS_ID);
 

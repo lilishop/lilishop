@@ -10,11 +10,7 @@ public enum OtherTagsEnum {
     /**
      * 站内消息提醒
      */
-    MESSAGE("站内消息提醒"),
-    /**
-     * 短信消息提醒
-     */
-    SMS("短信消息提醒");
+    MESSAGE("站内消息提醒");
 
     private final String description;
 

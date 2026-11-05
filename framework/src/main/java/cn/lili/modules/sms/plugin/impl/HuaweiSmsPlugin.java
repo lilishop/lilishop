@@ -1,12 +1,9 @@
 package cn.lili.modules.sms.plugin.impl;
 
-import cn.lili.modules.sms.entity.dos.SmsSign;
-import cn.lili.modules.sms.entity.dos.SmsTemplate;
 import cn.lili.modules.sms.entity.enums.SmsEnum;
 import cn.lili.modules.sms.plugin.SmsPlugin;
 import cn.lili.modules.system.entity.dto.SmsSetting;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -54,55 +51,6 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         } catch (Exception e) {
             log.error("华为短信发送失败", e);
         }
-
-    }
-
-    @Override
-    public void sendBatchSms(String signName, List<String> mobile, String templateCode) {
-        try {
-            this.sendSms(signName, StringUtils.join(mobile, ","), null, templateCode);
-        } catch (Exception e) {
-            log.error("华为短信批量发送失败", e);
-        }
-    }
-
-    @Override
-    public void addSmsSign(SmsSign smsSign) throws Exception {
-
-    }
-
-    @Override
-    public void deleteSmsSign(String signName) throws Exception {
-
-    }
-
-    @Override
-    public Map<String, Object> querySmsSign(String signName) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void modifySmsSign(SmsSign smsSign) throws Exception {
-
-    }
-
-    @Override
-    public void modifySmsTemplate(SmsTemplate smsTemplate) throws Exception {
-
-    }
-
-    @Override
-    public Map<String, Object> querySmsTemplate(String templateCode) throws Exception {
-        return null;
-    }
-
-    @Override
-    public String addSmsTemplate(SmsTemplate smsTemplate) throws Exception {
-        return null;
-    }
-
-    @Override
-    public void deleteSmsTemplate(String templateCode) throws Exception {
 
     }
 

@@ -3,6 +3,8 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
@@ -29,6 +31,22 @@ import static org.mockito.Mockito.*;
  * @since 2026-11-03
  */
 class RetiredDiscountPromotionTest {
+    /** 删除活动枚举后，历史优惠金额仍可读取及序列化。 */
+    @ParameterizedTest
+    @ValueSource(strings = {"FLASH_DISCOUNT", "NTH_ITEM_DISCOUNT"})
+    void historicalDiscountRemainsReadableAfterRemovingPromotionType(String type) {
+        String json = "{\"promotionTypeEnum\":\"" + type + "\",\"discountPrice\":12.5}";
+        OrderItem orderItem = new OrderItem();
+        orderItem.setPriceDetail("{\"discountPriceDetail\":[" + json + "]}");
+        for (DiscountPriceItem item : List.of(JSON.parseObject(json, DiscountPriceItem.class),
+                orderItem.getPriceDetailDTO().getDiscountPriceDetail().get(0))) {
+            assertThat(item.getPromotionTypeEnum()).isNull();
+            assertThat(item.getDiscountPrice()).isEqualTo(12.5D);
+            assertThat(item.getPromotionName()).isEqualTo("历史优惠");
+            assertThat(JSON.parseObject(JSON.toJSONString(item)).getDouble("discountPrice")).isEqualTo(12.5D);
+        }
+    }
+
     /**
      * 验证构建促销映射时忽略已退役活动类型。
      *

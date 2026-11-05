@@ -145,9 +145,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private FreightTemplateService freightTemplateService;
 
     @Autowired
-    private WholesaleService wholesaleService;
-
-    @Autowired
     private Cache<GoodsVO> cache;
 
     @Autowired
@@ -349,12 +346,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //参数非空则填写参数
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
             goodsVO.setGoodsParamsDTOList(GoodsSearchParamParser.parseAll(goods.getParams()));
-        }
-
-        //批发商品消费规则
-        List<Wholesale> wholesaleList = wholesaleService.findByGoodsId(goodsId);
-        if (CollUtil.isNotEmpty(wholesaleList)) {
-            goodsVO.setWholesaleList(wholesaleList);
         }
 
         //预约商品回显发品设置与时段可约数量

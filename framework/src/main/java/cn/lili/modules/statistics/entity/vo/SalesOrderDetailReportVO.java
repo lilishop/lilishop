@@ -64,9 +64,4 @@ public class SalesOrderDetailReportVO {
     @Schema(description = "平台优惠券金额")
     private Double siteCouponPrice;
 
-    @Schema(description = "限时直降补贴")
-    private Double flashDiscountSubsidy;
-
-    @Schema(description = "第N件优惠补贴")
-    private Double nthItemSubsidy;
 }

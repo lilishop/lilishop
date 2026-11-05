@@ -21,7 +21,6 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
@@ -33,9 +32,7 @@ import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.goods.sku.GoodsSkuBuilder;
-import cn.lili.modules.goods.sku.render.SalesModelRender;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
@@ -137,14 +134,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    private WholesaleService wholesaleService;
-
-    @Autowired
     @Lazy
     private CouponService couponService;
-
-    @Autowired
-    private List<SalesModelRender> salesModelRenders;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -275,9 +266,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public GoodsSku getCanPromotionGoodsSkuByIdFromCache(String skuId) {
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku != null && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsSku.getSalesModel())) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE, goodsSku.getGoodsName());
-        }
         return goodsSku;
     }
 
@@ -363,8 +351,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         map.put("data", goodsSkuDetail);
 
         // 获取分类
-        map.put("wholesaleList", GoodsSalesModeEnum.WHOLESALE.name().equals(goodsVO.getSalesModel()) ?
-                wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()) : Collections.emptyList());
         map.put("categoryName", resolveCategoryNames(goodsVO, goodsIndex));
 
         // 获取规格信息
@@ -912,8 +898,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      */
     @Override
     public void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
-        // 商品销售模式渲染器
-        salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
         for (GoodsSku goodsSku : goodsSkuList) {
             extendOldSkuValue(goodsSku);
             this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
@@ -997,8 +981,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      */
     void renderGoodsSku(GoodsSku goodsSku, GoodsOperationDTO goodsOperationDTO) {
         extendOldSkuValue(goodsSku);
-        // 商品销售模式渲染器
-        salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
         this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
         applyECouponQuantityOnSave(goodsSku);
     }

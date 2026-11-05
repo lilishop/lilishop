@@ -8,8 +8,7 @@ package cn.lili.modules.goods.entity.enums;
  */
 public enum GoodsSalesModeEnum {
 
-    RETAIL("零售"),
-    WHOLESALE("批发");
+    RETAIL("零售");
 
     private final String description;
 

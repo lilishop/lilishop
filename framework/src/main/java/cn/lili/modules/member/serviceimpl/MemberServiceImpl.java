@@ -721,16 +721,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     /**
-     * 获取所有客户的手机号
-     *
-     * @return 所有客户的手机号
-     */
-    @Override
-    public List<String> getAllMemberMobile() {
-        return this.baseMapper.getAllMemberMobile();
-    }
-
-    /**
      * 更新客户登录时间为最新时间
      *
      * @param memberId 客户id

@@ -2,12 +2,10 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson2.JSON;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
@@ -104,12 +102,6 @@ public class StoreFlow extends BaseIdEntity {
     @Schema(description = "砍价活动商品结算价格")
     private Double kanjiaSettlementPrice;
 
-    @Schema(description = "限时直降补贴")
-    private Double flashDiscountSubsidy;
-
-    @Schema(description = "第N件优惠补贴")
-    private Double nthItemSubsidy;
-
     @Schema(description = "平台优惠券 使用金额")
     private Double siteCouponPrice;
 
@@ -195,7 +187,7 @@ public class StoreFlow extends BaseIdEntity {
         this.setGoodsName(item.getGoodsName());
         this.setOrderPromotionType(item.getPromotionType());
         //格式化订单价格详情
-        PriceDetailDTO priceDetailDTO = JSONUtil.toBean(item.getPriceDetail(), PriceDetailDTO.class);
+        PriceDetailDTO priceDetailDTO = JSON.parseObject(item.getPriceDetail(), PriceDetailDTO.class);
         //站点优惠券比例=最大比例(100)-店铺承担比例
         this.setSiteCouponPoint(CurrencyUtil.sub(100, priceDetailDTO.getSiteCouponPoint()));
         //平台优惠券 使用金额
@@ -226,7 +218,6 @@ public class StoreFlow extends BaseIdEntity {
                 this.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
             }
         }
-        applyMarketingSubsidy(item.getPriceDetailDTO());
         //添加支付方式
         this.setPaymentName(order.getPaymentMethod());
         //添加第三方支付流水号
@@ -238,23 +229,4 @@ public class StoreFlow extends BaseIdEntity {
         }
     }
 
-    private void applyMarketingSubsidy(PriceDetailDTO priceDetailDTO) {
-        if (priceDetailDTO == null || priceDetailDTO.getDiscountPriceDetail() == null) {
-            return;
-        }
-        double flash = 0D;
-        double nth = 0D;
-        for (DiscountPriceItem item : priceDetailDTO.getDiscountPriceDetail()) {
-            if (item.getPromotionTypeEnum() == null || item.getDiscountPrice() == null) {
-                continue;
-            }
-            switch (item.getPromotionTypeEnum()) {
-                case FLASH_DISCOUNT -> flash = CurrencyUtil.add(flash, item.getDiscountPrice());
-                case NTH_ITEM_DISCOUNT -> nth = CurrencyUtil.add(nth, item.getDiscountPrice());
-                default -> { }
-            }
-        }
-        this.setFlashDiscountSubsidy(flash);
-        this.setNthItemSubsidy(nth);
-    }
 }

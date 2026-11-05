@@ -1752,7 +1752,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             OrderExportDetailDTO orderExportDetailDTO = new OrderExportDetailDTO();
             BeanUtil.copyProperties(orderExportDTO, orderExportDetailDTO);
             //金额
-            PriceDetailDTO priceDetailDTO = JSONUtil.toBean(orderExportDTO.getPriceDetail(), PriceDetailDTO.class);
+            PriceDetailDTO priceDetailDTO = com.alibaba.fastjson2.JSON.parseObject(orderExportDTO.getPriceDetail(), PriceDetailDTO.class);
             orderExportDetailDTO.setFreightPrice(priceDetailDTO.getFreightPrice());
             orderExportDetailDTO.setDiscountPrice(CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), priceDetailDTO.getCouponPrice()));
             orderExportDetailDTO.setUpdatePrice(priceDetailDTO.getUpdatePrice());

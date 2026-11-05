@@ -525,7 +525,7 @@ class GoodsSearchServiceImplTest {
         GoodsSearchDTO searchDTO = new GoodsSearchDTO();
         searchDTO.setBrandId("brand-1@brand-2");
         searchDTO.setNeGoodsType("VIRTUAL_GOODS");
-        searchDTO.setNeSalesModel("WHOLESALE");
+        searchDTO.setNeSalesModel("RETAIL");
         QueryWrapper<GoodsSkuDTO> wrapper = buildSharedWhere(service, searchDTO);
         String sql = wrapper.getCustomSqlSegment();
         Map<String, Object> pairs = wrapper.getParamNameValuePairs();
@@ -537,7 +537,7 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(sql.contains("(gs.goods_type IS NULL OR gs.goods_type <>"));
         Assertions.assertTrue(sql.contains("(gs.sales_model IS NULL OR gs.sales_model <>"));
         Assertions.assertTrue(pairs.containsValue("VIRTUAL_GOODS"));
-        Assertions.assertTrue(pairs.containsValue("WHOLESALE"));
+        Assertions.assertTrue(pairs.containsValue("RETAIL"));
         Assertions.assertTrue(sql.contains("(g.delete_flag IS NULL OR g.delete_flag = 0)"));
         Assertions.assertFalse(sql.contains("ORDER BY"));
     }

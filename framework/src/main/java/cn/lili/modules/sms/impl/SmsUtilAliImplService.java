@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -131,11 +130,6 @@ public class SmsUtilAliImplService implements SmsUtil {
             return false;
         }
 
-    }
-
-    @Override
-    public void sendBatchSms(String signName, List<String> mobile, String templateCode) {
-        smsPluginFactory.smsPlugin().sendBatchSms(signName, mobile, templateCode);
     }
 
     @Override

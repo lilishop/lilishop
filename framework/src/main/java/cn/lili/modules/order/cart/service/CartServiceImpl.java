@@ -10,15 +10,12 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
@@ -127,9 +124,6 @@ public class CartServiceImpl implements CartService {
     private PromotionGoodsService promotionGoodsService;
 
     @Autowired
-    private WholesaleService wholesaleService;
-
-    @Autowired
     private StoreService storeService;
 
     @Autowired
@@ -214,7 +208,6 @@ public class CartServiceImpl implements CartService {
                 cartSkuVOS.add(cartSkuVO);
             }
 
-            this.checkGoodsSaleModel(dataSku, tradeDTO.getSkuList());
             tradeDTO.setCartTypeEnum(cartTypeEnum);
 
             remoteCoupon(tradeDTO);
@@ -491,7 +484,7 @@ public class CartServiceImpl implements CartService {
             cartSkuVO.setNum(num);
         }
 
-        if (cartSkuVO.getGoodsSku() != null && !GoodsSalesModeEnum.WHOLESALE.name().equals(cartSkuVO.getGoodsSku().getSalesModel()) && cartSkuVO.getNum() > 99) {
+        if (cartSkuVO.getNum() > 99) {
             cartSkuVO.setNum(99);
         }
     }
@@ -829,23 +822,6 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-
-    private void checkGoodsSaleModel(GoodsSku dataSku, List<CartSkuVO> cartSkuVOS) {
-        if (dataSku.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
-            int numSum = 0;
-            List<CartSkuVO> sameGoodsIdSkuList = cartSkuVOS.stream().filter(i -> i.getGoodsSku().getGoodsId().equals(dataSku.getGoodsId())).collect(Collectors.toList());
-            if (CollUtil.isNotEmpty(sameGoodsIdSkuList)) {
-                numSum += sameGoodsIdSkuList.stream().mapToInt(CartSkuVO::getNum).sum();
-            }
-            Wholesale match = wholesaleService.match(dataSku.getGoodsId(), numSum);
-            if (match != null) {
-                sameGoodsIdSkuList.forEach(i -> {
-                    i.setPurchasePrice(match.getPrice());
-                    i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
-                });
-            }
-        }
-    }
 
     /**
      * 校验拼团信息

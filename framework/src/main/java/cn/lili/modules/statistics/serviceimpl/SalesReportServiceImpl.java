@@ -541,9 +541,7 @@ public class SalesReportServiceImpl extends ServiceImpl<SalesReportMapper, Store
     private void fillOrderDetailMetrics(SalesOrderDetailReportVO row) {
         double transactionAmount = nullSafeDouble(row.getTransactionAmount());
         double siteCoupon = nullSafeDouble(row.getSiteCouponPrice());
-        double flashDiscount = nullSafeDouble(row.getFlashDiscountSubsidy());
-        double nthSubsidy = nullSafeDouble(row.getNthItemSubsidy());
-        double discountAmount = siteCoupon + flashDiscount + nthSubsidy;
+        double discountAmount = siteCoupon;
 
         row.setTransactionAmount(transactionAmount);
         row.setDiscountAmount(discountAmount);
@@ -551,7 +549,7 @@ public class SalesReportServiceImpl extends ServiceImpl<SalesReportMapper, Store
         row.setOrderRefundSn(buildOrderRefundSn(row.getOrderSn(), row.getRefundSn()));
         row.setFlowTypeName(formatFlowType(row.getFlowType()));
         row.setPaymentDetail(formatPaymentDetail(row.getPaymentName()));
-        row.setDiscountDetail(buildDiscountDetail(siteCoupon, flashDiscount, nthSubsidy));
+        row.setDiscountDetail(buildDiscountDetail(siteCoupon));
     }
 
     private String buildOrderRefundSn(String orderSn, String refundSn) {
@@ -584,16 +582,10 @@ public class SalesReportServiceImpl extends ServiceImpl<SalesReportMapper, Store
         };
     }
 
-    private String buildDiscountDetail(double siteCoupon, double flashDiscount, double nthSubsidy) {
+    private String buildDiscountDetail(double siteCoupon) {
         List<String> parts = new ArrayList<>();
         if (siteCoupon > 0D) {
             parts.add("平台券:" + siteCoupon);
-        }
-        if (flashDiscount > 0D) {
-            parts.add("限时直降:" + flashDiscount);
-        }
-        if (nthSubsidy > 0D) {
-            parts.add("第N件优惠:" + nthSubsidy);
         }
         return String.join(";", parts);
     }

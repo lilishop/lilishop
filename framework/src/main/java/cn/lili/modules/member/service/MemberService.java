@@ -321,13 +321,6 @@ public interface MemberService extends IService<Member> {
     void resetPassword(List<String> ids);
 
     /**
-     * 获取所有客户的手机号
-     *
-     * @return 所有客户的手机号
-     */
-    List<String> getAllMemberMobile();
-
-    /**
      * 更新客户登录时间为最新时间
      *
      * @param memberId 客户id

@@ -65,9 +65,9 @@ class GoodsSkuServiceImplECouponStockTest {
                 .salesModel("RETAIL")
                 .goodsGalleryList(new ArrayList<>())
                 .build();
-        ReflectionTestUtils.setField(goodsSkuService, "salesModelRenders", List.of());
 
-        goodsSkuService.renderGoodsSkuList(List.of(sku), dto);
+        doReturn(null).when(serviceSpy).getGoodsSkuByIdFromCache((String) null);
+        serviceSpy.renderGoodsSkuList(List.of(sku), dto);
 
         assertThat(sku.getQuantity()).isZero();
     }

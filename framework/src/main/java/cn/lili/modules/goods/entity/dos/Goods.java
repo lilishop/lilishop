@@ -153,9 +153,10 @@ public class Goods extends BaseEntity {
     private Boolean recommend;
 
     /**
+     * 销售模式兼容字段，统一按 RETAIL（零售）处理历史值。
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "销售模式（兼容字段，固定零售）", allowableValues = "RETAIL")
     private String salesModel;
 
 
@@ -173,6 +174,11 @@ public class Goods extends BaseEntity {
     private String params;
 
 
+    /** 返回统一的零售模式，兼容历史商品和缓存数据。 */
+    public String getSalesModel() {
+        return GoodsSalesModeEnum.RETAIL.name();
+    }
+
     public Goods() {
     }
 
@@ -185,7 +191,7 @@ public class Goods extends BaseEntity {
         this.templateId = goodsOperationDTO.getTemplateId();
         this.recommend = goodsOperationDTO.getRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();
-        this.salesModel = CharSequenceUtil.isNotEmpty(goodsOperationDTO.getSalesModel()) ? goodsOperationDTO.getSalesModel() : GoodsSalesModeEnum.RETAIL.name();
+        this.salesModel = GoodsSalesModeEnum.RETAIL.name();
         this.goodsUnit = goodsOperationDTO.getGoodsUnit();
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
@@ -202,10 +208,10 @@ public class Goods extends BaseEntity {
         //循环sku，判定sku是否有效
         for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
             //SKU编码(sn)由后端自动生成，不再要求前端必传
-            if ((!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) && !GoodsSalesModeEnum.WHOLESALE.name().equals(goodsOperationDTO.getSalesModel())) {
+            if ((!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0)) {
                 throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
             }
-            if ((!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) && !GoodsSalesModeEnum.WHOLESALE.name().equals(goodsOperationDTO.getSalesModel())) {
+            if ((!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0)) {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段

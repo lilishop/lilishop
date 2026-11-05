@@ -39,6 +39,6 @@ public class DiscountPriceItem {
 
 
     public String getPromotionName() {
-        return promotionTypeEnum.description();
+        return promotionTypeEnum == null ? "历史优惠" : promotionTypeEnum.description();
     }
 }

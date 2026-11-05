@@ -8,14 +8,11 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -66,9 +63,6 @@ public class CheckDataRender implements CartRenderStep {
     @Autowired
     private MemberService memberService;
 
-    @Autowired
-    private WholesaleService wholesaleService;
-
     /**
      * 商品索引
      */
@@ -89,9 +83,6 @@ public class CheckDataRender implements CartRenderStep {
 
         //预校验
         preCalibration(tradeDTO);
-
-        //批量销售预处理
-        preSaleModel(tradeDTO);
 
         //店铺分组数据初始化
         groupStore(tradeDTO);
@@ -268,40 +259,4 @@ public class CheckDataRender implements CartRenderStep {
     }
 
 
-    /**
-     * 商品销售模式特殊处理
-     *
-     * @param tradeDTO 交易信息
-     */
-    private void preSaleModel(TradeDTO tradeDTO) {
-        // 寻找同goods下销售模式为批发的商品
-        Map<String, List<CartSkuVO>> goodsGroup = tradeDTO.getCheckedSkuList().stream().filter(i -> i.getGoodsSku().getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())).collect(Collectors.groupingBy(i -> i.getGoodsSku().getGoodsId()));
-        if (CollUtil.isNotEmpty(goodsGroup)) {
-            goodsGroup.forEach((k, v) -> {
-                // 获取购买总数
-                int sum = v.stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
-                int fSum = v.stream().filter(i -> Boolean.FALSE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
-                // 匹配符合的批发规则
-                Wholesale match = wholesaleService.match(k, sum);
-                if (match != null) {
-                    v.forEach(i -> {
-                        // 将符合规则的商品设置批发价格
-                        if (Boolean.TRUE.equals(i.getChecked())) {
-                            i.setPurchasePrice(match.getPrice());
-                            i.getGoodsSku().setPrice(match.getPrice());
-                            i.getGoodsSku().setCost(match.getPrice());
-                            i.setUtilPrice(match.getPrice());
-                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
-                        } else {
-                            i.setPurchasePrice(wholesaleService.match(k, fSum).getPrice());
-                            i.getGoodsSku().setPrice(i.getPurchasePrice());
-                            i.getGoodsSku().setCost(i.getPurchasePrice());
-                            i.setUtilPrice(i.getPurchasePrice());
-                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
-                        }
-                    });
-                }
-            });
-        }
-    }
 }

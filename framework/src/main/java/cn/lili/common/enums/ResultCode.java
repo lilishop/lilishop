@@ -78,11 +78,7 @@ public enum ResultCode {
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
     GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
     MUST_HAVE_GOODS_SKU(11012, "规格必须要有一个！"),
-    MUST_HAVE_SALES_MODEL(11022, "销售模式为批发时必须要有批发规则！"),
-
-    HAVE_INVALID_SALES_MODEL(11023, "批发规则存在小于等于0的无效数据！"),
     MUST_HAVE_GOODS_SKU_VALUE(11024, "规格值不能为空！"),
-    DO_NOT_MATCH_WHOLESALE(11025, "批发商品购买数量不能低于起拍量！"),
     GOODS_NOT_ERROR(11026, "商品不存在"),
 
     GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
@@ -347,7 +343,6 @@ public enum ResultCode {
      */
     PROMOTION_GOODS_NOT_EXIT(40000, "当前促销商品不存在！"),
     PROMOTION_GOODS_QUANTITY_NOT_EXIT(40020, "当前促销商品库存不足！"),
-    PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE(40050, "批发商品无法参加促销"),
     PROMOTION_SAME_ACTIVE_EXIST(40001, "活动时间内已存在同类活动，请选择关闭、删除当前时段的活动"),
     PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
     PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
@@ -554,7 +549,6 @@ public enum ResultCode {
     LOGISTICS_CHECK_SETTING(70005, "操作失败,请检查您的快递鸟配置"),
     ORDER_SETTING_ERROR(70006, "系统订单配置异常"),
     ALI_SMS_SETTING_ERROR(70007, "您还未配置阿里云短信"),
-    SMS_SIGN_EXIST_ERROR(70008, "短信签名已存在"),
 
     /**
      * 站内信

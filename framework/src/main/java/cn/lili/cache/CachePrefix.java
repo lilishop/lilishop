@@ -217,12 +217,6 @@ public enum CachePrefix {
      */
     PROMOTION_GOODS,
 
-    /*** 单品立减 */
-    STORE_ID_MINUS,
-
-    /*** 第二件半价 */
-    STORE_ID_HALF_PRICE,
-
     /*** 满优惠 */
     STORE_ID_FULL_DISCOUNT,
 

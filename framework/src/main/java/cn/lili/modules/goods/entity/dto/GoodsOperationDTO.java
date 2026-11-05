@@ -98,9 +98,10 @@ public class GoodsOperationDTO implements Serializable {
     private String sellingPoint;
 
     /**
+     * 销售模式兼容字段，发品请求统一按 RETAIL（零售）处理。
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "销售模式（兼容字段，固定零售）", allowableValues = "RETAIL")
     private String salesModel = GoodsSalesModeEnum.RETAIL.name();
 
     @Schema(description = "是否有规格", hidden = true)
@@ -138,11 +139,6 @@ public class GoodsOperationDTO implements Serializable {
     @Schema(description = "是否为商品模版")
     @Builder.Default
     private Boolean goodsTemplateFlag = false;
-    /**
-     * 批发商品规则
-     */
-    @Schema(description = "批发商品规则")
-    private List<WholesaleDTO> wholesaleList;
 
     @Schema(description = "注意事项")
     private String needingAttention;
@@ -159,6 +155,11 @@ public class GoodsOperationDTO implements Serializable {
 
     @Schema(description = "预约时段模板（发品）")
     private Map<String, Object> appointmentSlotTemplate;
+
+    /** 返回统一的零售模式，避免旧请求恢复已下线的销售方式。 */
+    public String getSalesModel() {
+        return GoodsSalesModeEnum.RETAIL.name();
+    }
 
     public String getGoodsName() {
         //对商品对名称做一个极限处理。这里没有用xss过滤是因为xss过滤为全局过滤，影响很大。

@@ -31,8 +31,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
             " COUNT(DISTINCT CASE WHEN flow_type='PAY' THEN order_sn END) AS payOrderCount," +
             " COUNT(DISTINCT CASE WHEN flow_type='REFUND' THEN order_sn END) AS refundCount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     IPage<StorePerformanceReportVO> storePerformanceByStore(IPage<StorePerformanceReportVO> page,
                                                             @Param(Constants.WRAPPER) Wrapper<StorePerformanceReportVO> queryWrapper);
@@ -45,8 +44,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
             " COUNT(DISTINCT CASE WHEN flow_type='PAY' THEN order_sn END) AS payOrderCount," +
             " COUNT(DISTINCT CASE WHEN flow_type='REFUND' THEN order_sn END) AS refundCount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     List<StorePerformanceReportVO> storePerformanceByStoreList(@Param(Constants.WRAPPER) Wrapper<StorePerformanceReportVO> queryWrapper);
 
@@ -59,8 +57,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
             " COUNT(DISTINCT CASE WHEN flow_type='PAY' THEN order_sn END) AS payOrderCount," +
             " COUNT(DISTINCT CASE WHEN flow_type='REFUND' THEN order_sn END) AS refundCount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     IPage<StorePerformanceReportVO> storePerformanceByDay(IPage<StorePerformanceReportVO> page,
                                                           @Param(Constants.WRAPPER) Wrapper<StorePerformanceReportVO> queryWrapper);
@@ -74,8 +71,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
             " COUNT(DISTINCT CASE WHEN flow_type='PAY' THEN order_sn END) AS payOrderCount," +
             " COUNT(DISTINCT CASE WHEN flow_type='REFUND' THEN order_sn END) AS refundCount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     List<StorePerformanceReportVO> storePerformanceByDayList(@Param(Constants.WRAPPER) Wrapper<StorePerformanceReportVO> queryWrapper);
 
@@ -140,8 +136,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='PAY' THEN final_price ELSE 0 END) AS salesAmount," +
             " SUM(CASE WHEN flow_type='REFUND' THEN num ELSE 0 END) AS refundNum," +
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     IPage<GoodsSalesSummaryReportVO> goodsSalesSummary(IPage<GoodsSalesSummaryReportVO> page,
                                                          @Param(Constants.WRAPPER) Wrapper<GoodsSalesSummaryReportVO> queryWrapper);
@@ -154,8 +149,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
             " SUM(CASE WHEN flow_type='PAY' THEN final_price ELSE 0 END) AS salesAmount," +
             " SUM(CASE WHEN flow_type='REFUND' THEN num ELSE 0 END) AS refundNum," +
             " SUM(CASE WHEN flow_type='REFUND' THEN final_price ELSE 0 END) AS refundAmount," +
-            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) + COALESCE(flash_discount_subsidy,0)" +
-            " + COALESCE(nth_item_subsidy,0) ELSE 0 END) AS discountAmount" +
+            " SUM(CASE WHEN flow_type='PAY' THEN COALESCE(site_coupon_price,0) ELSE 0 END) AS discountAmount" +
             " FROM li_store_flow ${ew.customSqlSegment}")
     List<GoodsSalesSummaryReportVO> goodsSalesSummaryList(@Param(Constants.WRAPPER) Wrapper<GoodsSalesSummaryReportVO> queryWrapper);
 
@@ -173,9 +167,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
     @Select("SELECT sf.order_sn AS orderSn, sf.refund_sn AS refundSn, sf.create_time AS occurTime," +
             " sf.flow_type AS flowType, sf.num AS num, sf.final_price AS transactionAmount," +
             " sf.payment_name AS paymentName, o.client_type AS clientType," +
-            " COALESCE(sf.site_coupon_price,0) AS siteCouponPrice," +
-            " COALESCE(sf.flash_discount_subsidy,0) AS flashDiscountSubsidy," +
-            " COALESCE(sf.nth_item_subsidy,0) AS nthItemSubsidy" +
+            " COALESCE(sf.site_coupon_price,0) AS siteCouponPrice" +
             " FROM li_store_flow sf LEFT JOIN li_order o ON sf.order_sn = o.sn ${ew.customSqlSegment}")
     IPage<SalesOrderDetailReportVO> salesOrderDetail(IPage<SalesOrderDetailReportVO> page,
                                                      @Param(Constants.WRAPPER) Wrapper<SalesOrderDetailReportVO> queryWrapper);
@@ -186,9 +178,7 @@ public interface SalesReportMapper extends BaseMapper<StoreFlow> {
     @Select("SELECT sf.order_sn AS orderSn, sf.refund_sn AS refundSn, sf.create_time AS occurTime," +
             " sf.flow_type AS flowType, sf.num AS num, sf.final_price AS transactionAmount," +
             " sf.payment_name AS paymentName, o.client_type AS clientType," +
-            " COALESCE(sf.site_coupon_price,0) AS siteCouponPrice," +
-            " COALESCE(sf.flash_discount_subsidy,0) AS flashDiscountSubsidy," +
-            " COALESCE(sf.nth_item_subsidy,0) AS nthItemSubsidy" +
+            " COALESCE(sf.site_coupon_price,0) AS siteCouponPrice" +
             " FROM li_store_flow sf LEFT JOIN li_order o ON sf.order_sn = o.sn ${ew.customSqlSegment}")
     List<SalesOrderDetailReportVO> salesOrderDetailList(@Param(Constants.WRAPPER) Wrapper<SalesOrderDetailReportVO> queryWrapper);
 }

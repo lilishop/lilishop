@@ -11,11 +11,8 @@ import cn.lili.modules.message.entity.dos.Message;
 import cn.lili.modules.message.entity.dos.StoreMessage;
 import cn.lili.modules.message.entity.enums.MessageSendClient;
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
-import cn.lili.modules.message.entity.enums.RangeEnum;
 import cn.lili.modules.message.service.MemberMessageService;
 import cn.lili.modules.message.service.StoreMessageService;
-import cn.lili.modules.sms.SmsUtil;
-import cn.lili.modules.sms.entity.dto.SmsReachDTO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.message.QueueMessage;
@@ -38,11 +35,6 @@ import java.util.List;
 public class NoticeSendMessageListener {
 
     /**
-     * 短信
-     */
-    @Autowired
-    private SmsUtil smsUtil;
-    /**
      * 店铺消息
      */
     @Autowired
@@ -64,33 +56,15 @@ public class NoticeSendMessageListener {
     private MemberService memberService;
 
     public void onMessage(QueueMessage messageExt) {
-        switch (OtherTagsEnum.valueOf(messageExt.getTags())) {
-            case SMS:
-                String smsJsonStr = new String(messageExt.getBody());
-                SmsReachDTO smsReachDTO = JSONUtil.toBean(smsJsonStr, SmsReachDTO.class);
-                //发送全部客户
-                if (smsReachDTO.getSmsRange().equals(RangeEnum.ALL.name())) {
-                    //获取所有客户的手机号
-                    List<String> list = memberService.getAllMemberMobile();
-                    smsUtil.sendBatchSms(smsReachDTO.getSignName(), list, smsReachDTO.getMessageCode());
-                    //判断为发送部分用户
-                } else {
-                    smsUtil.sendBatchSms(smsReachDTO.getSignName(), smsReachDTO.getMobile(), smsReachDTO.getMessageCode());
-                }
-                break;
-            //管理员发送站内信
-            case MESSAGE:
-                Message message = JSONUtil.toBean(new String(messageExt.getBody()), Message.class);
-                // 管理端发送给商家的站内信
-                if (message.getMessageClient().equals(MessageSendClient.STORE.name().toLowerCase())) {
-                    saveStoreMessage(message);
-                } else {
-                    //管理员发送给客户的站内信
-                    saveMemberMessage(message);
-                }
-                break;
-            default:
-                break;
+        // 忽略已下线或未知任务，避免旧队列消息反复重试。
+        if (!OtherTagsEnum.MESSAGE.name().equals(messageExt.getTags())) {
+            return;
+        }
+        Message message = JSONUtil.toBean(new String(messageExt.getBody()), Message.class);
+        if (MessageSendClient.STORE.name().toLowerCase().equals(message.getMessageClient())) {
+            saveStoreMessage(message);
+        } else {
+            saveMemberMessage(message);
         }
     }
 

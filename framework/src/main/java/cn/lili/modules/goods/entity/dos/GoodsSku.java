@@ -1,6 +1,7 @@
 package cn.lili.modules.goods.entity.dos;
 
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -153,9 +154,10 @@ public class GoodsSku extends BaseEntity {
     private Boolean recommend;
 
     /**
+     * 销售模式兼容字段，统一按 RETAIL（零售）处理历史值。
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "销售模式（兼容字段，固定零售）", allowableValues = "RETAIL")
     private String salesModel;
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
@@ -165,6 +167,11 @@ public class GoodsSku extends BaseEntity {
 
     @Schema(description = "预警数量")
     private Integer alertQuantity;
+
+    /** 返回统一的零售模式，兼容历史商品和缓存数据。 */
+    public String getSalesModel() {
+        return GoodsSalesModeEnum.RETAIL.name();
+    }
 
     public Double getWeight() {
         if (weight == null) {

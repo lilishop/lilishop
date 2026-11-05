@@ -23,13 +23,7 @@ public enum PromotionTypeEnum {
     FULL_DISCOUNT("满减"),
     POINTS_GOODS("积分商品"),
     KANJIA("砍价"),
-    COUPON_ACTIVITY("优惠券活动"),
-    /** 已下线，仅保留历史订单及财务数据反序列化兼容。 */
-    @Deprecated
-    FLASH_DISCOUNT("限时直降"),
-    /** 已下线，仅保留历史订单及财务数据反序列化兼容。 */
-    @Deprecated
-    NTH_ITEM_DISCOUNT("第N件优惠");
+    COUPON_ACTIVITY("优惠券活动");
 
     /**
      * 有促销库存的活动类型
@@ -74,7 +68,7 @@ public enum PromotionTypeEnum {
      * 已下线的活动不再参与促销展示、库存及计价。
      */
     public static boolean isRetired(String promotionType) {
-        return FLASH_DISCOUNT.name().equals(promotionType) || NTH_ITEM_DISCOUNT.name().equals(promotionType);
+        return !isValid(promotionType);
     }
 
     /**
