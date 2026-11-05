@@ -29,6 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 买家端,客户等级接口
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @RestController
 @Tag(name = "买家端,客户等级接口")
 @RequestMapping("/buyer/member/memberGrade")
@@ -55,7 +61,7 @@ public class MemberGradeBuyerController {
         if (CharSequenceUtil.isNotBlank(member.getGradeId())) {
             grade = memberGradeService.getById(member.getGradeId());
         }
-        if (grade == null) {
+        if (grade == null || !"OPEN".equals(grade.getGradeState())) {
             grade = memberGradeService.getCurrentGradeByExperience(member.getExperience());
         }
         IPage<MemberExperienceLog> experiencePage = memberExperienceService.getExperiencePageByMemberId(memberId, ruleKey, page);

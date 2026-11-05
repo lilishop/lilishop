@@ -5,6 +5,12 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 买家端单项经验值任务进度，包含规则编码、名称、奖励值、限额及当前客户的完成状态和累计获得经验值。
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @Data
 public class ExperienceRuleProgressVO implements Serializable {
 

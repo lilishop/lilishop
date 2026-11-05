@@ -1,9 +1,6 @@
 package cn.lili.event.impl;
 
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.event.OrderStatusChangeEvent;
@@ -12,14 +9,10 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.PointSourceEnum;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.PointSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -35,16 +28,11 @@ import org.springframework.stereotype.Service;
  * @since 2020-07-03 11:20
  */
 @Service
-public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent {
+public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {
 
-    /**
-     * 配置
-     */
+
     @Autowired
     private SettingService settingService;
-    /**
-     * 客户
-     */
     @Autowired
     private MemberService memberService;
     /**
@@ -80,7 +68,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     }
 
     /**
-     * 非积分订单订单完成后赠送积分
+     * 处理订单取消时返还支付积分；购物赠送积分统一由关闭售后任务发放
      *
      * @param orderMessage 订单消息
      */
@@ -103,52 +91,11 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
                 memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), order.getMemberId(), content, PointSourceEnum.ORDER.name());
                 break;
             }
-            case COMPLETED: {
-                Order order = orderService.getBySn(orderMessage.getOrderSn());
-                //如果是积分订单 则直接返回
-                if (CharSequenceUtil.isNotEmpty(order.getOrderPromotionType())
-                        && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
-                    return;
-                }
-                //获取积分设置
-                PointSetting pointSetting = getPointSetting();
-                if (pointSetting.getConsumer() == 0) {
-                    return;
-                }
-                //计算赠送积分数量
-                Double point = CurrencyUtil.mul(pointSetting.getConsumer(), order.getFlowPrice(), 0);
-                //赠送客户积分
-                memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "客户下单，赠送积分" + point + "分", PointSourceEnum.ORDER.name());
-                break;
-            }
-
             default:
                 break;
         }
     }
 
-
-    /**
-     * 提交售后后扣除积分
-     *
-     * @param afterSale 售后
-     */
-    @Override
-    public void afterSaleStatusChange(AfterSale afterSale) {
-        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {
-            Order order = orderService.getBySn(afterSale.getOrderSn());
-            //获取积分设置
-            PointSetting pointSetting = getPointSetting();
-            if (pointSetting.getConsumer() == 0 || !OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
-                return;
-            }
-            //计算扣除积分数量
-            Double point = CurrencyUtil.mul(pointSetting.getConsumer(), afterSale.getActualRefundPrice(), 0);
-            //扣除客户积分
-            memberService.updateMemberPoint(point.longValue(), PointTypeEnum.REDUCE.name(), afterSale.getMemberId(), "客户退款，回退消费赠送积分" + point + "分", PointSourceEnum.REFUND_BACK.name());
-
-        }
-    }
 
     /**
      * 获取积分设置

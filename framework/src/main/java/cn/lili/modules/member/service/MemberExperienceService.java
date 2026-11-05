@@ -11,6 +11,9 @@ import java.util.List;
 
 /**
  * 客户经验值服务
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 public interface MemberExperienceService {
 

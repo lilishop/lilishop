@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -38,42 +37,17 @@ public interface StoreFlowMapper extends BaseMapper<StoreFlow> {
     @Select("SELECT * FROM li_store_flow ${ew.customSqlSegment}")
     List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(@Param(Constants.WRAPPER) Wrapper<StoreFlow> queryWrapper);
 
-    @Update("UPDATE li_store_flow "+
-            "SET profit_sharing_status = 'PROCESSING', "+
-            "bill_time=NOW()  "+
-            "WHERE order_item_sn IN ( "+
-            "SELECT o.order_item_sn "+
-            "FROM ( "+
-            "SELECT lof.order_item_sn "+
-            "FROM li_store_flow lof "+
-            "LEFT JOIN ( "+
-            "SELECT order_sn "+
-            "FROM li_order_item "+
-            "WHERE after_sale_status <> 'EXPIRED' "+
-            "GROUP BY order_sn "+
-            ") oi ON lof.order_sn = oi.order_sn "+
-            "WHERE lof.profit_sharing_status = 'WAIT_COMPLETE' "+
-            "AND oi.order_sn IS NULL "+
-            ") o "+
-            ")")
-    void updateProfitSharingStatus();
-
-    @Select("SELECT * FROM li_store_flow "+
-            "WHERE order_item_sn IN ( "+
-            "SELECT o.order_item_sn "+
-            "FROM ( "+
-            "SELECT lof.order_item_sn "+
-            "FROM li_store_flow lof "+
-            "LEFT JOIN ( "+
-            "SELECT order_sn "+
-            "FROM li_order_item "+
-            "WHERE after_sale_status <> 'EXPIRED' "+
-            "GROUP BY order_sn "+
-            ") oi ON lof.order_sn = oi.order_sn "+
-            "WHERE lof.profit_sharing_status = 'WAIT_COMPLETE' "+
-            "AND oi.order_sn IS NULL "+
-            ") o "+
-            ")")
+    /**
+     * 获取本次待完结流水；订单须完成、所有商品项不可售后且不存在处理中售后。
+     * 仅返回 WAIT_COMPLETE，避免将同一商品项其他状态的流水重新结算。
+     * @return 符合条件的支付及退款流水，按订单号分组处理积分
+     */
+    @Select("SELECT f.* FROM li_store_flow f WHERE f.profit_sharing_status='WAIT_COMPLETE' "
+            + "AND EXISTS (SELECT 1 FROM li_order o WHERE o.sn=f.order_sn AND o.delete_flag=0 AND o.order_status='COMPLETED') "
+            + "AND EXISTS (SELECT 1 FROM li_order_item i WHERE i.order_sn=f.order_sn) "
+            + "AND NOT EXISTS (SELECT 1 FROM li_order_item i WHERE i.order_sn=f.order_sn AND (i.after_sale_status IS NULL OR i.after_sale_status<>'EXPIRED')) "
+            + "AND NOT EXISTS (SELECT 1 FROM li_after_sale a WHERE a.order_sn=f.order_sn AND (a.service_status IS NULL "
+            + "OR a.service_status NOT IN ('COMPLETE','REFUSE','SELLER_TERMINATION','BUYER_CANCEL')))")
     List<StoreFlow> completeList();
 
 

@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 客户经验值流水
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

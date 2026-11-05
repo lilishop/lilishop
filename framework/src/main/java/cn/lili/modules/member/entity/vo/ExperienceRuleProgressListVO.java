@@ -6,6 +6,12 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * 买家端经验值任务列表响应，包含经验值说明及当前客户已开启任务的完成状态、累计获得经验值。
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @Data
 public class ExperienceRuleProgressListVO implements Serializable {
 

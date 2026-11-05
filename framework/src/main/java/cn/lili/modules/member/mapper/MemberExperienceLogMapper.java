@@ -10,6 +10,9 @@ import org.apache.ibatis.annotations.Select;
 
 /**
  * 客户经验值流水数据层
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 public interface MemberExperienceLogMapper extends BaseMapper<MemberExperienceLog> {
 
@@ -41,6 +44,9 @@ public interface MemberExperienceLogMapper extends BaseMapper<MemberExperienceLo
     @Select("SELECT variable_experience FROM li_member_experience_log WHERE member_id = #{memberId} AND rule_key = #{ruleKey} AND biz_id = #{bizId} AND delete_flag = 0 ORDER BY create_time DESC LIMIT 1")
     Long getVariableByMemberRuleAndBiz(@Param("memberId") String memberId, @Param("ruleKey") String ruleKey, @Param("bizId") String bizId);
 
+    /**
+     * 分页查询客户经验值流水
+     */
     @Select("SELECT el.*, m.mobile AS memberMobile " +
             "FROM li_member_experience_log el " +
             "LEFT JOIN li_member m ON el.member_id = m.id ${ew.customSqlSegment}")

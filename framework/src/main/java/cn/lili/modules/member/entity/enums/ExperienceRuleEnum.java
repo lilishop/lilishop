@@ -2,6 +2,9 @@ package cn.lili.modules.member.entity.enums;
 
 /**
  * 经验值规则场景
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 public enum ExperienceRuleEnum {
     CONSUME("消费"),

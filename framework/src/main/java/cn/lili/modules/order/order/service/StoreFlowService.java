@@ -103,7 +103,7 @@ public interface StoreFlowService extends IService<StoreFlow> {
     List<StoreFlow> listStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO);
 
     /**
-     * 修改分账状态
+     * 对待完结订单先完成分销、再赠送购物积分，并推进本批成功流水的分账状态；失败保留待处理状态。
      */
     void updateProfitSharingStatus();
 

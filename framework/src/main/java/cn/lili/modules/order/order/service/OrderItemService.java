@@ -75,7 +75,15 @@ public interface OrderItemService extends IService<OrderItem> {
      */
     OrderItem getByOrderSnAndSkuId(String orderSn, String skuId);
 
+    /**
+     * 查询待操作的子订单
+     * @param orderItemOperationDTO 订单查询参数
+     * @return 待操作的子订单列表
+     */
     List<OrderItem> waitOperationOrderItem(OrderItemOperationDTO orderItemOperationDTO);
-
+    /**
+     * 更新子订单售后状态为过期
+     * @param expiredTime 过期时间
+     */
     void expiredAfterSaleStatus(DateTime expiredTime);
 }

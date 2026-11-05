@@ -109,7 +109,9 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
     @Override
     public void expiredAfterSaleStatus(DateTime expiredTime) {
+        // 更新订单项售后状态
         this.baseMapper.expiredAfterSaleStatus(expiredTime);
+        // 更新订单项售后状态执行
         this.baseMapper.expiredAfterSaleStatusExecuteByAfterSale(expiredTime);
     }
 }

@@ -9,22 +9,22 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberExperienceLog;
 import cn.lili.modules.member.entity.dos.MemberGrade;
 import cn.lili.modules.member.entity.enums.ExperienceRuleEnum;
-import cn.lili.modules.member.mapper.MemberExperienceLogMapper;
 import cn.lili.modules.member.entity.vo.ExperienceRuleProgressListVO;
+import cn.lili.modules.member.entity.vo.ExperienceRuleProgressVO;
+import cn.lili.modules.member.mapper.MemberExperienceLogMapper;
 import cn.lili.modules.member.service.MemberBenefitService;
 import cn.lili.modules.member.service.MemberExperienceService;
 import cn.lili.modules.member.service.MemberGradeService;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.entity.vo.ExperienceRuleProgressVO;
-import cn.lili.mybatis.util.PageUtil;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.ExperienceSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +39,9 @@ import java.util.List;
 
 /**
  * 客户经验值服务实现
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Slf4j
 @Service
@@ -83,7 +86,7 @@ public class MemberExperienceServiceImpl implements MemberExperienceService {
             storedGrade = memberGradeService.getById(member.getGradeId());
         }
         MemberGrade finalGrade = computed;
-        if (storedGrade != null) {
+        if (storedGrade != null && "OPEN".equals(storedGrade.getGradeState())) {
             Integer se = storedGrade.getRequiredExperience();
             Integer ce = computed.getRequiredExperience();
             if (se != null && ce != null && se > ce) {
@@ -93,6 +96,7 @@ public class MemberExperienceServiceImpl implements MemberExperienceService {
         String oldGradeId = member.getGradeId();
         String newGradeId = finalGrade.getId();
         if (CharSequenceUtil.equals(oldGradeId, newGradeId)) {
+            this.memberBenefitService.tryGrantBenefitsForGradeReached(memberId, newGradeId);
             return;
         }
         member.setGradeId(newGradeId);
@@ -174,6 +178,18 @@ public class MemberExperienceServiceImpl implements MemberExperienceService {
         return vo;
     }
 
+    /**
+     * 按开启的经验规则发放经验，查询规则及业务记录防重，并写入经验流水后刷新客户等级。
+     * 新增地址先锁客户行；一次性任务按客户和规则、签到按业务日期、消费及分享等按业务ID查询去重。
+     * 除消费外的规则按该客户累计已得经验限制maxValue，经验余额使用SQL原子累加。
+     *
+     * @param memberId 客户主键，空值不处理
+     * @param ruleEnum 触发的经验规则，空值不处理
+     * @param amount   消费金额，单位元，仅消费规则使用
+     * @param bizId    订单号、被邀请人、店铺ID或签到日期等业务防重标识
+     * @param content  写入经验流水的变更说明
+     * @throws ServiceException 客户不存在
+     */
     private void grant(String memberId, ExperienceRuleEnum ruleEnum, Double amount, String bizId, String content) {
         if (memberId == null || ruleEnum == null) {
             return;
@@ -301,6 +317,15 @@ public class MemberExperienceServiceImpl implements MemberExperienceService {
         refreshMemberGrade(memberId);
     }
 
+    /**
+     * 计算本次经验增量，消费按金额向下取整后乘每元奖励，其他规则取配置固定奖励。
+     * 累计上限由grant方法处理，本方法不扣减已获得的经验。
+     *
+     * @param ruleEnum 经验规则
+     * @param amount   消费金额，单位元，消费规则下非正数或空值不发放
+     * @param ruleItem 已读取的规则配置
+     * @return 本次应增加的经验值，奖励未配置或非正数时为0
+     */
     private long calcVariableExperience(ExperienceRuleEnum ruleEnum, Double amount, ExperienceSetting.ExperienceRuleItem ruleItem) {
         if (ruleEnum == ExperienceRuleEnum.CONSUME) {
             if (amount == null || amount <= 0) {
@@ -319,6 +344,12 @@ public class MemberExperienceServiceImpl implements MemberExperienceService {
         return ruleItem.getValue();
     }
 
+    /**
+     * 从li_setting的EXPERIENCE_SETTING中按规则编码读取配置，不在此过滤开启状态。
+     *
+     * @param ruleEnum 需要查询的经验规则
+     * @return 对应配置，设置缺失、内容空白或未找到规则时为null
+     */
     private ExperienceSetting.ExperienceRuleItem getRuleItem(ExperienceRuleEnum ruleEnum) {
         Setting setting = settingService.get(SettingEnum.EXPERIENCE_SETTING.name());
         if (setting == null || CharSequenceUtil.isBlank(setting.getSettingValue())) {

@@ -58,4 +58,5 @@ public class MemberGrade extends BaseEntity {
 
     @Schema(description = "会员权益ID，多个用英文逗号分隔")
     private String benefitIds;
+
 }

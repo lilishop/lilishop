@@ -10,6 +10,9 @@ import java.util.List;
 
 /**
  * 客户等级详情（含关联权益列表，管理端/买家端共用）
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Data
 @Schema(description = "客户等级详情")

@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
@@ -32,12 +31,13 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 订单每日维护：自动收货、评价、售后关闭与最终购物积分结算，以及分账和账单处理。
+ *
  * @author paulG
  * @since 2021/3/11
  **/
@@ -46,41 +46,18 @@ import java.util.stream.Collectors;
 
 public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
-    /**
-     * 订单
-     */
     @Autowired
     private OrderService orderService;
-    /**
-     * 订单货物
-     */
     @Autowired
     private OrderItemService orderItemService;
-    /**
-     * 设置
-     */
     @Autowired
     private SettingService settingService;
-    /**
-     * 客户评价
-     */
     @Autowired
     private MemberEvaluationService memberEvaluationService;
-
-    @Autowired
-    private DistributionOrderService distributionOrderService;
-
     @Autowired
     private StoreFlowService storeFlowService;
-
-    /**
-     * 结算单
-     */
     @Autowired
     private BillService billService;
-    /**
-     * 店铺详情
-     */
     @Autowired
     private StoreDetailService storeDetailService;
 
@@ -139,32 +116,44 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
     }
 
-    /** 手动触发：自动确认收货 */
+    /**
+     * 手动触发：自动确认收货
+     */
     public void executeAutoComplete() {
         completedOrder(getOrderSetting());
     }
 
-    /** 手动触发：自动好评 */
+    /**
+     * 手动触发：自动好评
+     */
     public void executeAutoEvaluate() {
         memberEvaluation(getOrderSetting());
     }
 
-    /** 手动触发：关闭售后申请 */
+    /**
+     * 手动触发：关闭售后申请
+     */
     public void executeCloseAfterSale() {
         closeAfterSale(getOrderSetting());
     }
 
-    /** 手动触发：关闭交易投诉 */
+    /**
+     * 手动触发：关闭交易投诉
+     */
     public void executeCloseComplaint() {
         closeComplaint(getOrderSetting());
     }
 
-    /** 手动触发：更新分账状态 */
+    /**
+     * 手动触发：更新分账状态
+     */
     public void executeProfitSharing() {
         storeFlowService.updateProfitSharingStatus();
     }
 
-    /** 手动触发：生成店铺结算单 */
+    /**
+     * 手动触发：生成店铺结算单
+     */
     public void executeCreateBill() {
         createBill();
     }
@@ -221,8 +210,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //订单完成时间 <= 订单自动好评时间
         OrderItemOperationDTO orderItemOperationDTO =
-            OrderItemOperationDTO.builder().receiveTime(receiveTime).commentStatus(CommentStatusEnum.UNFINISHED.name())
-                .build();
+                OrderItemOperationDTO.builder().receiveTime(receiveTime).commentStatus(CommentStatusEnum.UNFINISHED.name())
+                        .build();
         List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(orderItemOperationDTO);
 
         //判断是否有符合条件的订单，进行自动评价处理
@@ -250,20 +239,17 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
     }
 
     /**
-     * 关闭允许售后申请
+     * 关闭到期的售后入口；积分由随后执行的交易完结处理统一赠送。
      *
      * @param orderSetting 订单设置
      */
-    @Transactional(rollbackFor = Exception.class)
     public void closeAfterSale(OrderSetting orderSetting) {
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
 
-//        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime)
-//            .afterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()).build();
-//        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         orderItemService.expiredAfterSaleStatus(receiveTime);
+
 
     }
 
@@ -283,7 +269,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime)
-            .complainStatus(OrderComplaintStatusEnum.NO_APPLY.name()).build();
+                .complainStatus(OrderComplaintStatusEnum.NO_APPLY.name()).build();
         List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
@@ -294,8 +280,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
             //修改订单投诉状态
             LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper =
-                new LambdaUpdateWrapper<OrderItem>().set(OrderItem::getComplainStatus,
-                    OrderItemAfterSaleStatusEnum.EXPIRED.name()).in(OrderItem::getId, orderItemIdList);
+                    new LambdaUpdateWrapper<OrderItem>().set(OrderItem::getComplainStatus,
+                            OrderItemAfterSaleStatusEnum.EXPIRED.name()).in(OrderItem::getId, orderItemIdList);
             orderItemService.update(lambdaUpdateWrapper);
         }
 

@@ -9,6 +9,8 @@ import cn.lili.modules.member.entity.vo.EnumValueVO;
 import cn.lili.modules.member.entity.vo.MemberBenefitDetailVO;
 import cn.lili.modules.member.entity.vo.MemberBenefitGrantRecordVO;
 import cn.lili.modules.member.service.MemberBenefitService;
+import cn.lili.modules.member.service.MemberBenefitDeliveryService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,6 +21,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ *
+ * 管理端,客户权益接口
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @RestController
 @Tag(name = "管理端,客户权益接口")
 @RequestMapping("/manager/member/benefit")
@@ -26,6 +34,26 @@ public class MemberBenefitManagerController {
 
     @Autowired
     private MemberBenefitService memberBenefitService;
+    @Autowired
+    private MemberBenefitDeliveryService memberBenefitDeliveryService;
+
+    @GetMapping("/deliveries")
+    @Operation(description = "逐项权益发放明细")
+    public ResultMessage<?> deliveries(@RequestParam(required = false) String memberId,
+            @RequestParam(required = false) String status, PageVO page) {
+        var query = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<cn.lili.modules.member.entity.dos.MemberBenefitDelivery>()
+            .eq(memberId != null && !memberId.isBlank(), cn.lili.modules.member.entity.dos.MemberBenefitDelivery::getMemberId, memberId)
+            .eq(status != null && !status.isBlank(), cn.lili.modules.member.entity.dos.MemberBenefitDelivery::getStatus, status)
+            .orderByDesc(cn.lili.modules.member.entity.dos.MemberBenefitDelivery::getCreateTime);
+        return ResultUtil.data(memberBenefitDeliveryService.page(PageUtil.initPage(page), query));
+    }
+
+    @PostMapping("/deliveries/{id}/retry")
+    @Operation(description = "重试失败权益（使用原发放配置快照）")
+    public ResultMessage<?> retry(@PathVariable String id) {
+        memberBenefitService.retryBenefitGrant(id);
+        return ResultUtil.success(ResultCode.SUCCESS);
+    }
 
     @Operation(description = "通过id获取客户权益详情")
     @Parameter(name = "id", description = "客户权益ID", required = true)

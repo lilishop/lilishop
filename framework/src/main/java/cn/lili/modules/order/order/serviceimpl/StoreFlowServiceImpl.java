@@ -6,6 +6,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.member.service.MemberOrderPointService;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
@@ -41,6 +42,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * 商家订单流水业务层实现
@@ -75,6 +78,9 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
     @Autowired
     private DistributionOrderService distributionOrderService;
+
+    @Autowired
+    private MemberOrderPointService memberOrderPointService;
 
     /**
      * 店铺订单支付流水
@@ -293,15 +299,41 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         return this.list(generatorQueryWrapper(storeFlowQueryDTO));
     }
 
+    /**
+     * 在交易完结入口先完成分销、再赠送购物积分，全部成功后推进本次流水至待出账状态。
+     * 同一订单的多商品项、支付和退款流水只赠送一次；失败订单保留 WAIT_COMPLETE，
+     * 下次任务重试时复用积分流水防重，不修改订单表。
+     */
     @Override
     public void updateProfitSharingStatus() {
-        //获取已完成的列表，进行相关的处理
+        // 查询待完结流水：订单已完成、全部商品项已关闭售后入口，且不存在未终结售后。
         List<StoreFlow> storeFlowList = this.baseMapper.completeList();
-
-        for (StoreFlow storeFlow : storeFlowList) {
-            distributionOrderService.completeOrder(storeFlow);
+        // 一笔订单可能包含多个商品项及支付、退款流水，按订单号归组，避免逐条重复结算购物积分。
+        Map<String, List<StoreFlow>> orders = new LinkedHashMap<>();
+        for (StoreFlow flow : storeFlowList) {
+            orders.computeIfAbsent(flow.getOrderSn(), key -> new ArrayList<>()).add(flow);
         }
-        this.baseMapper.updateProfitSharingStatus();
+        for (var entry : orders.entrySet()) {
+            try {
+                // 先逐条完成该订单的分销结算；失败时终止本订单处理，分销服务保证重试不会重复结算。
+                for (StoreFlow flow : entry.getValue()) {
+                    distributionOrderService.completeOrder(flow);
+                }
+                // 再按最终保留金额赠送一次积分；已发放或无需赠送也视为成功。
+                // 返回 false 时保留 WAIT_COMPLETE，下次任务重新核验；已完成的分销允许重复调用。
+                if (!memberOrderPointService.complete(entry.getKey())) continue;
+                // 两项均成功后，只推进本次处理的流水 ID，避免将处理期间新增的流水一并出账。
+                // WAIT_COMPLETE 转为 PROCESSING，并记录入账时间，供后续账单生成使用。
+                this.update(new LambdaUpdateWrapper<StoreFlow>()
+                        .in(StoreFlow::getId, entry.getValue().stream().map(StoreFlow::getId).toList())
+                        .eq(StoreFlow::getProfitSharingStatus, ProfitSharingStatusEnum.WAIT_COMPLETE.name())
+                        .set(StoreFlow::getProfitSharingStatus, ProfitSharingStatusEnum.PROCESSING.name())
+                        .set(StoreFlow::getBillTime, new Date()));
+            } catch (Exception e) {
+                // 当前订单处理失败时不推进流水，继续处理其他订单；下次任务重试，已成功赠送的积分由积分流水防重。
+                log.error("订单[{}]交易完结处理失败，下次任务重试", entry.getKey(), e);
+            }
+        }
     }
 
     @Override

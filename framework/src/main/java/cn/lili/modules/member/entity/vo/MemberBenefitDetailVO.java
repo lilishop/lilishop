@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * 管理端客户权益详情（券礼包类型附带优惠券明细）
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Data
 @Schema(description = "客户权益详情")

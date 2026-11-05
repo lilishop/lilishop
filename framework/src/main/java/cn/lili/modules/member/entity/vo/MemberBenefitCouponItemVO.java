@@ -7,6 +7,9 @@ import java.io.Serializable;
 
 /**
  * 券礼包权益中单张优惠券展示信息
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Data
 @Schema(description = "券礼包-优惠券明细")

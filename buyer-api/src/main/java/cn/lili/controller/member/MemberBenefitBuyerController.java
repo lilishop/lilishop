@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
+/**
+ * 买家端,客户权益接口
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @RestController
 @Tag(name = "买家端,客户权益接口")
 @RequestMapping("/buyer/member/benefit")
@@ -22,7 +28,7 @@ public class MemberBenefitBuyerController {
     @Autowired
     private MemberBenefitService memberBenefitService;
 
-    @Operation(summary = "获取当前客户权益")
+    @Operation(summary = "获取当前客户权益及等级升级经验进度")
     @GetMapping("/current")
     public ResultMessage<MemberCurrentBenefitVO> current() {
         String memberId = Objects.requireNonNull(UserContext.getCurrentUser()).getId();

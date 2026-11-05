@@ -18,6 +18,15 @@ import org.apache.ibatis.annotations.Select;
 public interface AfterSaleMapper extends BaseMapper<AfterSale> {
 
     /**
+     * 读取售后记录，核验全部终态并汇总已完成退款，不额外加锁。
+     * 包含逻辑删除记录，财务退款不因记录隐藏而丢失；不依赖售后通知或额外防重字段。
+     * @param orderSn 订单业务单号
+     * @return 该订单全部售后记录
+     */
+    @Select("SELECT * FROM li_after_sale WHERE order_sn=#{orderSn}")
+    java.util.List<AfterSale> memberPointAfterSales(@Param("orderSn") String orderSn);
+
+    /**
      * 获取售后VO分页
      *
      * @param page         分页

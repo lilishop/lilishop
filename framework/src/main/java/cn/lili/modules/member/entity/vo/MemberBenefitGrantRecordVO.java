@@ -10,6 +10,9 @@ import java.util.Date;
 
 /**
  * 管理端：等级权益发放记录（会员达到等级时触发的一次性发放）
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 @Data
 @Schema(description = "权益发放记录")

@@ -6,8 +6,13 @@ import java.util.Arrays;
 
 /**
  * 权益类型
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
  */
 public enum MemberBenefitTypeEnum {
+    GRADE_BADGE("等级徽章"),
+    POINT_MULTIPLIER("积分倍率"),
     EXCLUSIVE_CUSTOMER_SERVICE("专属客服"),
     COUPON_PACKAGE("券礼包"),
     GIFT_POINT("赠送积分"),

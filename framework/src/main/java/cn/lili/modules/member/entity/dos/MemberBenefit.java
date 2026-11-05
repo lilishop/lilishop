@@ -11,6 +11,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * 客户权益
+ *
+ * @author Bulbasaur
+ * @since 2026-11-04
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("li_member_benefit")
