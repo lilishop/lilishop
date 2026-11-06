@@ -18,6 +18,7 @@ import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.modules.wallet.service.MemberWalletService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -114,9 +115,23 @@ public class WalletPlugin implements Payment {
         }
     }
 
+    /**
+     * 余额退款：按会员加锁并校验退款流水，防止订单取消、重复通知等场景同一笔退款重复入账。
+     * 幂等口径为 订单编号+售后单号：取消退款售后单号固定为 ORDER_CANCEL，真实售后退款的售后单号本身唯一。
+     */
     @Override
     public void refund(RefundLog refundLog) {
+        RLock lock = redisson.getLock("WALLET_REFUND_" + refundLog.getMemberId());
+        lock.lock();
         try {
+            long refunded = refundLogService.count(new LambdaQueryWrapper<RefundLog>()
+                    .eq(RefundLog::getOrderSn, refundLog.getOrderSn())
+                    .eq(RefundLog::getAfterSaleNo, refundLog.getAfterSaleNo())
+                    .eq(RefundLog::getIsRefund, true));
+            if (refunded > 0) {
+                log.warn("重复退款请求已忽略：订单[{}]，售后单[{}]", refundLog.getOrderSn(), refundLog.getAfterSaleNo());
+                return;
+            }
             memberWalletService.increase(new MemberWalletUpdateDTO(refundLog.getTotalAmount(),
                     refundLog.getMemberId(),
                     "订单[" + refundLog.getOrderSn() + "]，售后单[" + refundLog.getAfterSaleNo() + "]，退还金额[" + refundLog.getTotalAmount() + "]",
@@ -125,6 +140,8 @@ public class WalletPlugin implements Payment {
             refundLogService.save(refundLog);
         } catch (Exception e) {
             log.error("退款失败", e);
+        } finally {
+            lock.unlock();
         }
     }
 
