@@ -49,7 +49,7 @@ public class OrderGiftCardRecord extends BaseEntity {
     @Schema(description = "流水方向：INCREASE/DECREASE")
     private String flowType;
 
-    @Schema(description = "业务类型：ORDER_DEDUCT/ORDER_REFUND/ORDER_CANCEL/CARD_ACTIVATE")
+    @Schema(description = "业务类型：ORDER_DEDUCT/ORDER_REFUND/ORDER_CANCEL/CARD_ACTIVATE/PICKUP_REDEEM；PICKUP_CANCEL 为零金额取消处理记录，表示库存已恢复，不代表退款或回卡")
     private String bizType;
 
     @Schema(description = "业务单号（售后单号/订单号等）")

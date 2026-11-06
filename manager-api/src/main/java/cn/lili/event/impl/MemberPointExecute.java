@@ -55,7 +55,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     }
 
     /**
-     * 客户评价赠送积分
+     * 客户完成评价后按积分配置赠送评价积分，提货卡订单与普通订单一致，不按支付方式排除。
      *
      * @param memberEvaluation 客户评价
      */

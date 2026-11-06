@@ -193,7 +193,7 @@ public class OrderItem extends BaseEntity {
             this.setPromotionType(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getPromotionType).collect(Collectors.toList()), ","));
             this.setPromotionId(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getActivityId).collect(Collectors.toList()), ","));
         }
-        this.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
+        this.setAfterSaleStatus(tradeDTO.getPickupCardId() == null ? OrderItemAfterSaleStatusEnum.NEW.name() : OrderItemAfterSaleStatusEnum.EXPIRED.name());
         this.setCommentStatus(CommentStatusEnum.NEW.name());
         this.setComplainStatus(OrderComplaintStatusEnum.NEW.name());
         this.setPriceDetailDTO(cartSkuVO.getPriceDetailDTO());

@@ -47,6 +47,7 @@ class MemberOrderPointServiceTest {
     private final MemberBenefitService benefits=mock(MemberBenefitService.class);
     /** 被测试的积分发放服务。 */
     private final MemberOrderPointService service=new MemberOrderPointServiceImpl();
+    private final cn.lili.modules.promotion.service.PickupCardOrderService pickupOrders=mock(cn.lili.modules.promotion.service.PickupCardOrderService.class);
     /** 表示积分变动切面已保存现有流水。 */
     private final AtomicBoolean rewarded=new AtomicBoolean();
     /** 持久化订单样本，不包含额外积分状态。 */
@@ -56,6 +57,7 @@ class MemberOrderPointServiceTest {
 
     /** 准备已完成且售后入口关闭、原金额十元及1.5倍积分的样本。 */
     @BeforeEach void setup() {
+        ReflectionTestUtils.setField(service,"pickupCardOrderService",pickupOrders);
         ReflectionTestUtils.setField(service,"orders",orders); ReflectionTestUtils.setField(service,"items",items);
         ReflectionTestUtils.setField(service,"afterSales",afterSales); ReflectionTestUtils.setField(service,"histories",histories);
         ReflectionTestUtils.setField(service,"memberService",members);
@@ -89,6 +91,15 @@ class MemberOrderPointServiceTest {
         service.complete(order.getSn()); service.complete(order.getSn());
         verify(members,times(1)).updateMemberPoint(eq(15L),eq("INCREASE"),eq("member"),anyString(),eq("ORDER"));
         verify(orders,never()).updateById(any(Order.class));
+    }
+
+    /** 提货订单即使完成且售后入口关闭，也不发放消费积分；评价奖励不属于此流程。 */
+    @Test void pickupOrderDoesNotReceiveShoppingPoints() {
+        when(pickupOrders.isPickupOrder(order.getSn())).thenReturn(true);
+
+        assertThat(service.complete(order.getSn())).isTrue();
+
+        verifyNoInteractions(members, histories, items, afterSales, settings, benefits);
     }
 
     /** 旧发放记录同样阻止重复赠送。 */

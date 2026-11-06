@@ -1,5 +1,6 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.lili.modules.member.entity.enums.PointSourceEnum;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberOrderPointService;
@@ -36,6 +37,9 @@ import java.util.List;
  */
 @Service("memberOrderPointService")
 public class MemberOrderPointServiceImpl implements MemberOrderPointService {
+
+    @Autowired
+    private PickupCardOrderService pickupCardOrderService;
     @Autowired
     private OrderMapper orders;
     @Autowired
@@ -86,8 +90,8 @@ public class MemberOrderPointServiceImpl implements MemberOrderPointService {
         Order order = orders.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
         if (order == null) throw new IllegalStateException("订单不存在");
         if (!OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) return false;
-        // 积分兑换不再送购物积分；已有赠送流水说明本订单已经处理。
-        if ("POINTS".equals(order.getOrderPromotionType())
+        // 提货卡及积分兑换不送购物积分；已有赠送流水说明本订单已经处理。评价奖励由独立评价事件处理。
+        if (pickupCardOrderService.isPickupOrder(order.getSn()) || "POINTS".equals(order.getOrderPromotionType())
                 || histories.findOrderReward(order.getMemberId(), orderSn) != null) return true;
 
         List<AfterSale> refunds = afterSales.memberPointAfterSales(orderSn);

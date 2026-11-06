@@ -1,5 +1,6 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.distribution.entity.dos.Distribution;
@@ -53,6 +54,9 @@ import java.util.stream.Collectors;
 @Service
 public class DistributionRewardServiceImpl implements DistributionRewardService {
 
+    @Autowired
+    private PickupCardOrderService pickupCardOrderService;
+
     private static final int IN_QUERY_BATCH_SIZE = 500;
 
     @Autowired
@@ -87,7 +91,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
     @Transactional(rollbackFor = Exception.class)
     public void handlePaymentRewards(String orderSn) {
         Order order = orderService.getBySn(orderSn);
-        if (order == null || !PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+        if (order == null || !PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             return;
         }
         // 支付成功后将客户与分销员绑定为永久关系

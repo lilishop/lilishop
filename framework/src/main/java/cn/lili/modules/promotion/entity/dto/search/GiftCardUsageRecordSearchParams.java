@@ -17,6 +17,10 @@ import java.util.Date;
 @Schema(description = "礼品卡使用记录分页查询")
 public class GiftCardUsageRecordSearchParams {
 
+    /** 礼品卡活动 ID，关联 li_gift_card_cash_activity.id；指定时仅查询该活动凭据的使用流水。 */
+    @Schema(description = "礼品卡活动 ID，关联 li_gift_card_cash_activity.id；指定时仅查询该活动凭据的使用流水")
+    private String activityId;
+
     @Schema(description = "订单号")
     private String orderSn;
 

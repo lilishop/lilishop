@@ -19,6 +19,12 @@ public class GiftCardCashMemberCardVO extends GiftCardCashCredential {
     @Schema(description = "礼品卡名称")
     private String giftCardName;
 
+    @Schema(description = "提货卡兑换方式：ONE、ALL、ANY")
+    private String pickupMode;
+
+    @Schema(description = "本卡一次应兑换的 SKU 种数，每种一件")
+    private Integer pickupCount;
+
     @Schema(description = "会员礼品卡状态：AVAILABLE/UNAVAILABLE/PENDING_ACTIVATION")
     private String memberCardStatus;
 }

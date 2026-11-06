@@ -7,6 +7,8 @@ package cn.lili.modules.promotion.entity.enums;
  * @since 2026-05-22
  */
 public enum GiftCardCashCredentialStatusEnum {
+    /** 提货卡已成功兑换 */
+    REDEEMED,
 
     /** 未发放给会员 */
     UNISSUED,

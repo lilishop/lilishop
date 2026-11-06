@@ -4,7 +4,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.security.sensitive.Sensitive;
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
@@ -33,6 +32,9 @@ public class OrderSimpleVO {
     @Schema(description = "sn")
     private String sn;
 
+    @Schema(description = "提货卡凭据 ID，从原兑换流水批量查询，非订单表字段；买家取消时据此提示权益不恢复")
+    private String pickupCardId;
+
     @Schema(description = "总价格")
     private Double flowPrice;
 
@@ -41,16 +43,10 @@ public class OrderSimpleVO {
     @Schema(description = "创建时间")
     private Date createTime;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.OrderStatusEnum
-     */
-    @Schema(description = "订单状态")
+    @Schema(description = "订单状态；取值参见 OrderStatusEnum")
     private String orderStatus;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.PayStatusEnum
-     */
-    @Schema(description = "付款状态")
+    @Schema(description = "付款状态；取值参见 PayStatusEnum")
     private String payStatus;
 
     @Schema(description = "支付方式")
@@ -79,15 +75,10 @@ public class OrderSimpleVO {
     @Schema(description = "店铺ID")
     private String storeId;
 
-    /**
-     * @see ClientTypeEnum
-     */
-    @Schema(description = "订单来源")
+    @Schema(description = "订单来源；取值参见 ClientTypeEnum")
     private String clientType;
 
-    /**
-     * 子订单信息
-     */
+    @Schema(description = "子订单信息")
     private List<OrderItemVO> orderItems;
 
     @Schema(hidden = true, description = "item goods_id")
@@ -121,50 +112,30 @@ public class OrderSimpleVO {
     @Schema(hidden = true, description = "item 商品价格")
     @Setter
     private String groupGoodsPrice;
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum
-     */
-    @Schema(hidden = true, description = "item 售后状态", allowableValues = "NOT_APPLIED(未申请),ALREADY_APPLIED(已申请),EXPIRED(已失效不允许申请售后)")
+
+    @Schema(hidden = true, description = "item 售后状态；取值参见 OrderItemAfterSaleStatusEnum", allowableValues = "NOT_APPLIED(未申请),ALREADY_APPLIED(已申请),EXPIRED(已失效不允许申请售后)")
     @Setter
     private String groupAfterSaleStatus;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum
-     */
-    @Schema(hidden = true, description = "item 投诉状态")
+    @Schema(hidden = true, description = "item 投诉状态；取值参见 OrderComplaintStatusEnum")
     @Setter
     private String groupComplainStatus;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.CommentStatusEnum
-     */
-    @Schema(hidden = true, description = "item 评价状态")
+    @Schema(hidden = true, description = "item 评价状态；取值参见 CommentStatusEnum")
     @Setter
     private String groupCommentStatus;
 
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.OrderTypeEnum
-     */
-    @Schema(description = "订单类型")
+    @Schema(description = "订单类型；取值参见 OrderTypeEnum")
     private String orderType;
 
-    /**
-     * @see cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum
-     */
-    @Schema(description = "配送方式")
+    @Schema(description = "配送方式；取值参见 DeliveryMethodEnum")
     private String deliveryMethod;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.DeliverStatusEnum
-     */
-    @Schema(description = "货运状态")
+    @Schema(description = "货运状态；取值参见 DeliverStatusEnum")
     private String deliverStatus;
 
-    /**
-     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
-     */
-    @Schema(description = "订单促销类型")
+    @Schema(description = "订单促销类型；取值参见 OrderPromotionTypeEnum")
     private String orderPromotionType;
 
     @Schema(description = "是否退款")

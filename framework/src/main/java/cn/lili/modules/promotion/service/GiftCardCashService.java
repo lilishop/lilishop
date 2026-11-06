@@ -1,7 +1,6 @@
 package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.promotion.entity.dos.GiftCardCashActivity;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashCreateBatch;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashIssueBatch;
 import cn.lili.modules.promotion.entity.dto.GiftCardCashActivityDTO;
@@ -14,6 +13,7 @@ import cn.lili.modules.promotion.entity.dto.search.GiftCardCashIssueBatchSearchP
 import cn.lili.modules.promotion.entity.dto.search.GiftCardCashMemberCardSearchParams;
 import cn.lili.modules.promotion.entity.dto.search.GiftCardUsageRecordSearchParams;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashCredentialVO;
+import cn.lili.modules.promotion.entity.vos.GiftCardCashActivityVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashCreateBatchVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashDeductPreviewVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashIssueBatchVO;
@@ -70,9 +70,9 @@ public interface GiftCardCashService {
      * 查询活动详情。
      *
      * @param id 活动ID
-     * @return 活动详情（含聚合字段）
+     * @return 活动详情（含聚合字段，提货卡额外包含候选商品实时展示数据）
      */
-    GiftCardCashActivity getActivity(String id);
+    GiftCardCashActivityVO getActivity(String id);
 
     /**
      * 活动分页查询。
@@ -81,7 +81,7 @@ public interface GiftCardCashService {
      * @param page   分页参数
      * @return 活动分页结果（含制卡数/发卡数/剩余库存聚合）
      */
-    IPage<GiftCardCashActivity> pageActivity(GiftCardCashActivitySearchParams params, PageVO page);
+    IPage<GiftCardCashActivityVO> pageActivity(GiftCardCashActivitySearchParams params, PageVO page);
 
     /**
      * 在活动下批量制卡（写入凭证，占用活动库存上限）。

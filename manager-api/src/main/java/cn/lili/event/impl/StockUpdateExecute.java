@@ -1,5 +1,6 @@
 package cn.lili.event.impl;
 
+import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.hutool.core.convert.Convert;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -47,6 +48,9 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class StockUpdateExecute implements OrderStatusChangeEvent {
+
+    @Autowired
+    private PickupCardOrderService pickupCardOrderService;
 
     /**
      * 出库失败消息
@@ -101,6 +105,9 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
     @Autowired
     private CardKeyService cardKeyService;
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private cn.lili.modules.promotion.service.PickupCardService pickupCardService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -131,6 +138,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 if (order.getOrder() != null
                         && OrderTypeEnum.E_COUPON.name().equals(order.getOrder().getOrderType())) {
                     handleECouponCancelled(order);
+                    break;
+                }
+                // 提货卡已在兑换事务扣库存，取消仅幂等恢复商品，不回卡。
+                if (pickupCardOrderService.isPickupOrder(order.getOrder().getSn())) {
+                    pickupCardService.releaseCancelledStock(order);
                     break;
                 }
                 //判定是否已支付 并且 非库存不足导致库存回滚 则需要考虑订单库存返还业务
@@ -169,6 +181,12 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     private void handlePaidOrder(OrderMessage orderMessage) {
         OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
         Order orderHeader = order.getOrder();
+        if (orderHeader != null && pickupCardOrderService.isPickupOrder(orderHeader.getSn())) {
+            if (OrderStatusEnum.PAID.name().equals(orderHeader.getOrderStatus())) {
+                orderService.afterOrderConfirm(orderHeader.getSn());
+            }
+            return;
+        }
         if (orderHeader != null && OrderTypeEnum.E_COUPON.name().equals(orderHeader.getOrderType())) {
             if (OrderStatusEnum.COMPLETED.name().equals(orderHeader.getOrderStatus())) {
                 log.info("E_COUPON PAID 跳过，订单已完成，orderSn={}", orderMessage.getOrderSn());

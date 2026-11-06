@@ -61,6 +61,7 @@ class StockUpdateExecuteRoutingTest {
     @BeforeEach
     void setUp() {
         stockUpdateExecute = new StockUpdateExecute();
+        ReflectionTestUtils.setField(stockUpdateExecute, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         orderService = mock(OrderService.class);
         cardKeyService = mock(CardKeyService.class);
         cache = mock(Cache.class);

@@ -104,6 +104,8 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         walletLogs.clear();
 
         rewardService = new DistributionRewardServiceImpl();
+
+        ReflectionTestUtils.setField(rewardService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         orderService = mock(OrderService.class);
         orderItemService = mock(OrderItemService.class);
         distributionOrderService = mock(DistributionOrderService.class);

@@ -1,5 +1,6 @@
 package cn.lili.modules.order.aftersale.serviceimpl;
 
+import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -68,6 +69,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale> implements AfterSaleService {
+
+    @Autowired
+    private PickupCardOrderService pickupCardOrderService;
 
     /**
      * 订单
@@ -639,6 +643,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      * @param order 订单
      */
     private void rejectECouponAfterSale(Order order) {
+        if (order != null && pickupCardOrderService.isPickupOrder(order.getSn())) {
+            throw new ServiceException(ResultCode.AFTER_SALES_BAN, "提货卡兑换订单不支持退款或退货");
+        }
         if (order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
             throw new ServiceException(ResultCode.CARD_KEY_E_COUPON_NO_AFTER_SALE);
         }

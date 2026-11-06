@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
@@ -109,6 +110,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
+
+    @Autowired
+    private PickupCardOrderService pickupCardOrderService;
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
@@ -255,12 +259,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public IPage<OrderSimpleVO> queryBuyerByParams(OrderSearchParams orderSearchParams) {
-        return this.baseMapper.queryBuyerByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams));
+        return fillPickupOrderInfo(this.baseMapper.queryBuyerByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams)));
     }
 
     @Override
     public IPage<OrderSimpleVO> queryManageByParams(OrderSearchParams orderSearchParams) {
-        return this.baseMapper.queryManageByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams));
+        return fillPickupOrderInfo(this.baseMapper.queryManageByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams)));
+    }
+
+    /**
+     * 当前页批量回填提货卡关联，避免每个订单单独查询流水。
+     * @param page 订单分页
+     * @return 保留分页元数据并补充展示关联的订单列表
+     */
+    private IPage<OrderSimpleVO> fillPickupOrderInfo(IPage<OrderSimpleVO> page) {
+        if (page == null || page.getRecords().isEmpty()) return page;
+        Map<String, String> credentials = pickupCardOrderService.getCredentialIds(
+                page.getRecords().stream().map(OrderSimpleVO::getSn).toList());
+        page.getRecords().forEach(order -> order.setPickupCardId(credentials.get(order.getSn())));
+        return page;
     }
 
     private QueryWrapper orderListWrapper(OrderSearchParams orderSearchParams) {
@@ -377,7 +394,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //查询发票信息
         Receipt receipt = receiptService.getByOrderSn(orderSn);
         //查询订单和自订单，然后写入vo返回
-        return new OrderDetailVO(order, orderItems, orderLogs, receipt);
+        return new OrderDetailVO(new OrderInfoVO(order,
+                pickupCardOrderService.getCredentialId(orderSn)), orderItems, orderLogs, receipt);
     }
 
     @Override
@@ -402,8 +420,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setCancelReason(reason);
             //修改订单
             this.updateById(order);
-            //订单货物设置全部退款
-            orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
+            // 普通订单标记退款，提货取消不标记为已退款。
+            if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
+                orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
+            }
             // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
             refundCanceledOrderBySplit(order, reason);
             //生成店铺退款流水
@@ -425,9 +445,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
-        //订单货物设置全部退款
-        orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
-        if (refundMoney) {
+        // 普通订单标记退款，提货取消不标记为已退款。
+        if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
+            orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
+        }
+        if (refundMoney || pickupCardOrderService.isPickupOrder(order.getSn())) {
             // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
             refundCanceledOrderBySplit(order, reason);
             //生成店铺退款流水
@@ -440,7 +462,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 取消订单退款统一逻辑：礼品卡先回卡，剩余金额原路退支付渠道。
      */
     private void refundCanceledOrderBySplit(Order order, String reason) {
-        if (order == null) {
+        // 提货卡取消仅关闭订单，权益不回退，也不发起渠道退款。
+        if (order == null || pickupCardOrderService.isPickupOrder(order.getSn())) {
             return;
         }
         if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
@@ -509,6 +532,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             log.error("订单[ {} ]检测到重复付款，请处理", orderSn);
             throw new ServiceException(ResultCode.PAY_DOUBLE_ERROR);
         }
+        boolean pickupOrder = pickupCardOrderService.isPickupOrder(orderSn);
 
         //修改订单状态
         order.setPaymentTime(new Date());
@@ -516,7 +540,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setReceivableNo(receivableNo);
-        order.setCanReturn(!PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
+        order.setCanReturn(!pickupOrder && !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
         this.updateById(order);
 
         //记录店铺订单支付流水
@@ -529,12 +553,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setNewStatus(OrderStatusEnum.PAID);
         this.sendUpdateStatusMessage(orderMessage);
 
-        // 支付提交后再入账，避免分销写库失败把本事务标成 rollback-only
-        applicationEventPublisher.publishEvent(new DistributionPaymentRewardsEvent(this, orderSn));
-        if (CharSequenceUtil.isNotBlank(order.getMemberId())) {
-            applicationEventPublisher.publishEvent(new DistributionRecruitAutoApplyEvent(this, order.getMemberId()));
+        // 提货卡不参与分销奖励；普通订单保留原有提交后入账流程。
+        if (!pickupOrder) {
+            applicationEventPublisher.publishEvent(new DistributionPaymentRewardsEvent(this, orderSn));
+            if (CharSequenceUtil.isNotBlank(order.getMemberId())) {
+                applicationEventPublisher.publishEvent(new DistributionRecruitAutoApplyEvent(this, order.getMemberId()));
+            }
         }
-
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);
         orderLogService.save(orderLog);
@@ -1387,7 +1412,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.updateById(order);
         this.updateStatus(order.getSn(), OrderStatusEnum.DELIVERED);
         orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, order.getSn())
-                .set("after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED)
+                .set("after_sale_status", !pickupCardOrderService.isPickupOrder(order.getSn()) ? OrderItemAfterSaleStatusEnum.NOT_APPLIED : OrderItemAfterSaleStatusEnum.EXPIRED)
                 .set("complain_status", OrderComplaintStatusEnum.NO_APPLY));
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setNewStatus(OrderStatusEnum.DELIVERED);

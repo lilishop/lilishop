@@ -78,7 +78,9 @@ class OrderServiceImplDeliveryTest {
      */
     @BeforeEach
     void setUp() {
+        cn.lili.common.utils.SnowFlake.initialize(1, 1);
         orderService = spy(new OrderServiceImpl());
+        ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         orderMapper = mock(OrderMapper.class);
         orderItemService = mock(OrderItemService.class);
         orderPackageService = mock(OrderPackageService.class);

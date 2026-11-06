@@ -22,7 +22,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @TableName("li_gift_card_cash_credential")
-@Schema(description = "现金礼品卡卡密凭证")
+@Schema(description = "礼品卡卡密凭证（现金卡、提货卡）")
 public class GiftCardCashCredential extends BaseEntity {
 
     @Schema(description = "活动ID")
@@ -40,7 +40,13 @@ public class GiftCardCashCredential extends BaseEntity {
     @Schema(description = "卡密")
     private String cardSecret;
 
-    @Schema(description = "单卡面额")
+    @Schema(description = "卡类型快照：CASH 现金卡、PICKUP 提货卡；由活动写入，不允许买家指定")
+    private String cardType;
+
+    @Schema(description = "成功兑换的 li_trade.sn；一次核销后取消不恢复，重试返回原交易")
+    private String pickupTradeSn;
+
+    @Schema(description = "单卡面额（人民币元）；现金卡保留发行面额，提货卡固定为零")
     private BigDecimal faceValue;
 
     @Schema(description = "绑定会员ID")
@@ -64,12 +70,9 @@ public class GiftCardCashCredential extends BaseEntity {
     @Schema(description = "卡到期时间（按活动有效期规则计算）")
     private Date expireTime;
 
-    @Schema(description = "当前余额")
+    @Schema(description = "当前余额（人民币元）")
     private BigDecimal balance;
 
-    /**
-     * @see cn.lili.modules.promotion.entity.enums.GiftCardCashCredentialStatusEnum
-     */
-    @Schema(description = "凭证状态：UNISSUED/BOUND/VOIDED/EXPIRED")
+    @Schema(description = "凭证状态：UNISSUED 未发卡、BOUND 已绑定、VOIDED 作废、EXPIRED 过期、REDEEMED 提货已用；提货已用不可恢复", allowableValues = {"UNISSUED", "BOUND", "VOIDED", "EXPIRED", "REDEEMED"})
     private String status;
 }

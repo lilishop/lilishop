@@ -43,6 +43,8 @@ class AfterSaleServiceImplECouponAfterSaleTest {
     @BeforeEach
     void setUp() {
         afterSaleService = new AfterSaleServiceImpl();
+        ReflectionTestUtils.setField(afterSaleService, "appointmentService", mock(cn.lili.modules.appointment.service.AppointmentService.class));
+        ReflectionTestUtils.setField(afterSaleService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         orderItemService = mock(OrderItemService.class);
         orderService = mock(OrderService.class);
         ReflectionTestUtils.setField(afterSaleService, "orderItemService", orderItemService);

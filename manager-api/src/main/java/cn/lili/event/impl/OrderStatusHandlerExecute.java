@@ -43,6 +43,8 @@ public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusCha
 
     @Override
     public void orderCreate(TradeDTO tradeDTO) {
+        // 提货卡在兑换事务内已支付，消费重试不得重复支付。
+        if (tradeDTO.getPickupCardId() != null) return;
         // 应付现金为 0 时自动推进为已支付（优惠券/积分/礼品卡等抵扣后无需走收银台）
         if (tradeDTO.getPriceDetailDTO().getFlowPrice() <= 0) {
             String paymentMethod = PaymentMethodEnum.BANK_TRANSFER.name();

@@ -48,6 +48,7 @@ class OrderServiceImplVirtualConfirmTest {
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
+        ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         cardKeyService = mock(CardKeyService.class);
         ReflectionTestUtils.setField(orderService, "cardKeyService", cardKeyService);
     }

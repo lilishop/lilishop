@@ -27,6 +27,8 @@ import cn.lili.modules.order.order.entity.dos.OrderGiftCardRecord;
 import cn.lili.modules.order.order.mapper.OrderGiftCardRecordMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashActivity;
+import cn.lili.modules.promotion.service.PickupCardRuleService;
+import cn.lili.modules.promotion.entity.vos.GiftCardCashActivityVO;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashCreateBatch;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashCredential;
 import cn.lili.modules.promotion.entity.dos.GiftCardCashIssueBatch;
@@ -109,6 +111,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
     private OrderGiftCardRecordMapper orderGiftCardRecordMapper;
     @Autowired
     private OrderItemService orderItemService;
+    @Autowired
+    private PickupCardRuleService pickupCardRuleService;
 
 
     @Override
@@ -124,16 +128,33 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         return id;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     /**
      * 更新礼品卡活动。
      * 已经产卡后，只允许改活动名称和总库存，且库存不能小于已产数量。
+     * 活动创建后禁止切换现金卡与提货卡类型；未传类型时沿用已保存类型，避免旧调用方误切换。
+     *
+     * @param id 活动 ID
+     * @param dto 经服务端校验后保存的活动参数
      */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateActivity(String id, GiftCardCashActivityDTO dto) {
-        GiftCardCashActivity current = getActivityOrThrow(id);
-        normalizeActivityDto(dto);
+        GiftCardCashActivity current = lockActivity(id);
+        String cardType = CharSequenceUtil.isBlank(current.getCardType())
+                ? GiftCardTypeEnum.CASH.name() : current.getCardType();
+        if (CharSequenceUtil.isNotBlank(dto.getCardType()) && !cardType.equals(dto.getCardType().trim())) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡创建后不允许切换现金卡与提货卡类型");
+        }
+        dto.setCardType(cardType);
         long produced = countCredentialsByActivity(id);
+        if (produced > 0 && "PICKUP".equals(current.getCardType()) && "PICKUP".equals(dto.getCardType())) {
+            pickupCardRuleService.validateSelection(dto.getPickupMode(), dto.getPickupCount(), dto.getPickupSkuIds(), dto.getPickupSkuIds(), false);
+            dto.setFaceValue(BigDecimal.ZERO.setScale(2));
+            if ("ONE".equals(dto.getPickupMode())) dto.setPickupCount(1);
+            if ("ALL".equals(dto.getPickupMode())) dto.setPickupCount(dto.getPickupSkuIds().size());
+        } else {
+            normalizeActivityDto(dto);
+        }
         if (produced > 0) {
             if (dto.getStockTotal() < produced) {
                 throw new ServiceException(ResultCode.GIFT_CARD_CASH_ACTIVITY_STOCK_LT_PRODUCED);
@@ -154,7 +175,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
     @Transactional(rollbackFor = Exception.class)
     /** 删除活动：仅在未产生卡密且未产生制卡批次时允许删除。 */
     public void deleteActivity(String id) {
-        getActivityOrThrow(id);
+        lockActivity(id);
         long produced = countCredentialsByActivity(id);
         long batches = createBatchMapper.selectCount(new LambdaQueryWrapper<GiftCardCashCreateBatch>()
                 .eq(GiftCardCashCreateBatch::getActivityId, id)
@@ -168,17 +189,19 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
                 .eq(GiftCardCashActivity::getDeleteFlag, false));
     }
 
+    /** 查询活动详情，转换为展示对象后回填统计及提货商品，避免实体承载商品回显数据。 */
     @Override
-    /** 查询活动详情并回填聚合统计（已产、已发、剩余库存）。 */
-    public GiftCardCashActivity getActivity(String id) {
-        GiftCardCashActivity a = getActivityOrThrow(id);
-        fillActivityAggregateSingle(a);
-        return a;
+    public GiftCardCashActivityVO getActivity(String id) {
+        GiftCardCashActivityVO vo = toActivityVo(getActivityOrThrow(id));
+        if ("PICKUP".equals(vo.getCardType())) {
+            vo.setPickupGoods(pickupCardRuleService.goods(vo.getPickupSkuIds()));
+        }
+        return vo;
     }
 
     @Override
     /** 分页查询活动列表，并补充每条活动的聚合统计字段。 */
-    public IPage<GiftCardCashActivity> pageActivity(GiftCardCashActivitySearchParams params, PageVO page) {
+    public IPage<GiftCardCashActivityVO> pageActivity(GiftCardCashActivitySearchParams params, PageVO page) {
         Page<GiftCardCashActivity> mpPage = PageUtil.initPage(page);
         LambdaQueryWrapper<GiftCardCashActivity> w = new LambdaQueryWrapper<>();
         w.eq(GiftCardCashActivity::getDeleteFlag, false);
@@ -221,8 +244,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         }
         w.orderByDesc(GiftCardCashActivity::getCreateTime);
         IPage<GiftCardCashActivity> result = activityMapper.selectPage(mpPage, w);
-        fillActivityAggregates(result);
-        return result;
+        return result.convert(this::toActivityVo);
     }
 
     /** 规范化活动状态入参，仅支持英文。 */
@@ -265,25 +287,23 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         return type;
     }
 
-    /** 给分页活动列表批量填充聚合字段。 */
-    private void fillActivityAggregates(IPage<GiftCardCashActivity> page) {
-        if (page == null || CollUtil.isEmpty(page.getRecords())) {
-            return;
-        }
-        for (GiftCardCashActivity a : page.getRecords()) {
-            fillActivityAggregateSingle(a);
-        }
-    }
-
-    /** 给单个活动填充聚合字段。 */
-    private void fillActivityAggregateSingle(GiftCardCashActivity a) {
-        long unissuedPool = countUnissuedByActivity(a.getId());
-        long issuedByImport = countIssuedByIssueBatch(a.getId());
-        long used = countCredentialsByActivity(a.getId());
-        a.setProducedQuantity((int) unissuedPool);
-        a.setIssuedCardQuantity((int) issuedByImport);
-        int stockTotal = a.getStockTotal() == null ? 0 : a.getStockTotal();
-        a.setRemainingStock(stockTotal - (int) used);
+    /**
+     * 将持久化活动转换为列表和详情共用的展示对象，并统计未发放、导入发卡及剩余库存。
+     *
+     * @param activity 数据库读取的活动实体
+     * @return 含库存统计的活动展示数据，不修改持久化实体
+     */
+    private GiftCardCashActivityVO toActivityVo(GiftCardCashActivity activity) {
+        GiftCardCashActivityVO vo = new GiftCardCashActivityVO();
+        BeanUtils.copyProperties(activity, vo);
+        long unissuedPool = countUnissuedByActivity(activity.getId());
+        long issuedByImport = countIssuedByIssueBatch(activity.getId());
+        long used = countCredentialsByActivity(activity.getId());
+        vo.setProducedQuantity((int) unissuedPool);
+        vo.setIssuedCardQuantity((int) issuedByImport);
+        int stockTotal = activity.getStockTotal() == null ? 0 : activity.getStockTotal();
+        vo.setRemainingStock(stockTotal - (int) used);
+        return vo;
     }
 
     /** 统计活动下总卡密数量（含已发、未发，不含逻辑删除）。 */
@@ -311,7 +331,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
 
     /** 活动剩余可占用库存（制卡、发卡共用）。 */
     private int remainingActivityStock(String activityId) {
-        GiftCardCashActivity activity = getActivityOrThrow(activityId);
+        GiftCardCashActivity activity = lockActivity(activityId);
         int stockTotal = activity.getStockTotal() == null ? 0 : activity.getStockTotal();
         return stockTotal - (int) countCredentialsByActivity(activityId);
     }
@@ -321,6 +341,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
      * 核心规则用于限制“产卡后不可修改”的字段。
      */
     private boolean activityCoreEquals(GiftCardCashActivity a, GiftCardCashActivityDTO d) {
+        if (!Objects.equals(a.getPickupMode(), d.getPickupMode()) || !Objects.equals(a.getPickupCount(), d.getPickupCount())
+                || !Objects.equals(a.getPickupSkuIds(), d.getPickupSkuIds() == null ? null : com.alibaba.fastjson2.JSON.toJSONString(d.getPickupSkuIds()))) return false;
         if (a.getFaceValue().compareTo(d.getFaceValue().setScale(2, RoundingMode.HALF_UP)) != 0) {
             return false;
         }
@@ -345,6 +367,9 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
     private void copyDtoToActivity(GiftCardCashActivity entity, GiftCardCashActivityDTO dto) {
         entity.setGiftCardName(dto.getGiftCardName().trim());
         entity.setCardType(dto.getCardType());
+        entity.setPickupMode(dto.getPickupMode());
+        entity.setPickupCount(dto.getPickupCount());
+        entity.setPickupSkuIds(dto.getPickupSkuIds() == null ? null : com.alibaba.fastjson2.JSON.toJSONString(dto.getPickupSkuIds()));
         entity.setFaceValue(dto.getFaceValue().setScale(2, RoundingMode.HALF_UP));
         entity.setValidityType(dto.getValidityType());
         entity.setValidEndTime(dto.getValidEndTime());
@@ -354,7 +379,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
 
     /**
      * 规范化并校验活动参数：
-     * 1) 仅允许现金卡CASH
+     * 1) 按 CASH / PICKUP 分别校验金额或兑换商品规则
      * 2) 校验有效期类型及其配套字段
      * 3) 对不适用字段做清理，避免脏数据写入
      */
@@ -365,12 +390,17 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         try {
             cardTypeEnum = GiftCardTypeEnum.valueOf(raw);
         } catch (IllegalArgumentException ex) {
-            throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡类型无效，请使用 CASH（现金卡）或 PICKUP（提货卡，尚未开放）");
+            throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡类型无效，请使用 CASH（现金卡）或 PICKUP（提货卡）");
         }
-        if (cardTypeEnum != GiftCardTypeEnum.CASH) {
-            throw new ServiceException(ResultCode.PARAMS_ERROR, "本期仅支持现金卡（CASH），提货卡（PICKUP）功能尚未开放");
+        dto.setCardType(cardTypeEnum.name());
+        if (cardTypeEnum == GiftCardTypeEnum.PICKUP) {
+            pickupCardRuleService.validateActivity(dto);
+        } else {
+            if (dto.getFaceValue() == null || dto.getFaceValue().signum() <= 0 || dto.getFaceValue().scale() > 2) {
+                throw new ServiceException(ResultCode.PARAMS_ERROR, "现金卡面额必须大于零且最多两位小数");
+            }
+            dto.setPickupMode(null); dto.setPickupCount(null); dto.setPickupSkuIds(null);
         }
-        dto.setCardType(GiftCardTypeEnum.CASH.name());
         String validityType = CharSequenceUtil.isBlank(dto.getValidityType())
                 ? GiftCardCashValidityTypeEnum.LONG_TERM.name() : dto.getValidityType().trim();
         try {
@@ -406,7 +436,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         if (quantity < 1 || quantity > 10000) {
             throw new ServiceException(ResultCode.GIFT_CARD_CASH_CREATE_QUANTITY_ERROR);
         }
-        GiftCardCashActivity activity = getActivityOrThrow(activityId);
+        GiftCardCashActivity activity = lockActivity(activityId);
         long produced = countCredentialsByActivity(activityId);
         if (produced + quantity > activity.getStockTotal()) {
             throw new ServiceException(ResultCode.GIFT_CARD_CASH_ACTIVITY_OVER_STOCK);
@@ -429,6 +459,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             // 卡号按批次内递增生成：保证可读顺序；batchId 唯一保证跨批次不重复
             cred.setCardNo(buildSequentialCardNo(batchId, i + 1));
             cred.setCardSecret(RandomUtil.randomStringUpper(12));
+            cred.setCardType(activity.getCardType());
             cred.setFaceValue(face);
             cred.setBalance(face);
             cred.setStatus(GiftCardCashCredentialStatusEnum.UNISSUED.name());
@@ -608,7 +639,13 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         Page<GiftCardUsageRecordVO> mpPage = PageUtil.initPage(page);
         QueryWrapper<GiftCardUsageRecordVO> w = new QueryWrapper<>();
         w.eq("ogr.delete_flag", false);
+        // 提货取消的零金额处理记录仅用于库存幂等，不作为买家的余额变动展示。
+        w.and(q -> q.isNull("ogr.biz_type").or().ne("ogr.biz_type", "PICKUP_CANCEL"));
         if (params != null) {
+            // 按凭据所属活动隔离使用记录，不能用可能重名的礼品卡名称筛选。
+            if (CharSequenceUtil.isNotBlank(params.getActivityId())) {
+                w.eq("c.activity_id", params.getActivityId().trim());
+            }
             if (CharSequenceUtil.isNotBlank(params.getOrderSn())) {
                 w.eq("ogr.order_sn", params.getOrderSn().trim());
             }
@@ -660,14 +697,14 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         GiftCardCashActivity activity = getActivityOrThrow(batch.getActivityId());
         String batchLabel = CharSequenceUtil.blankToDefault(activity.getGiftCardName(), "-");
         ExcelWriter writer = ExcelUtil.getWriter(true);
-        writer.writeHeadRow(CollUtil.newArrayList("卡号", "卡密", "面值", "礼品卡名称", "制卡批次ID"));
+        writer.writeHeadRow(CollUtil.newArrayList("卡号", "卡密", "面值", "礼品卡名称", "制卡批次ID", "卡类型", "兑换方式", "兑换种数"));
         for (GiftCardCashCredential cred : list) {
             writer.writeRow(CollUtil.newArrayList(
                     cred.getCardNo(),
                     cred.getCardSecret(),
                     cred.getFaceValue().toPlainString(),
                     batchLabel,
-                    createBatchId
+                    createBatchId, activity.getCardType(), activity.getPickupMode(), activity.getPickupCount()
             ));
         }
         ServletOutputStream out = null;
@@ -763,8 +800,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
      * 状态筛选规则：
      * <ul>
      *   <li>PENDING_ACTIVATION：绑定会员=当前会员，且激活会员为空；</li>
-     *   <li>AVAILABLE：可用礼品卡=当前会员，余额大于0，且未过有效期；</li>
-     *   <li>UNAVAILABLE：不可用礼品卡=当前会员，且余额为0/空或已过有效期。</li>
+     *   <li>AVAILABLE：当前会员已激活且未过期；现金卡余额大于0，提货卡未兑换；</li>
+     *   <li>UNAVAILABLE：当前会员已激活，现金卡余额耗尽、提货卡已兑换或卡已过期。</li>
      * </ul>
      * 未传状态时，按绑定会员（memberId）查询当前会员的全部礼品卡。
      */
@@ -779,15 +816,16 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
                         .isNull(GiftCardCashCredential::getActivateMemberId);
             } else if ("AVAILABLE".equals(params.getMemberCardStatus())) {
                 w.eq(GiftCardCashCredential::getActivateMemberId, memberId)
-                        .gt(GiftCardCashCredential::getBalance, BigDecimal.ZERO)
+                        .and(q -> q.eq(GiftCardCashCredential::getCardType, "PICKUP").isNull(GiftCardCashCredential::getPickupTradeSn)
+                                .or(x -> x.eq(GiftCardCashCredential::getCardType, "CASH").gt(GiftCardCashCredential::getBalance, BigDecimal.ZERO)))
+                        .eq(GiftCardCashCredential::getStatus, "BOUND")
                         .and(q -> q.isNull(GiftCardCashCredential::getExpireTime)
                                 .or()
                                 .gt(GiftCardCashCredential::getExpireTime, now));
             } else {
                 w.eq(GiftCardCashCredential::getActivateMemberId, memberId)
-                        .and(q -> q.isNull(GiftCardCashCredential::getBalance)
-                                .or()
-                                .le(GiftCardCashCredential::getBalance, BigDecimal.ZERO)
+                        .and(q -> q.eq(GiftCardCashCredential::getStatus, "REDEEMED")
+                                .or(x -> x.eq(GiftCardCashCredential::getCardType, "CASH").le(GiftCardCashCredential::getBalance, BigDecimal.ZERO))
                                 .or(x -> x.isNotNull(GiftCardCashCredential::getExpireTime)
                                         .le(GiftCardCashCredential::getExpireTime, now)));
             }
@@ -883,7 +921,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡激活失败，请稍后重试");
         }
         GiftCardCashCredential refreshed = credentialMapper.selectById(memberCardId);
-        if (refreshed != null) {
+        if (refreshed != null && !"PICKUP".equals(refreshed.getCardType())) {
             saveGiftCardUsageRecord(null, null, memberId, refreshed, refreshed.getFaceValue(),
                     "INCREASE", "CARD_ACTIVATE", memberCardId, refreshed.getBalance());
         }
@@ -902,6 +940,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
                         .gt(GiftCardCashCredential::getExpireTime, now))
                 .orderByAsc(GiftCardCashCredential::getExpireTime)
                 .orderByAsc(GiftCardCashCredential::getCreateTime));
+        list.removeIf(c -> "PICKUP".equals(c.getCardType()));
         return list.stream().map(this::toMemberCardVo).collect(Collectors.toList());
     }
 
@@ -928,6 +967,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
                 .eq(GiftCardCashCredential::getDeleteFlag, false)
                 .eq(GiftCardCashCredential::getActivateMemberId, memberId)
                 .eq(GiftCardCashCredential::getStatus, GiftCardCashCredentialStatusEnum.BOUND.name()));
+        if (selected.stream().anyMatch(c -> "PICKUP".equals(c.getCardType()))) throw new ServiceException(ResultCode.PARAMS_ERROR, "提货卡仅可在专用兑换页使用");
         if (selected.size() != credentialIds.size()) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "存在无效礼品卡，无法试算");
         }
@@ -985,6 +1025,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             if (credential == null || Boolean.TRUE.equals(credential.getDeleteFlag())) {
                 throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡不存在或已失效");
             }
+            if ("PICKUP".equals(credential.getCardType())) throw new ServiceException(ResultCode.PARAMS_ERROR, "提货卡不支持现金抵扣");
             if (!Objects.equals(memberId, credential.getActivateMemberId())) {
                 throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡归属校验失败");
             }
@@ -1188,6 +1229,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         if (rows.size() > MAX_ISSUE_ROWS) {
             throw new ServiceException(ResultCode.GIFT_CARD_CASH_ISSUE_ROW_ERROR);
         }
+        lockActivity(activityId);
         int totalNeed = rows.stream().mapToInt(IssueRow::quantity).sum();
         if (totalNeed > remainingActivityStock(activityId)) {
             throw new ServiceException(ResultCode.GIFT_CARD_CASH_ISSUE_POOL_INSUFFICIENT);
@@ -1227,7 +1269,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             throw new ServiceException(ResultCode.GIFT_CARD_CASH_ISSUE_POOL_INSUFFICIENT);
         }
         Date now = new Date();
-        GiftCardCashActivity activity = getActivityOrThrow(activityId);
+        GiftCardCashActivity activity = lockActivity(activityId);
         BigDecimal face = activity.getFaceValue().setScale(2, RoundingMode.HALF_UP);
         int sequence = startSequence;
         for (int i = 0; i < count; i++) {
@@ -1238,6 +1280,7 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             cred.setIssueBatchId(issueBatchId);
             cred.setCardNo(buildSequentialCardNo(issueBatchId, sequence));
             cred.setCardSecret(RandomUtil.randomStringUpper(12));
+            cred.setCardType(activity.getCardType());
             cred.setFaceValue(face);
             cred.setBalance(null);
             cred.setStatus(GiftCardCashCredentialStatusEnum.BOUND.name());
@@ -1551,9 +1594,11 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
     private GiftCardCashMemberCardVO toMemberCardVo(GiftCardCashCredential credential) {
         GiftCardCashMemberCardVO vo = new GiftCardCashMemberCardVO();
         BeanUtils.copyProperties(credential, vo);
+        vo.setCardSecret(null);
         GiftCardCashActivity activity = activityMapper.selectById(credential.getActivityId());
         if (activity != null && !Boolean.TRUE.equals(activity.getDeleteFlag())) {
             vo.setGiftCardName(activity.getGiftCardName());
+            vo.setPickupMode(activity.getPickupMode()); vo.setPickupCount(activity.getPickupCount());
         }
         vo.setMemberCardStatus(resolveMemberCardStatus(credential, new Date()));
         return vo;
@@ -1574,7 +1619,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         }
         boolean isBound = GiftCardCashCredentialStatusEnum.BOUND.name().equals(credential.getStatus());
         boolean notExpired = credential.getExpireTime() == null || credential.getExpireTime().after(now);
-        boolean hasBalance = credential.getBalance() != null && credential.getBalance().compareTo(BigDecimal.ZERO) > 0;
+        boolean hasBalance = "PICKUP".equals(credential.getCardType()) ? credential.getPickupTradeSn() == null
+                : credential.getBalance() != null && credential.getBalance().compareTo(BigDecimal.ZERO) > 0;
         if (isBound && notExpired && hasBalance) {
             return "AVAILABLE";
         }
@@ -1666,6 +1712,14 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
 
 
     /** 根据活动ID查询活动，若不存在或已逻辑删除则抛业务异常。 */
+    /** 活动行锁统一串行化制卡、发卡及修改，防止超发和已发权益被修改。 */
+    private GiftCardCashActivity lockActivity(String id) {
+        GiftCardCashActivity activity = activityMapper.selectOne(new LambdaQueryWrapper<GiftCardCashActivity>()
+                .eq(GiftCardCashActivity::getId, id).eq(GiftCardCashActivity::getDeleteFlag, false).last("FOR UPDATE"));
+        if (activity == null) throw new ServiceException(ResultCode.GIFT_CARD_CASH_ACTIVITY_NOT_FOUND);
+        return activity;
+    }
+
     private GiftCardCashActivity getActivityOrThrow(String id) {
         GiftCardCashActivity a = activityMapper.selectById(id);
         if (a == null || Boolean.TRUE.equals(a.getDeleteFlag())) {

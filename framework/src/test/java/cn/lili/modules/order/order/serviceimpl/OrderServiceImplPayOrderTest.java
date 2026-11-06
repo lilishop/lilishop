@@ -65,6 +65,7 @@ class OrderServiceImplPayOrderTest {
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
+        ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         storeFlowService = mock(StoreFlowService.class);
         orderLogService = mock(OrderLogService.class);
         applicationEventPublisher = mock(ApplicationEventPublisher.class);

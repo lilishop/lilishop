@@ -3,7 +3,6 @@ package cn.lili.controller.manager.promotion;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dos.GiftCardCashActivity;
 import cn.lili.modules.promotion.entity.dto.GiftCardCashActivityDTO;
 import cn.lili.modules.promotion.entity.dto.GiftCardCashBatchCreateDTO;
 import cn.lili.modules.promotion.entity.dto.search.GiftCardCashActivitySearchParams;
@@ -12,6 +11,7 @@ import cn.lili.modules.promotion.entity.dto.search.GiftCardCashCredentialSearchP
 import cn.lili.modules.promotion.entity.dto.search.GiftCardCashIssueBatchSearchParams;
 import cn.lili.modules.promotion.entity.dto.search.GiftCardUsageRecordSearchParams;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashCredentialVO;
+import cn.lili.modules.promotion.entity.vos.GiftCardCashActivityVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashCreateBatchVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashIssueBatchVO;
 import cn.lili.modules.promotion.entity.vos.GiftCardUsageRecordVO;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 管理端现金礼品卡接口（活动、制卡、发卡、凭证查询与导出）
+ * 管理端现金礼品卡接口
  *
  * @author Bulbasaur
  * @since 2026-05-22
@@ -65,13 +65,13 @@ public class GiftCardCashManagerController {
 
     @Operation(description = "礼品卡-活动详情")
     @GetMapping("/activity/{id}")
-    public ResultMessage<GiftCardCashActivity> getActivity(@PathVariable String id) {
+    public ResultMessage<GiftCardCashActivityVO> getActivity(@PathVariable String id) {
         return ResultUtil.data(giftCardCashService.getActivity(id));
     }
 
     @Operation(description = "礼品卡-制卡活动分页列表")
     @GetMapping("/activity")
-    public ResultMessage<IPage<GiftCardCashActivity>> pageActivity(GiftCardCashActivitySearchParams params, PageVO page) {
+    public ResultMessage<IPage<GiftCardCashActivityVO>> pageActivity(GiftCardCashActivitySearchParams params, PageVO page) {
         return ResultUtil.data(giftCardCashService.pageActivity(params, page));
     }
 

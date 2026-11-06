@@ -3,7 +3,6 @@ package cn.lili.modules.order.cart.entity.dto;
 import cn.lili.modules.appointment.entity.dto.AppointmentCheckoutDTO;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
@@ -12,6 +11,7 @@ import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashMemberCardVO;
+import cn.lili.modules.promotion.entity.vos.GiftCardCashDeductPreviewVO;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.store.entity.dos.StoreAddress;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -68,86 +68,53 @@ public class TradeDTO implements Serializable {
     @Schema(description = "不支持配送方式")
     private List<CartSkuVO> notSupportFreight;
 
-    /**
-     * 购物车类型
-     */
+    @Schema(description = "购物车类型")
     private CartTypeEnum cartTypeEnum;
-    /**
-     * 店铺备注
-     */
+
+    @Schema(description = "店铺备注")
     private List<StoreRemarkDTO> storeRemark;
 
-    /**
-     * sku促销连线 包含满优惠
-     * <p>
-     * KEY值为 sku_id+"_"+SuperpositionPromotionEnum
-     * VALUE值为 对应的活动ID
-     *
-     * @see SuperpositionPromotionEnum
-     */
+    @Schema(description = "SKU 叠加促销关联（包含满优惠）：键为 sku_id + 下划线 + SuperpositionPromotionEnum 枚举值，值为活动 ID")
     private Map<String, String> skuPromotionDetail;
 
-    /**
-     * 使用平台优惠券，一笔订单只能使用一个平台优惠券
-     */
+    @Schema(description = "使用平台优惠券，一笔订单只能使用一个平台优惠券")
     private MemberCouponDTO platformCoupon;
 
-    /**
-     * key 为商家id
-     * value 为商家优惠券
-     * 店铺优惠券
-     */
+    @Schema(description = "店铺优惠券，键为店铺 ID，值为对应店铺的会员优惠券")
     private Map<String, MemberCouponDTO> storeCoupons;
 
-    /**
-     * 可用优惠券列表
-     */
+    @Schema(description = "可用优惠券列表")
     private List<MemberCoupon> canUseCoupons;
 
-    /**
-     * 可用礼品卡列表
-     */
+    @Schema(description = "可用礼品卡列表")
     private List<GiftCardCashMemberCardVO> canUseGiftCards;
 
-    /**
-     * 无法使用优惠券无法使用的原因
-     */
+    @Schema(description = "不可用优惠券列表及不可用原因")
     private List<MemberCouponVO> cantUseCoupons;
 
-    /**
-     * 收货地址
-     */
+    @Schema(description = "收货地址")
     private MemberAddress memberAddress;
 
-    /**
-     * 自提地址
-     */
+    @Schema(description = "自提地址")
     private StoreAddress storeAddress;
 
-    /**
-     * 客户端类型
-     */
+    @Schema(description = "客户端类型")
     private String clientType;
 
-    /**
-     * 买家名称
-     */
+    @Schema(description = "买家名称")
     private String memberName;
 
-    /**
-     * 买家id
-     */
+    @Schema(description = "买家id")
     private String memberId;
 
-    /**
-     * 分销员id
-     */
+    @Schema(description = "分销员id")
     private String distributionId;
 
-    /**
-     * 订单vo
-     */
+    @Schema(description = "订单vo")
     private List<OrderVO> orderVO;
+
+    @Schema(description = "提货卡凭证 ID，关联 li_gift_card_cash_credential；仅专用兑换服务写入")
+    private String pickupCardId;
 
     @Schema(description = "礼品卡抵扣总金额")
     private BigDecimal giftCardDeductTotal;
@@ -156,7 +123,7 @@ public class TradeDTO implements Serializable {
     private BigDecimal cashPayTotal;
 
     @Schema(description = "礼品卡抵扣明细")
-    private List<cn.lili.modules.promotion.entity.vos.GiftCardCashDeductPreviewVO.DeductItem> giftCardDeductItems;
+    private List<GiftCardCashDeductPreviewVO.DeductItem> giftCardDeductItems;
 
     @Schema(description = "已选礼品卡ID列表")
     private List<String> selectedGiftCardIds;
