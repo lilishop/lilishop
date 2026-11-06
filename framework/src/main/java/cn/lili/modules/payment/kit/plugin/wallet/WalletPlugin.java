@@ -134,7 +134,7 @@ public class WalletPlugin implements Payment {
             }
             memberWalletService.increase(new MemberWalletUpdateDTO(refundLog.getTotalAmount(),
                     refundLog.getMemberId(),
-                    "订单[" + refundLog.getOrderSn() + "]，售后单[" + refundLog.getAfterSaleNo() + "]，退还金额[" + refundLog.getTotalAmount() + "]",
+                    buildRefundDetail(refundLog),
                     DepositServiceTypeEnum.WALLET_REFUND.name()));
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
@@ -143,6 +143,21 @@ public class WalletPlugin implements Payment {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 组装余额退款的变动日志详情。
+     * 订单取消退款的售后单号是占位值 ORDER_CANCEL，对客户展示为“订单取消”；
+     * 真实售后退款保留售后单号，便于按售后单核对退款来源。
+     *
+     * @param refundLog 退款日志
+     * @return 变动日志详情
+     */
+    private String buildRefundDetail(RefundLog refundLog) {
+        if ("ORDER_CANCEL".equals(refundLog.getAfterSaleNo())) {
+            return "订单[" + refundLog.getOrderSn() + "]，订单取消，退还金额[" + refundLog.getTotalAmount() + "]";
+        }
+        return "订单[" + refundLog.getOrderSn() + "]，售后单[" + refundLog.getAfterSaleNo() + "]，退还金额[" + refundLog.getTotalAmount() + "]";
     }
 
     /**

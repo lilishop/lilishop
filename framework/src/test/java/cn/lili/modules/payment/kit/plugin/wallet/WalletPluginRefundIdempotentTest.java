@@ -6,6 +6,7 @@ import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -89,5 +90,37 @@ class WalletPluginRefundIdempotentTest {
         verify(memberWalletService).increase(any(MemberWalletUpdateDTO.class));
         verify(refundLogService).save(refundLog);
         org.assertj.core.api.Assertions.assertThat(refundLog.getIsRefund()).isTrue();
+    }
+
+    /**
+     * 订单取消退款的余额变动日志应展示“订单取消”，不得把占位售后单号 ORDER_CANCEL 直接暴露给客户。
+     */
+    @Test
+    void orderCancelRefundDetailShowsCancelReason() {
+        when(refundLogService.count(any())).thenReturn(0L);
+
+        walletPlugin.refund(buildCancelRefundLog());
+
+        ArgumentCaptor<MemberWalletUpdateDTO> captor = ArgumentCaptor.forClass(MemberWalletUpdateDTO.class);
+        verify(memberWalletService).increase(captor.capture());
+        org.assertj.core.api.Assertions.assertThat(captor.getValue().getDetail())
+                .isEqualTo("订单[O2118532463188905984]，订单取消，退还金额[666.0]");
+    }
+
+    /**
+     * 真实售后退款仍保留售后单号，便于客户按售后单核对退款来源。
+     */
+    @Test
+    void afterSaleRefundDetailKeepsAfterSaleNo() {
+        when(refundLogService.count(any())).thenReturn(0L);
+        RefundLog refundLog = buildCancelRefundLog();
+        refundLog.setAfterSaleNo("AS123456");
+
+        walletPlugin.refund(refundLog);
+
+        ArgumentCaptor<MemberWalletUpdateDTO> captor = ArgumentCaptor.forClass(MemberWalletUpdateDTO.class);
+        verify(memberWalletService).increase(captor.capture());
+        org.assertj.core.api.Assertions.assertThat(captor.getValue().getDetail())
+                .isEqualTo("订单[O2118532463188905984]，售后单[AS123456]，退还金额[666.0]");
     }
 }
