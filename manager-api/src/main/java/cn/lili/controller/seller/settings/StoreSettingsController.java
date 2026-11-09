@@ -11,6 +11,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
+import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
@@ -74,6 +75,21 @@ public class StoreSettingsController {
     public ResultMessage<StoreVO> get() {
         //获取当前登录商家内容
         return ResultUtil.data(storeService.getStoreDetail());
+    }
+
+    /**
+     * 获取当前登录商家入驻详情信息
+     *
+     * @return 店铺详细VO
+     */
+    @Operation(summary = "获取当前商家入驻详情")
+    @GetMapping("/storeDetail")
+    public ResultMessage<StoreDetailVO> getStoreDetail() {
+        AuthUser user = UserContext.getCurrentUser();
+        if (user == null || CharSequenceUtil.isBlank(user.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+        return ResultUtil.data(storeDetailService.getStoreDetailVO(user.getStoreId()));
     }
 
     @Operation(description = "修改商家设置")
