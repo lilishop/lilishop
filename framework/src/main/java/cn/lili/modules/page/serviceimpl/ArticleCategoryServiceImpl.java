@@ -175,6 +175,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     /**
      * 递归初始化子树
+     * 父分类 ID 为空的历史记录不匹配任何父节点；顶级分类仍按层级规则保留。
      *
      * @param tree              树结构
      * @param articleCategories 数据库对象集合
@@ -184,7 +185,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             return;
         }
         articleCategories.stream()
-                .filter(item -> (item.getParentId().equals(tree.getId())))
+                .filter(item -> tree.getId() != null && tree.getId().equals(item.getParentId()))
                 .forEach(child -> {
                     ArticleCategoryVO childTree = new ArticleCategoryVO(child);
                     initChild(childTree, articleCategories);
