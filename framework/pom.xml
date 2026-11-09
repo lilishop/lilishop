@@ -21,26 +21,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-        <!--定时任务-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-quartz</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,20 +43,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aspectj</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-redis</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -128,11 +99,6 @@
             <artifactId>hutool-all</artifactId>
             <version>${Hutool-version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.biezhi</groupId>
-            <artifactId>TinyPinyin</artifactId>
-            <version>${TinyPinyin-verions}</version>
-        </dependency>
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -145,18 +111,6 @@
             <groupId>com.github.ulisesbocchio</groupId>
             <artifactId>jasypt-spring-boot-starter</artifactId>
             <version>${jasypt-version}</version>
-        </dependency>
-        <!-- 阿里云核心包-->
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>aliyun-java-sdk-core</artifactId>
-            <version>${aliyun-version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- 阿里云OSS -->
         <dependency>
@@ -228,12 +182,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 解决版本提示问题 -->
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <version>${antlr4-version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -256,11 +204,6 @@
             <groupId>com.xkcoding.http</groupId>
             <artifactId>simple-http</artifactId>
             <version>${simple-http-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>${antlr4-runtime-version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sdk</groupId>
@@ -314,11 +257,6 @@
             <groupId>com.github.xkzhangsan</groupId>
             <artifactId>xk-time</artifactId>
             <version>${xk-time}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>${commons-text}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.googlecode.owasp-java-html-sanitizer/owasp-java-html-sanitizer -->
         <dependency>
@@ -442,14 +380,6 @@
                     <artifactId>okhttp</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <!-- netty-resolver-dns-native-macos -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-resolver-dns-native-macos</artifactId>
-            <version>4.1.90.Final</version>
-            <scope>runtime</scope>
-            <classifier>osx-aarch_64</classifier>
         </dependency>
         <dependency>
             <groupId>com.github.wechatpay-apiv3</groupId>

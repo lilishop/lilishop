@@ -18,11 +18,6 @@
             <version>${revision}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.jfinal</groupId>
-            <artifactId>enjoy</artifactId>
-            <version>${enjoy.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

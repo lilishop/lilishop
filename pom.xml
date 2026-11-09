@@ -27,29 +27,23 @@
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
         <mybatis-plus-version>3.5.15</mybatis-plus-version>
         <Hutool-version>5.8.41</Hutool-version>
-        <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.4</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
         <lombok-version>1.18.30</lombok-version>
         <redisson>3.52.0</redisson>
 
         <aliyun-sdk-dysms-version>2.0.8</aliyun-sdk-dysms-version>
-        <aliyun-version>4.6.0</aliyun-version>
         <aliyun-sdk-oss-version>3.14.0</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.9</aliyun-sdk-dysms-version>
         <jwt-version>0.13.0</jwt-version>
         <druid-version>1.2.16</druid-version>
         <simple-http-version>1.0.3</simple-http-version>
-        <antlr4-version>4.7.2</antlr4-version>
-        <antlr4-runtime-version>4.7.2</antlr4-runtime-version>
 
         <userAgentUtils>1.21</userAgentUtils>
         <poi-version>5.2.3</poi-version>
         <poi-ooxml-version>5.2.3</poi-ooxml-version>
         <zxing>3.5.0</zxing>
         <xk-time>3.2.3</xk-time>
-        <commons-text>1.14.0</commons-text>
-        <enjoy.version>4.3</enjoy.version>
         <spotify>1.2.2</spotify>
 
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
