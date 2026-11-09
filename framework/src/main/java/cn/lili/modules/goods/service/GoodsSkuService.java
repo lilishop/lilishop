@@ -175,6 +175,13 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void queryExportStock(HttpServletResponse response, GoodsSearchParams searchParams);
 
     /**
+     * 下载商品库存导入空白模板
+     *
+     * @param response HTTP 响应
+     */
+    void downloadStockTemplate(HttpServletResponse response);
+
+    /**
      * 导入商品库存
      * @param storeId 店铺ID
      * @param files 文件

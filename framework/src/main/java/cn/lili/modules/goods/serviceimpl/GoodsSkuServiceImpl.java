@@ -574,6 +574,29 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    public void downloadStockTemplate(HttpServletResponse response) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        this.createTemplate(workbook);
+        try {
+            String fileName = URLEncoder.encode("商品库存导入模板", "UTF-8");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+
+            ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+        } catch (Exception e) {
+            log.error("下载商品库存导入模板错误", e);
+            throw new ServiceException(ResultCode.ERROR);
+        } finally {
+            try {
+                workbook.close();
+            } catch (Exception e) {
+                log.error("下载商品库存导入模板关闭workbook错误", e);
+            }
+        }
+    }
+
+    @Override
     public void importStock(String storeId, MultipartFile file) {
         List<GoodsSkuStockDTO> goodsSkuStockDTOList = new ArrayList<>();
         try (InputStream inputStream = file.getInputStream()) {
@@ -777,7 +800,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStock(String skuId, Integer quantity, String type) {
-        if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
+        if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity <= 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
+        if (!GoodsStockTypeEnum.ADD.name().equals(type) && !GoodsStockTypeEnum.SUB.name().equals(type)) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
         GoodsSku goodsSku = loadGoodsSkuForStockUpdate(skuId);

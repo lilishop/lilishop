@@ -15,6 +15,7 @@ import cn.lili.modules.goods.entity.dto.GoodsMarketScheduleDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -192,18 +194,73 @@ public class GoodsStoreController {
         return ResultUtil.data(goodsSkuService.getGoodsSkuVOList(goodsSkuService.listByGoodsIdAndStoreId(goodsId, storeId)));
     }
 
+    /**
+     * 修改商品库存。
+     * <p>
+     * 支持两种模式：
+     * 1. 当请求项包含 {@code type}（取值 {@code ADD}/{@code 增} 或 {@code SUB}/{@code 减}）时，
+     *    按增减方向原子调整库存，{@code quantity} 为正整数变更量；
+     * 2. 当请求项未传 {@code type} 时，保持原有按目标库存值覆盖行为。
+     * 仅允许操作当前登录商家归属的 SKU。
+     *
+     * @param updateStockList 库存修改请求列表
+     * @return 操作结果
+     */
     @Operation(summary = "修改商品库存")
     @PutMapping(value = "/update/stocks", consumes = "application/json")
     public ResultMessage<Object> updateStocks(@RequestBody List<GoodsSkuStockDTO> updateStockList) {
+        if (updateStockList == null || updateStockList.isEmpty()) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         // 获取商品skuId集合
-        List<String> goodsSkuIds = updateStockList.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
-        // 根据skuId集合查询商品信息
+        List<String> goodsSkuIds = updateStockList.stream()
+                .map(GoodsSkuStockDTO::getSkuId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (goodsSkuIds.isEmpty()) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
+        // 根据skuId集合查询商品信息并校验当前店铺归属
         List<GoodsSku> goodsSkuList = goodsSkuService.listByIdsAndStoreId(goodsSkuIds, storeId);
+        Map<String, String> skuGoodsIdMap = goodsSkuList.stream()
+                .collect(Collectors.toMap(GoodsSku::getId, GoodsSku::getGoodsId, (a, b) -> a));
         // 过滤不符合当前店铺的商品
-        List<String> filterGoodsSkuIds = goodsSkuList.stream().map(GoodsSku::getId).collect(Collectors.toList());
-        List<GoodsSkuStockDTO> collect = updateStockList.stream().filter(i -> filterGoodsSkuIds.contains(i.getSkuId())).collect(Collectors.toList());
-        goodsSkuService.updateStocks(collect);
+        List<GoodsSkuStockDTO> collect = updateStockList.stream()
+                .filter(i -> skuGoodsIdMap.containsKey(i.getSkuId()))
+                .collect(Collectors.toList());
+        if (collect.isEmpty()) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        List<GoodsSkuStockDTO> typedList = new ArrayList<>();
+        List<GoodsSkuStockDTO> directList = new ArrayList<>();
+        for (GoodsSkuStockDTO item : collect) {
+            if (item.getType() != null && !item.getType().trim().isEmpty()) {
+                String rawType = item.getType().trim();
+                if (GoodsStockTypeEnum.ADD.name().equals(rawType)
+                        || GoodsStockTypeEnum.ADD.getDescription().equals(rawType)) {
+                    item.setType(GoodsStockTypeEnum.ADD.name());
+                } else if (GoodsStockTypeEnum.SUB.name().equals(rawType)
+                        || GoodsStockTypeEnum.SUB.getDescription().equals(rawType)) {
+                    item.setType(GoodsStockTypeEnum.SUB.name());
+                } else {
+                    throw new ServiceException(ResultCode.PARAMS_ERROR, "库存修改方向必须是“增”或“减”");
+                }
+                if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                    throw new ServiceException(ResultCode.PARAMS_ERROR, "库存变更数量必须是正整数");
+                }
+                item.setGoodsId(skuGoodsIdMap.get(item.getSkuId()));
+                typedList.add(item);
+            } else {
+                directList.add(item);
+            }
+        }
+        if (!typedList.isEmpty()) {
+            goodsSkuService.updateStocksByType(typedList);
+        }
+        if (!directList.isEmpty()) {
+            goodsSkuService.updateStocks(directList);
+        }
         return ResultUtil.success();
     }
 
@@ -253,6 +310,13 @@ public class GoodsStoreController {
 
         HttpServletResponse response = ThreadContextHolder.getHttpResponse();
         goodsSkuService.queryExportStock(response, goodsSearchParams);
+    }
+
+    @Operation(summary = "下载商品库存导入模板")
+    @GetMapping("/downloadStockTemplate")
+    public void downloadStockTemplate() {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        goodsSkuService.downloadStockTemplate(response);
     }
 
     @Operation(summary = "上传商品库存列表")
