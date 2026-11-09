@@ -25,6 +25,9 @@ import cn.lili.modules.promotion.mapper.GiftCardCashCredentialMapper;
 import cn.lili.modules.promotion.service.GiftCardCashService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
@@ -177,8 +180,11 @@ class PickupCardServiceImplTest {
     /**
      * 价格预览使用当前销售价而非促销价，免邮且商家全额结算。
      */
-    @Test
-    void previewUsesSalesPriceAndFullSettlementAcrossStores() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"PC", "H5", "WECHAT_MP", "APP", "UNKNOWN", " "})
+    void previewUsesSalesPriceAndFullSettlementAcrossStores(String client) {
+        request.setClient(client);
         GiftCardCashActivity activity = new GiftCardCashActivity();
         activity.setPickupMode("ALL");
         activity.setPickupCount(2);
@@ -229,6 +235,10 @@ class PickupCardServiceImplTest {
             when(user.getUsername()).thenReturn("buyer");
             context.when(UserContext::getCurrentUser).thenReturn(user);
             TradeDTO preview = service.preview("member", request);
+            String expectedClient = client == null || client.isBlank() ? "UNKNOWN" : client;
+            assertThat(preview.getClientType()).isEqualTo(expectedClient);
+            assertThat(preview.getCartList()).allSatisfy(cart ->
+                    assertThat(new Order(cart, preview).getClientType()).isEqualTo(expectedClient));
             assertThat(preview.getPriceDetailDTO().getGoodsPrice()).isEqualTo(168.49);
             assertThat(preview.getPriceDetailDTO().getFlowPrice()).isZero();
             assertThat(preview.getPriceDetailDTO().getBillPrice()).isEqualTo(168.49);
@@ -241,6 +251,13 @@ class PickupCardServiceImplTest {
             assertThat(preview.getSkuList().getFirst().getPromotionMap()).isEmpty();
             verify(goods, never()).updateGoodsStock(any());
         }
+    }
+
+    /** 非法客户端值不能写入订单来源；枚举校验独立于金额及兑换权益。 */
+    @Test
+    void rejectsInvalidClientType() {
+        assertThatThrownBy(() -> ReflectionTestUtils.invokeMethod(service, "resolveClientType", "invalid-client"))
+                .isInstanceOf(ServiceException.class);
     }
 
     /**

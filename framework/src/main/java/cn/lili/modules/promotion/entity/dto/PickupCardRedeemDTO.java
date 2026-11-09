@@ -9,7 +9,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 提货卡兑换请求，仅接受卡、SKU 和地址标识，价格及权益以服务端为准。
+ * 提货卡兑换请求，包含卡、SKU、地址标识及客户端来源，价格及权益以服务端为准。
  *
  * @author Bulbasaur
  * @since 2026-11-05
@@ -30,4 +30,8 @@ public class PickupCardRedeemDTO {
     @NotBlank
     @Schema(description = "当前会员收货地址 ID，对应 li_member_address.id")
     private String addressId;
+
+    /** 客户端来源：PC、H5、WECHAT_MP、APP、UNKNOWN；旧客户端未传时记为 UNKNOWN，不影响兑换权益。 */
+    @Schema(description = "客户端来源：PC/PC端、H5/移动网页、WECHAT_MP/微信小程序、APP/移动应用、UNKNOWN/未知；未传时记为 UNKNOWN")
+    private String client;
 }

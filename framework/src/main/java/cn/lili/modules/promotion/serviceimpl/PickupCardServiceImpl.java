@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SnowFlake;
@@ -259,6 +260,7 @@ public class PickupCardServiceImpl implements PickupCardService {
         if (address == null || !Objects.equals(memberId, address.getMemberId()) || Boolean.TRUE.equals(address.getDeleteFlag()))
             throw error("收货地址不存在或不属于当前会员");
         TradeDTO trade = new TradeDTO(CartTypeEnum.BUY_NOW);
+        trade.setClientType(resolveClientType(dto.getClient()));
         trade.setMemberId(memberId);
         trade.setMemberName(UserContext.getCurrentUser().getUsername());
         trade.setMemberAddress(address);
@@ -293,6 +295,20 @@ public class PickupCardServiceImpl implements PickupCardService {
         trade.getSkuList().forEach(item -> item.getPriceDetailDTO().setFreightPrice(0D));
         priceRender.render(trade);
         return trade;
+    }
+
+    /**
+     * 沿用普通订单客户端枚举，兼容旧请求缺省来源，拒绝非法来源值。
+     * @param client 客户端上报来源，仅作订单来源记录，不参与价格及权益判断
+     * @return 订单持久化使用的客户端枚举名称
+     */
+    private String resolveClientType(String client) {
+        if (client == null || client.isBlank()) return ClientTypeEnum.UNKNOWN.name();
+        try {
+            return ClientTypeEnum.valueOf(client.trim()).name();
+        } catch (IllegalArgumentException e) {
+            throw error("客户端来源不正确");
+        }
     }
 
     /**
