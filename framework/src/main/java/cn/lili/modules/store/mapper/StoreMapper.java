@@ -24,7 +24,7 @@ public interface StoreMapper extends BaseMapper<Store> {
      * @param id 店铺ID
      * @return 店铺VO
      */
-    @Select("select d.*,s.* from li_store s inner join li_store_detail d on s.id=d.store_id where s.id=#{id} ")
+    @Select("select s.* from li_store s where s.id=#{id} ")
     StoreVO getStoreDetail(String id);
 
     /**
