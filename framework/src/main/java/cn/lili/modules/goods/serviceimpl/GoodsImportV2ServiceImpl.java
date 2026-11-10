@@ -1,16 +1,20 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.GoodsUnit;
+import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vo.GoodsImportResultVO;
 import cn.lili.modules.goods.entity.vos.CategoryBrandVO;
 import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
 import cn.lili.modules.goods.service.CategoryBrandService;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsImportV2Service;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsUnitService;
 import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
@@ -32,16 +36,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 /**
  * 商品批量导入v2业务层实现：解析多规格商品 Excel（第 1 行说明、第 2 行表头、第 3 行起数据），
- * 按「商品序号」列将同一商品的多个 SKU 行归并为一组，校验与落库在后续任务叠加。
- * 本类当前实现行解析、分组、序号预检（非法/空缺/复用序号转失败记录）与组内两级校验
- * （行级 SKU 字段 + 商品级字段，含分类/品牌/运费模板/计量单位/店铺分类的归属校验），
- * 商品级字段按组内继承规则以首行为准；importGoods/downloadTemplate 主流程待后续任务补全。
+ * 按「商品序号」列将同一商品的多个 SKU 行归并为一组，做序号预检（非法/空缺/复用序号转失败记录）
+ * 与组内两级校验（行级 SKU 字段 + 商品级字段，含分类/品牌/运费模板/计量单位/店铺分类的归属校验），
+ * 商品级字段按组内继承规则以首行为准；校验通过的组组装为 GoodsOperationDTO 逐个调用
+ * goodsService.addGoods 落库（addGoods 自身事务即每商品独立事务，单组失败记 failList 后继续，
+ * 实现部分成功）；downloadTemplate 主流程待后续任务补全。
  *
  * @author Bulbasaur
  * @since 2026-10-20
@@ -59,6 +65,8 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
     private GoodsUnitService goodsUnitService;
     @Autowired
     private StoreGoodsLabelService storeGoodsLabelService;
+    @Autowired
+    private GoodsService goodsService;
 
     /**
      * 模板列数（A-T 共 20 列）
@@ -70,9 +78,221 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
      */
     static final int DATA_START_ROW_INDEX = 2;
 
+    /**
+     * 单次导入数据行上限（不含说明行与表头），超过即整文件拒绝
+     */
+    static final int MAX_DATA_ROWS = 2000;
+
+    /**
+     * 单次导入商品数量上限（按商品序号分组计数），超过即整文件拒绝
+     */
+    static final int MAX_GOODS_COUNT = 500;
+
     @Override
     public GoodsImportResultVO importGoods(MultipartFile file) {
-        throw new UnsupportedOperationException("商品批量导入v2主流程将在后续任务实现");
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase(Locale.ROOT).endsWith(".xlsx")) {
+            throw new ServiceException("仅支持上传 .xlsx 格式的商品导入文件");
+        }
+        List<Row> rows;
+        try (InputStream in = file.getInputStream()) {
+            rows = parseRows(in);
+        } catch (IOException e) {
+            throw new ServiceException("商品导入文件读取失败：" + e.getMessage());
+        }
+        if (rows.size() > MAX_DATA_ROWS) {
+            throw new ServiceException("单次最多导入" + MAX_DATA_ROWS + "行数据，当前文件共" + rows.size() + "行，请拆分后重试");
+        }
+        GroupingResult grouping = splitValidGroups(rows);
+        if (grouping.groups.size() > MAX_GOODS_COUNT) {
+            throw new ServiceException("单次最多导入" + MAX_GOODS_COUNT + "个商品（按商品序号计），当前文件共"
+                    + grouping.groups.size() + "个，请拆分后重试");
+        }
+        GoodsImportResultVO result = new GoodsImportResultVO();
+        result.getFailList().addAll(grouping.fails);
+        for (Map.Entry<Integer, List<Row>> entry : grouping.groups.entrySet()) {
+            Integer goodsNo = entry.getKey();
+            List<Row> groupRows = entry.getValue();
+            String error = validateGroup(goodsNo, groupRows);
+            if (error == null) {
+                try {
+                    goodsService.addGoods(buildGoodsOperationDTO(groupRows));
+                    result.setSuccessCount(result.getSuccessCount() + 1);
+                    continue;
+                } catch (Exception e) {
+                    error = e.getMessage() == null ? "商品保存失败" : e.getMessage();
+                }
+            }
+            GoodsImportResultVO.FailGoods failGoods = buildFailGoods(groupRows, error);
+            failGoods.setGoodsNo(goodsNo);
+            result.getFailList().add(failGoods);
+        }
+        result.setFailCount(result.getFailList().size());
+        return result;
+    }
+
+    /**
+     * 将校验通过（已完成组内继承回填）的商品组组装为 GoodsOperationDTO。
+     * 关键规则：
+     * ① skuList 每条 map 含 price/cost/quantity/weight/alertQuantity、规格名→规格值动态键、
+     * images（首行图片数组）；不放 sn 键，由 GoodsSkuBuilder 兜底生成以规避批量 SN 碰撞；
+     * ② 预警库存留空时按 0 写入（校验层只放行不回填，默认值在组装层补齐）；
+     * ③ DTO 的 price 取组内 SKU 最低价；categoryPath 为回溯出的三级分类 ID 逗号串；
+     * templateId/brandId/storeCategoryPath 解析为对应记录 ID，goodsUnit 存单位名称
+     * （Excel 允许填 ID、名称或 ID-名称，统一归一到落库口径）；
+     * ④ 导入商品一律下架暂存：release=false、goodsType=PHYSICAL_GOODS、intro/mobileIntro 为空串、
+     * goodsParamsDTOList 为 null（不触碰商品参数与倒排表）。
+     *
+     * @param rows 校验通过的商品组数据行（首行为商品级字段来源）
+     * @return 可直接交给 goodsService.addGoods 的商品操作 DTO
+     */
+    private GoodsOperationDTO buildGoodsOperationDTO(List<Row> rows) {
+        Row first = rows.get(0);
+        List<String> gallery = splitImages(first.goodsImages);
+        List<Map<String, Object>> skuList = new ArrayList<>(rows.size());
+        double minPrice = Double.MAX_VALUE;
+        for (Row row : rows) {
+            Map<String, Object> sku = new LinkedHashMap<>();
+            double price = Double.parseDouble(row.price);
+            sku.put("price", price);
+            sku.put("cost", Double.parseDouble(row.cost));
+            sku.put("quantity", Integer.valueOf(row.quantity));
+            sku.put("weight", Double.parseDouble(row.weight));
+            sku.put("alertQuantity", row.alertQuantity.isEmpty() ? 0 : Integer.valueOf(row.alertQuantity));
+            if (!row.spec1Name.isEmpty()) {
+                sku.put(row.spec1Name, row.spec1Value);
+            }
+            if (!row.spec2Name.isEmpty()) {
+                sku.put(row.spec2Name, row.spec2Value);
+            }
+            if (!row.spec3Name.isEmpty()) {
+                sku.put(row.spec3Name, row.spec3Value);
+            }
+            sku.put("images", gallery);
+            skuList.add(sku);
+            minPrice = Math.min(minPrice, price);
+        }
+        GoodsOperationDTO dto = new GoodsOperationDTO();
+        dto.setGoodsName(first.goodsName);
+        dto.setPrice(minPrice);
+        dto.setCategoryPath(resolveCategoryPath(first));
+        dto.setStoreCategoryPath(resolveStoreCategoryPath(first.storeCategory));
+        dto.setBrandId(resolveBrandId(first));
+        dto.setTemplateId(resolveTemplateId(first.freightTemplate));
+        dto.setGoodsUnit(resolveGoodsUnitName(first.goodsUnit));
+        dto.setGoodsGalleryList(gallery);
+        dto.setSkuList(skuList);
+        dto.setIntro("");
+        dto.setMobileIntro("");
+        dto.setGoodsType(GoodsTypeEnum.PHYSICAL_GOODS.name());
+        dto.setRelease(false);
+        dto.setRecommend(false);
+        dto.setGoodsParamsDTOList(null);
+        return dto;
+    }
+
+    /**
+     * 拆分商品图片列为 URL 列表（英文逗号分隔，逐项去空白）。
+     *
+     * @param goodsImages 图片列原始文本（校验已保证非空且均为 http(s):// 前缀）
+     * @return 图片 URL 列表，首张为主图
+     */
+    private static List<String> splitImages(String goodsImages) {
+        List<String> images = new ArrayList<>();
+        for (String url : goodsImages.split(",")) {
+            String image = url.trim();
+            if (!image.isEmpty()) {
+                images.add(image);
+            }
+        }
+        return images;
+    }
+
+    /**
+     * 截取平台分类填值的分类 ID（「分类ID-名称」取首个「-」之前；纯 ID 原样返回）。
+     *
+     * @param categoryPath 平台分类列原始填值
+     * @return 分类 ID
+     */
+    private static String categoryIdOf(String categoryPath) {
+        return categoryPath.contains("-")
+                ? categoryPath.substring(0, categoryPath.indexOf('-')) : categoryPath;
+    }
+
+    /**
+     * 回溯平台分类的三级分类路径（一级,二级,三级 ID 逗号串）；调用前校验已保证三级完整。
+     *
+     * @param first 组内首行
+     * @return 三级分类 ID 逗号串
+     */
+    private String resolveCategoryPath(Row first) {
+        Category leaf = categoryService.getCategoryById(categoryIdOf(first.categoryPath));
+        Category second = categoryService.getCategoryById(leaf.getParentId());
+        Category top = categoryService.getCategoryById(second.getParentId());
+        return top.getId() + "," + second.getId() + "," + leaf.getId();
+    }
+
+    /**
+     * 解析运费模板填值为本店运费模板 ID；校验已保证命中本店模板列表。
+     *
+     * @param freightTemplate 运费模板列填值（ID / 名称 / ID-名称）
+     * @return 运费模板 ID
+     */
+    private String resolveTemplateId(String freightTemplate) {
+        FreightTemplateVO template = findOption(freightTemplate,
+                freightTemplateService.getFreightTemplateList(currentStoreId()),
+                FreightTemplateVO::getId, FreightTemplateVO::getName);
+        return template == null ? freightTemplate : template.getId();
+    }
+
+    /**
+     * 解析品牌填值为品牌 ID；未填品牌返回 null。
+     *
+     * @param first 组内首行
+     * @return 品牌 ID，未填时返回 null
+     */
+    private String resolveBrandId(Row first) {
+        if (first.brand.isEmpty()) {
+            return null;
+        }
+        CategoryBrandVO brand = findOption(first.brand,
+                categoryBrandService.getCategoryBrandList(categoryIdOf(first.categoryPath)),
+                CategoryBrandVO::getId, CategoryBrandVO::getName);
+        return brand == null ? first.brand : brand.getId();
+    }
+
+    /**
+     * 解析计量单位填值为单位名称（GoodsOperationDTO.goodsUnit 存名称）；校验已保证命中平台单位表。
+     *
+     * @param goodsUnit 计量单位列填值（ID / 名称 / ID-名称）
+     * @return 计量单位名称
+     */
+    private String resolveGoodsUnitName(String goodsUnit) {
+        GoodsUnit unit = findOption(goodsUnit, goodsUnitService.list(), GoodsUnit::getId, GoodsUnit::getName);
+        return unit == null ? goodsUnit : unit.getName();
+    }
+
+    /**
+     * 解析店铺分类填值（逗号分隔多项）为本店店铺分类 ID 逗号串；未填返回 null。
+     *
+     * @param storeCategory 店铺分类列填值
+     * @return 店铺分类 ID 逗号串，未填时返回 null
+     */
+    private String resolveStoreCategoryPath(String storeCategory) {
+        if (storeCategory.isEmpty()) {
+            return null;
+        }
+        List<StoreGoodsLabelVO> labels = storeGoodsLabelService.listByStoreId(currentStoreId());
+        List<String> ids = new ArrayList<>();
+        for (String item : storeCategory.split(",")) {
+            String label = item.trim();
+            if (label.isEmpty()) {
+                continue;
+            }
+            StoreGoodsLabelVO option = findOption(label, labels, StoreGoodsLabelVO::getId, StoreGoodsLabelVO::getLabelName);
+            ids.add(option == null ? label : option.getId());
+        }
+        return ids.isEmpty() ? null : String.join(",", ids);
     }
 
     @Override
@@ -283,6 +503,7 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
             if (error != null) {
                 return error;
             }
+            // 规格值组合以“ ”分隔拼接，避免「AB+C」与「A+BC」这类值文本误判为重复
             String combo = row.spec1Value + '' + row.spec2Value + '' + row.spec3Value;
             Integer comboRowNo = specComboRows.putIfAbsent(combo, row.excelRowNo);
             if (comboRowNo != null) {
@@ -324,8 +545,7 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
         if (first.categoryPath.isEmpty()) {
             return "第" + rowNo + "行：平台分类不能为空";
         }
-        String categoryId = first.categoryPath.contains("-")
-                ? first.categoryPath.substring(0, first.categoryPath.indexOf('-')) : first.categoryPath;
+        String categoryId = categoryIdOf(first.categoryPath);
         String categoryError = checkCategoryPath(categoryId, first.categoryPath, rowNo);
         if (categoryError != null) {
             return categoryError;
@@ -417,7 +637,8 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
     }
 
     /**
-     * 校验非负整数字段（库存必填、预警库存选填默认 0）。
+     * 校验非负整数字段（库存必填；预警库存选填，留空即通过——本层只校验不回填，
+     * 预警库存留空的默认值 0 由组装层 {@link #buildGoodsOperationDTO(List)} 写入）。
      *
      * @param value      单元格文本
      * @param fieldLabel 字段中文名
@@ -486,17 +707,31 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
      * @return 命中返回 true
      */
     private static <T> boolean matchesOption(String value, List<T> options, Function<T, String> idGetter, Function<T, String> nameGetter) {
+        return findOption(value, options, idGetter, nameGetter) != null;
+    }
+
+    /**
+     * 在候选列表中查找填值命中的候选项，命中规则同 {@link #matchesOption}；供组装层把填值归一为 ID/名称。
+     *
+     * @param value      Excel 填值
+     * @param options    候选列表（分类品牌/运费模板/计量单位/店铺分类）
+     * @param idGetter   候选项 ID 取值函数
+     * @param nameGetter 候选项名称取值函数
+     * @param <T>        候选项类型
+     * @return 命中的候选项，未命中返回 null
+     */
+    private static <T> T findOption(String value, List<T> options, Function<T, String> idGetter, Function<T, String> nameGetter) {
         if (options == null) {
-            return false;
+            return null;
         }
         for (T option : options) {
             String id = idGetter.apply(option);
             String name = nameGetter.apply(option);
             if (value.equals(id) || value.equals(name) || (id != null && name != null && value.equals(id + "-" + name))) {
-                return true;
+                return option;
             }
         }
-        return false;
+        return null;
     }
 
     /**
