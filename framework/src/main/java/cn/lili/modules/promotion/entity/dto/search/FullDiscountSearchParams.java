@@ -20,9 +20,11 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
 
     private static final long serialVersionUID = -4052716630253333681L;
 
-
     @Schema(description = "活动名称")
     private String promotionName;
+
+    @Schema(description = "活动子类型：FULL_MINUS-满减，FULL_RATE-满折，FULL_GIFT-满赠")
+    private String activityType;
 
     @Schema(description = "是否赠优惠券")
     private Boolean couponFlag;
@@ -35,6 +37,9 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
         QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(promotionName)) {
             queryWrapper.like("promotion_name", promotionName);
+        }
+        if (CharSequenceUtil.isNotEmpty(activityType)) {
+            queryWrapper.eq("activity_type", activityType);
         }
         if (couponFlag != null) {
             queryWrapper.eq("coupon_flag", couponFlag);

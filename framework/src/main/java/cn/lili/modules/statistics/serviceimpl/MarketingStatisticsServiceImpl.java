@@ -1,6 +1,8 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.modules.promotion.entity.dos.Coupon;
+import cn.lili.modules.promotion.entity.dos.FullDiscount;
+import cn.lili.modules.promotion.entity.enums.FullDiscountTypeEnum;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.FullDiscountService;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
@@ -53,6 +55,9 @@ public class MarketingStatisticsServiceImpl implements MarketingStatisticsServic
         vo.setSeckillActiveNum(countActive(seckillService, now));
         vo.setPintuanActiveNum(countActive(pintuanService, now));
         vo.setFullDiscountActiveNum(countActive(fullDiscountService, now));
+        vo.setFullMinusActiveNum(countActiveFullDiscountByType(now, FullDiscountTypeEnum.FULL_MINUS));
+        vo.setFullRateActiveNum(countActiveFullDiscountByType(now, FullDiscountTypeEnum.FULL_RATE));
+        vo.setFullGiftActiveNum(countActiveFullDiscountByType(now, FullDiscountTypeEnum.FULL_GIFT));
         vo.setKanjiaActiveNum(countActive(kanjiaActivityGoodsService, now));
         vo.setPointsGoodsActiveNum(countActive(pointsGoodsService, now));
 
@@ -73,6 +78,31 @@ public class MarketingStatisticsServiceImpl implements MarketingStatisticsServic
         Double discount = orderStatisticsService.getDiscountPrice(dates);
         vo.setDiscountAmount(discount == null ? 0D : discount);
         return vo;
+    }
+
+    /**
+     * 按满额活动子类型统计当前进行中的活动数量（兼容未迁移的旧字段标志位）
+     *
+     * @param now      当前时间
+     * @param typeEnum 满额活动子类型枚举
+     * @return 进行中活动数量
+     */
+    private long countActiveFullDiscountByType(Date now, FullDiscountTypeEnum typeEnum) {
+        QueryWrapper<FullDiscount> qw = Wrappers.query();
+        qw.apply("start_time <= {0} AND (end_time IS NULL OR end_time >= {0})", now);
+        qw.eq("delete_flag", false);
+        if (FullDiscountTypeEnum.FULL_RATE == typeEnum) {
+            qw.and(w -> w.eq("activity_type", FullDiscountTypeEnum.FULL_RATE.name())
+                    .or(legacy -> legacy.isNull("activity_type").eq("full_rate_flag", true)));
+        } else if (FullDiscountTypeEnum.FULL_GIFT == typeEnum) {
+            qw.and(w -> w.eq("activity_type", FullDiscountTypeEnum.FULL_GIFT.name())
+                    .or(legacy -> legacy.isNull("activity_type").eq("gift_flag", true)
+                            .and(m -> m.isNull("full_minus_flag").or().eq("full_minus_flag", false))));
+        } else {
+            qw.and(w -> w.eq("activity_type", FullDiscountTypeEnum.FULL_MINUS.name())
+                    .or(legacy -> legacy.isNull("activity_type").eq("full_minus_flag", true)));
+        }
+        return fullDiscountService.count(qw);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

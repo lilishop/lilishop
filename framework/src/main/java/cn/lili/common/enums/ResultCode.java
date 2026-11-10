@@ -437,6 +437,12 @@ public enum ResultCode {
     FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS(43009, "满减金额不能大于优惠门槛"),
     FULL_DISCOUNT_GIFT_E_COUPON_ERROR(43010, "电子卡券不可作为满额活动赠品"),
     FULL_RATE_NUM_ERROR(43010, "请填写打折数值"),
+    FULL_DISCOUNT_TIER_SIZE_ERROR(43011, "阶梯优惠规则数量须为1至3个"),
+    FULL_DISCOUNT_TIER_THRESHOLD_ERROR(43012, "各阶梯优惠门槛金额必须大于0且按阶梯严格递增"),
+    FULL_DISCOUNT_TIER_MINUS_ERROR(43013, "满减阶梯的优惠金额必须随阶梯严格递增"),
+    FULL_DISCOUNT_TIER_RATE_ERROR(43014, "满折阶梯的折扣数值必须随阶梯严格递减（折扣力度递增）"),
+    FULL_DISCOUNT_GIFT_SIZE_ERROR(43015, "每个阶梯最多只能选择3个不重复的赠品"),
+    FULL_DISCOUNT_GIFT_NUM_ERROR(43016, "单个赠品的赠送数量须在1至10件之间"),
 
     /**
      * 营销促销扩展

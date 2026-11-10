@@ -3,13 +3,11 @@ package cn.lili.modules.promotion.entity.dos;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 满优惠活动实体类
+ * 满优惠活动实体类（包含满减活动、满折活动、满赠活动，支持最多三级阶梯）
  *
  * @author Chopper
  * @since 2020-03-19 10:44 上午
@@ -22,9 +20,14 @@ public class FullDiscount extends BasePromotions {
 
     private static final long serialVersionUID = 430433787214894166L;
 
-    @NotNull(message = "请填写优惠门槛")
-    @DecimalMax(value = "99999999.00", message = "优惠券门槛金额超出限制")
-    @Schema(description = "优惠门槛金额", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "活动子类型：FULL_MINUS-满减，FULL_RATE-满折，FULL_GIFT-满赠")
+    private String activityType;
+
+    @Schema(description = "阶梯规则JSON列表（最多3级）")
+    private String rulesJson;
+
+    @DecimalMax(value = "99999999.00", message = "优惠门槛金额超出限制")
+    @Schema(description = "优惠门槛金额")
     private Double fullMoney;
 
     @Schema(description = "活动是否减现金")
@@ -60,13 +63,11 @@ public class FullDiscount extends BasePromotions {
     @Schema(description = "优惠券id")
     private String couponId;
 
-    @NotEmpty(message = "请填写活动标题")
-    @Schema(description = "活动标题", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "活动标题")
     private String title;
 
     @Schema(description = "活动说明")
     private String description;
-
 
     public Boolean getFullMinusFlag() {
         if (fullMinusFlag == null) {

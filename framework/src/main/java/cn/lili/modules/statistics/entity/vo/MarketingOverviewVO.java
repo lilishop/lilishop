@@ -17,8 +17,14 @@ public class MarketingOverviewVO {
     private Long seckillActiveNum = 0L;
     @Schema(description = "进行中拼团数")
     private Long pintuanActiveNum = 0L;
-    @Schema(description = "进行中满减数")
+    @Schema(description = "进行中满额活动总数")
     private Long fullDiscountActiveNum = 0L;
+    @Schema(description = "进行中满减活动数")
+    private Long fullMinusActiveNum = 0L;
+    @Schema(description = "进行中满折活动数")
+    private Long fullRateActiveNum = 0L;
+    @Schema(description = "进行中满赠活动数")
+    private Long fullGiftActiveNum = 0L;
     @Schema(description = "进行中砍价商品数")
     private Long kanjiaActiveNum = 0L;
     @Schema(description = "进行中积分商品数")

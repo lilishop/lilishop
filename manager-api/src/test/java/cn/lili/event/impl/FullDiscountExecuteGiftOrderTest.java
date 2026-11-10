@@ -1,24 +1,34 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.message.LiliMessageTemplate;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
+import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.service.OrderLogService;
+import cn.lili.modules.promotion.entity.dto.FullDiscountGiftItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 满赠 E_COUPON 赠品子单创建与落库归一化。
+ * 满赠 E_COUPON 赠品子单创建、多赠品件数与部分库存降级落库归一化测试。
  *
  * @author Mike
  * @date 2026-08-02
@@ -40,6 +50,9 @@ class FullDiscountExecuteGiftOrderTest {
     private FullDiscountExecute execute;
     private OrderService orderService;
     private OrderItemService orderItemService;
+    private GoodsSkuService goodsSkuService;
+    private CardKeyService cardKeyService;
+    private Cache cache;
 
     /**
      * 初始化当前用例的模拟依赖及测试数据。
@@ -49,12 +62,18 @@ class FullDiscountExecuteGiftOrderTest {
         execute = new FullDiscountExecute();
         orderService = mock(OrderService.class);
         orderItemService = mock(OrderItemService.class);
+        goodsSkuService = mock(GoodsSkuService.class);
+        cardKeyService = mock(CardKeyService.class);
+        cache = mock(Cache.class);
         OrderLogService orderLogService = mock(OrderLogService.class);
         LiliMessageTemplate messageTemplate = mock(LiliMessageTemplate.class);
         RocketmqCustomProperties rocketmqCustomProperties = mock(RocketmqCustomProperties.class);
 
         ReflectionTestUtils.setField(execute, "orderService", orderService);
         ReflectionTestUtils.setField(execute, "orderItemService", orderItemService);
+        ReflectionTestUtils.setField(execute, "goodsSkuService", goodsSkuService);
+        ReflectionTestUtils.setField(execute, "cardKeyService", cardKeyService);
+        ReflectionTestUtils.setField(execute, "cache", cache);
         ReflectionTestUtils.setField(execute, "orderLogService", orderLogService);
         ReflectionTestUtils.setField(execute, "liliMessageTemplate", messageTemplate);
         ReflectionTestUtils.setField(execute, "rocketmqCustomProperties", rocketmqCustomProperties);
@@ -124,6 +143,106 @@ class FullDiscountExecuteGiftOrderTest {
                 List.of(giftSku), origin, OrderTypeEnum.E_COUPON);
 
         verify(orderService, never()).save(any());
+    }
+
+    /**
+     * 验证多赠品发放时若库存部分不足则按实际可用库存发放，库存为0的赠品自动跳过且不影响同档其他赠品。
+     */
+    @Test
+    void orderStatusChangeFulfillsPartialStockAndSkipsZeroStockGift() {
+        Order origin = originOrder();
+        when(orderService.getBySn("P100")).thenReturn(origin);
+
+        // 赠品1：申请赠送5件，实际库存仅3件 -> 应按3件发放
+        GoodsSku partialPhysicalSku = new GoodsSku();
+        partialPhysicalSku.setId("SKU_PARTIAL");
+        partialPhysicalSku.setGoodsName("实物赠品A");
+        partialPhysicalSku.setGoodsType(GoodsTypeEnum.PHYSICAL_GOODS.name());
+        partialPhysicalSku.setQuantity(3);
+        partialPhysicalSku.setCategoryPath("1,2,3");
+        when(goodsSkuService.getGoodsSkuByIdFromCache("SKU_PARTIAL")).thenReturn(partialPhysicalSku);
+
+        // 赠品2：申请赠送2件，实际库存0件 -> 应跳过不发
+        GoodsSku zeroPhysicalSku = new GoodsSku();
+        zeroPhysicalSku.setId("SKU_ZERO");
+        zeroPhysicalSku.setGoodsName("实物赠品B");
+        zeroPhysicalSku.setGoodsType(GoodsTypeEnum.PHYSICAL_GOODS.name());
+        zeroPhysicalSku.setQuantity(0);
+        zeroPhysicalSku.setCategoryPath("1,2,3");
+        when(goodsSkuService.getGoodsSkuByIdFromCache(any(List.class)))
+                .thenReturn(Arrays.asList(partialPhysicalSku, zeroPhysicalSku));
+
+        FullDiscountGiftItem item1 = new FullDiscountGiftItem();
+        item1.setSkuId("SKU_PARTIAL");
+        item1.setNum(5);
+        FullDiscountGiftItem item2 = new FullDiscountGiftItem();
+        item2.setSkuId("SKU_ZERO");
+        item2.setNum(2);
+
+        CartVO cartVO = new CartVO();
+        cartVO.setSn("P100");
+        cartVO.setGiftItemList(Arrays.asList(item1, item2));
+        when(cache.getString(any())).thenReturn(JSONUtil.toJsonStr(cartVO));
+
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setOrderSn("P100");
+        orderMessage.setNewStatus(OrderStatusEnum.PAID);
+
+        execute.orderChange(orderMessage);
+
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+        verify(orderService).save(orderCaptor.capture());
+        assertThat(orderCaptor.getValue().getGoodsNum()).isEqualTo(3);
+
+        ArgumentCaptor<List<OrderItem>> itemCaptor = ArgumentCaptor.forClass(List.class);
+        verify(orderItemService).saveBatch(itemCaptor.capture());
+        List<OrderItem> savedItems = itemCaptor.getValue();
+        assertThat(savedItems).hasSize(1);
+        assertThat(savedItems.get(0).getSkuId()).isEqualTo("SKU_PARTIAL");
+        assertThat(savedItems.get(0).getNum()).isEqualTo(3);
+    }
+
+    /**
+     * 验证若实物赠品在下单时已随主单落库为 OrderItem，支付事件触发时跳过生成独立的实物赠品子单，避免重复赠送。
+     */
+    @Test
+    void orderStatusChangeSkipsPhysicalGiftWhenAlreadyAttachedToOriginOrder() {
+        Order origin = originOrder();
+        origin.setOrderType(OrderTypeEnum.NORMAL.name());
+        when(orderService.getBySn("P100")).thenReturn(origin);
+
+        GoodsSku physicalSku = new GoodsSku();
+        physicalSku.setId("SKU_ATTACHED");
+        physicalSku.setGoodsName("已随单赠品");
+        physicalSku.setGoodsType(GoodsTypeEnum.PHYSICAL_GOODS.name());
+        physicalSku.setQuantity(10);
+        when(goodsSkuService.getGoodsSkuByIdFromCache(any(List.class)))
+                .thenReturn(List.of(physicalSku));
+
+        // 模拟主单已包含该赠品的 OrderItem（0元 + GIFT）
+        OrderItem attachedItem = new OrderItem();
+        attachedItem.setSkuId("SKU_ATTACHED");
+        attachedItem.setFlowPrice(0.0D);
+        attachedItem.setPromotionType("GIFT");
+        when(orderItemService.getByOrderSn("P100")).thenReturn(List.of(attachedItem));
+
+        FullDiscountGiftItem item = new FullDiscountGiftItem();
+        item.setSkuId("SKU_ATTACHED");
+        item.setNum(1);
+
+        CartVO cartVO = new CartVO();
+        cartVO.setSn("P100");
+        cartVO.setGiftItemList(List.of(item));
+        when(cache.getString(any())).thenReturn(JSONUtil.toJsonStr(cartVO));
+
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setOrderSn("P100");
+        orderMessage.setNewStatus(OrderStatusEnum.PAID);
+
+        execute.orderChange(orderMessage);
+
+        // 验证未调用 orderService.save() 创建独立赠品子单
+        verify(orderService, never()).save(any(Order.class));
     }
 
     /**

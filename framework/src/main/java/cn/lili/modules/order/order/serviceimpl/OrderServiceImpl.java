@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -29,12 +30,16 @@ import cn.lili.modules.appointment.entity.vo.AppointmentVerificationResultVO;
 import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.distribution.event.DistributionPaymentRewardsEvent;
 import cn.lili.modules.distribution.event.DistributionRecruitAutoApplyEvent;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.CardKeyService;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
+import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.*;
@@ -47,6 +52,7 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.Payment;
+import cn.lili.modules.promotion.entity.dto.FullDiscountGiftItem;
 import cn.lili.modules.promotion.service.GiftCardCashService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
@@ -205,6 +211,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private AppointmentService appointmentService;
 
+    @Lazy
+    @Autowired
+    private GoodsSkuService goodsSkuService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -247,6 +257,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         tradeDTO.setOrderVO(orderVOS);
         // 礼品卡按订单/订单项分摊并写入礼品卡使用记录（下沉至礼品卡服务）
         giftCardCashService.applyGiftCardUsageOnOrderCreate(tradeDTO, orders, orderItems);
+        // 满赠实物商品随主订单落库（0元赠品不参与礼品卡金额分摊）
+        appendPhysicalGiftOrderItems(orders, tradeDTO, orderItems);
         //批量保存订单
         this.saveBatch(orders);
         //批量保存 子订单
@@ -255,6 +267,130 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderLogService.saveBatch(orderLogs);
         // 预约单：创单写入订单扩展（时段 + 补充信息），支付成功再扣时段
         appointmentService.stashCheckoutForPayment(tradeDTO);
+    }
+
+    /**
+     * 满赠活动实物赠品随主订单落库处理
+     * <p>
+     * 关键业务规则：
+     * <ul>
+     *     <li>仅当主订单为普通实物订单（{@link OrderTypeEnum#NORMAL}）且购物车包含满赠实物赠品时随单落库。</li>
+     *     <li>赠品行构造实付金额为 0 的 {@link OrderItem}，不参与礼品卡或优惠券金额分摊。</li>
+     *     <li>赠品行售后状态设为 {@link OrderItemAfterSaleStatusEnum#EXPIRED}，防止单独发起退款；数量累加至主单 {@link Order#getGoodsNum()}。</li>
+     *     <li>跨形态赠品（如电子卡券）不随实物单落库，由支付后事件生成独立履约子单。</li>
+     * </ul>
+     *
+     * @param orders     待保存主订单列表
+     * @param tradeDTO   交易模型
+     * @param orderItems 待保存订单项列表
+     */
+    private void appendPhysicalGiftOrderItems(List<Order> orders, TradeDTO tradeDTO, List<OrderItem> orderItems) {
+        if (tradeDTO == null || CollUtil.isEmpty(tradeDTO.getCartList()) || CollUtil.isEmpty(orders)) {
+            return;
+        }
+        Map<String, Order> orderMap = orders.stream().collect(Collectors.toMap(Order::getSn, o -> o, (a, b) -> a));
+        Map<String, OrderVO> orderVOMap = tradeDTO.getOrderVO() == null ? Collections.emptyMap()
+                : tradeDTO.getOrderVO().stream().collect(Collectors.toMap(OrderVO::getSn, vo -> vo, (a, b) -> a));
+
+        for (CartVO cartVO : tradeDTO.getCartList()) {
+            Order order = orderMap.get(cartVO.getSn());
+            if (order == null || !OrderTypeEnum.NORMAL.name().equals(order.getOrderType())) {
+                continue;
+            }
+            Map<String, Integer> requestedQtyMap = new LinkedHashMap<>();
+            if (CollUtil.isNotEmpty(cartVO.getGiftItemList())) {
+                for (FullDiscountGiftItem giftItem : cartVO.getGiftItemList()) {
+                    if (giftItem != null && CharSequenceUtil.isNotBlank(giftItem.getSkuId())) {
+                        requestedQtyMap.merge(giftItem.getSkuId().trim(), giftItem.validNum(), Integer::sum);
+                    }
+                }
+            } else if (CollUtil.isNotEmpty(cartVO.getGiftList())) {
+                for (String skuId : cartVO.getGiftList()) {
+                    if (CharSequenceUtil.isNotBlank(skuId)) {
+                        requestedQtyMap.merge(skuId.trim(), 1, Integer::sum);
+                    }
+                }
+            }
+            if (requestedQtyMap.isEmpty()) {
+                continue;
+            }
+
+            List<GoodsSku> giftSkus = goodsSkuService.getGoodsSkuByIdFromCache(new ArrayList<>(requestedQtyMap.keySet()));
+            if (CollUtil.isEmpty(giftSkus)) {
+                continue;
+            }
+
+            OrderVO orderVO = orderVOMap.get(order.getSn());
+            int giftTotalNum = 0;
+
+            for (GoodsSku sku : giftSkus) {
+                if (sku == null || CharSequenceUtil.isBlank(sku.getId())) {
+                    continue;
+                }
+                boolean isPhysical = sku.getGoodsType() == null
+                        || GoodsTypeEnum.PHYSICAL_GOODS.name().equals(sku.getGoodsType());
+                if (!isPhysical) {
+                    continue;
+                }
+
+                int requested = requestedQtyMap.getOrDefault(sku.getId(), 1);
+                int available = sku.getQuantity() == null ? Integer.MAX_VALUE : Math.max(0, sku.getQuantity());
+                int actual = Math.min(requested, available);
+                if (actual <= 0) {
+                    log.warn("满赠实物赠品库存不足，随单落库跳过赠送，orderSn={} skuId={} requested={} available={}",
+                            order.getSn(), sku.getId(), requested, available);
+                    continue;
+                }
+
+                PriceDetailDTO giftPriceDetail = new PriceDetailDTO();
+                giftPriceDetail.setGoodsPrice(0D);
+                giftPriceDetail.setFlowPrice(0D);
+                giftPriceDetail.setDiscountPrice(0D);
+                giftPriceDetail.setGiftCardPrice(0D);
+
+                OrderItem giftOrderItem = new OrderItem();
+                BeanUtil.copyProperties(sku, giftOrderItem, "id", "sn");
+                BeanUtil.copyProperties(giftPriceDetail, giftOrderItem, "id");
+                giftOrderItem.setSn(SnowFlake.createStr("OI"));
+                giftOrderItem.setOrderSn(order.getSn());
+                giftOrderItem.setTradeSn(tradeDTO.getSn());
+                giftOrderItem.setImage(sku.getThumbnail());
+                giftOrderItem.setGoodsName(sku.getGoodsName());
+                giftOrderItem.setSkuId(sku.getId());
+                giftOrderItem.setNum(actual);
+                if (CharSequenceUtil.isNotBlank(sku.getCategoryPath())) {
+                    giftOrderItem.setCategoryId(sku.getCategoryPath().substring(
+                            sku.getCategoryPath().lastIndexOf(",") + 1
+                    ));
+                }
+                giftOrderItem.setGoodsPrice(sku.getPrice());
+                giftOrderItem.setUnitPrice(0D);
+                giftOrderItem.setFlowPrice(0D);
+                giftOrderItem.setSubTotal(0D);
+                giftOrderItem.setPromotionType("GIFT");
+                if (cartVO.getFullDiscount() != null && CharSequenceUtil.isNotBlank(cartVO.getFullDiscount().getId())) {
+                    giftOrderItem.setPromotionId(cartVO.getFullDiscount().getId());
+                }
+                giftOrderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.EXPIRED.name());
+                giftOrderItem.setCommentStatus(CommentStatusEnum.NEW.name());
+                giftOrderItem.setComplainStatus(OrderComplaintStatusEnum.NEW.name());
+                giftOrderItem.setPriceDetailDTO(giftPriceDetail);
+
+                orderItems.add(giftOrderItem);
+                if (orderVO != null && orderVO.getOrderItems() != null) {
+                    orderVO.getOrderItems().add(giftOrderItem);
+                }
+                giftTotalNum += actual;
+            }
+
+            if (giftTotalNum > 0) {
+                int baseNum = order.getGoodsNum() == null ? 0 : order.getGoodsNum();
+                order.setGoodsNum(baseNum + giftTotalNum);
+                if (orderVO != null) {
+                    orderVO.setGoodsNum(order.getGoodsNum());
+                }
+            }
+        }
     }
 
     @Override

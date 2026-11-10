@@ -2,8 +2,8 @@ package cn.lili.modules.order.cart.entity.vo;
 
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.FullDiscountGiftItem;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
-import cn.lili.mybatis.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 /**
  * 购物车展示VO
@@ -40,6 +39,9 @@ public class CartVO extends CartBase {
     @Schema(description = "满优惠活动")
     private FullDiscountVO fullDiscount;
 
+    @Schema(description = "当前店铺参与的满优惠活动列表")
+    private List<FullDiscountVO> fullDiscountList;
+
     @Schema(description = "满优惠促销的商品")
     private List<String> fullDiscountSkuIds;
 
@@ -49,11 +51,14 @@ public class CartVO extends CartBase {
     @Schema(description = "使用的优惠券列表")
     private List<MemberCoupon> couponList;
 
-    @Schema(description = "使用的优惠券列表")
+    @Schema(description = "可领取的优惠券列表")
     private List<CouponVO> canReceiveCoupon;
 
     @Schema(description = "赠品列表")
     private List<String> giftList;
+
+    @Schema(description = "满赠活动命中的赠品明细列表（含赠送件数）")
+    private List<FullDiscountGiftItem> giftItemList;
 
     @Schema(description = "赠送优惠券列表")
     private List<String> giftCouponList;
@@ -67,12 +72,9 @@ public class CartVO extends CartBase {
     @Schema(description = "购物车商品数量")
     private Integer goodsNum;
 
-    @Schema(description = "购物车商品数量")
+    @Schema(description = "购物车备注")
     private String remark;
 
-    /**
-     * @see DeliveryMethodEnum
-     */
     @Schema(description = "配送方式")
     private String deliveryMethod;
 
@@ -86,6 +88,8 @@ public class CartVO extends CartBase {
         this.setSkuList(new ArrayList<>());
         this.setCouponList(new ArrayList<>());
         this.setGiftList(new ArrayList<>());
+        this.setGiftItemList(new ArrayList<>());
+        this.setFullDiscountList(new ArrayList<>());
         this.setGiftCouponList(new ArrayList<>());
         this.setCanReceiveCoupon(new ArrayList<>());
         this.setChecked(false);
@@ -103,11 +107,10 @@ public class CartVO extends CartBase {
         }
     }
 
-
     /**
      * 过滤购物车中已选择的sku
      *
-     * @return
+     * @return 已勾选的购物车SKU列表
      */
     public List<CartSkuVO> getCheckedSkuList() {
         if (skuList != null && !skuList.isEmpty()) {
