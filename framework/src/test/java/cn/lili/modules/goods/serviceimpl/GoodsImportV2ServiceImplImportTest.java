@@ -28,6 +28,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -259,6 +260,36 @@ class GoodsImportV2ServiceImplImportTest {
         assertThatThrownBy(() -> service.importGoods(file))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("xlsx");
+        verifyNoInteractions(goodsService);
+    }
+
+    /**
+     * 验证内容损坏的 xlsx（解析期抛 RuntimeException）被包装为友好的 ServiceException，
+     * 提示商家使用下载的模板，而不是暴露 POI 内部异常。
+     */
+    @Test
+    void corruptXlsxContentWrappedAsFriendlyServiceException() {
+        MockMultipartFile file = new MockMultipartFile("files", "goods.xlsx", null, new byte[0]) {
+            @Override
+            public InputStream getInputStream() {
+                return new InputStream() {
+                    private final byte[] head = {'P', 'K', 3, 4};
+                    private int pos = 0;
+
+                    @Override
+                    public int read() {
+                        if (pos < head.length) {
+                            return head[pos++] & 0xff;
+                        }
+                        throw new IllegalStateException("模拟损坏的xlsx内容");
+                    }
+                };
+            }
+        };
+
+        assertThatThrownBy(() -> service.importGoods(file))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("模板");
         verifyNoInteractions(goodsService);
     }
 

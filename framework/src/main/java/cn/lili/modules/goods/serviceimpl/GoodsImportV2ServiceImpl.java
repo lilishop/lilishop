@@ -4,25 +4,39 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.GoodsUnit;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vo.GoodsImportResultVO;
 import cn.lili.modules.goods.entity.vos.CategoryBrandVO;
+import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
+import cn.lili.modules.goods.service.BrandService;
 import cn.lili.modules.goods.service.CategoryBrandService;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsImportV2Service;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsUnitService;
 import cn.lili.modules.goods.service.StoreGoodsLabelService;
+import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
+import cn.lili.modules.store.service.StoreDetailService;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +45,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +62,8 @@ import java.util.function.Function;
  * 与组内两级校验（行级 SKU 字段 + 商品级字段，含分类/品牌/运费模板/计量单位/店铺分类的归属校验），
  * 商品级字段按组内继承规则以首行为准；校验通过的组组装为 GoodsOperationDTO 逐个调用
  * goodsService.addGoods 落库（addGoods 自身事务即每商品独立事务，单组失败记 failList 后继续，
- * 实现部分成功）；downloadTemplate 主流程待后续任务补全。
+ * 实现部分成功）；downloadTemplate 用 XSSF 生成 .xlsx 模板（第 1 行合并说明、第 2 行 20 列表头、
+ * 隐藏 sheet + 命名区域为平台分类/店铺分类/品牌/运费模板/计量单位列提供 id-名称 下拉）。
  *
  * @author Bulbasaur
  * @since 2026-10-20
@@ -67,11 +83,34 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
     private StoreGoodsLabelService storeGoodsLabelService;
     @Autowired
     private GoodsService goodsService;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     /**
      * 模板列数（A-T 共 20 列）
      */
     static final int COLUMN_COUNT = 20;
+
+    /**
+     * 模板第 2 行的 20 列表头文案，顺序与 {@link Row} 字段（A-T 列）一一对应，列错位会导致整列解析错位
+     */
+    static final String[] TEMPLATE_HEADERS = {
+            "商品序号", "商品名称", "平台分类", "店铺分类", "品牌",
+            "运费模板", "计量单位", "商品图片", "规格1名称", "规格1值",
+            "规格2名称", "规格2值", "规格3名称", "规格3值", "SKU编码",
+            "销售价", "成本价", "库存", "重量", "预警库存"};
+
+    /**
+     * 模板第 1 行（合并 A1:T1）的填写说明：分组规则、商品级字段只填首行、名称逗号与图片素材限制
+     */
+    static final String TEMPLATE_INSTRUCTION =
+            "填写说明：1.一行一个SKU、同商品填相同序号（续行商品序号留空自动归属上一商品）；"
+                    + "2.商品级字段只填首行（商品名称、平台分类、店铺分类、品牌、运费模板、计量单位、商品图片、规格名称），续行留空；"
+                    + "3.商品名称勿含英文逗号；"
+                    + "4.商品图片须先上传素材中心，再复制图片URL填写，多个用英文逗号分隔、首张为主图；"
+                    + "5.平台分类、店铺分类、品牌、运费模板、计量单位可从下拉选择（id-名称格式）。";
 
     /**
      * 数据起始行下标（从 0 开始，跳过第 1 行说明与第 2 行表头）
@@ -99,6 +138,9 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
             rows = parseRows(in);
         } catch (IOException e) {
             throw new ServiceException("商品导入文件读取失败：" + e.getMessage());
+        } catch (RuntimeException e) {
+            // POI 对损坏/伪装的 xlsx（如改后缀的非 Excel 文件）会抛 RuntimeException，收敛为友好提示
+            throw new ServiceException("商品导入文件解析失败，请使用下载的模板重新填写后导入");
         }
         if (rows.size() > MAX_DATA_ROWS) {
             throw new ServiceException("单次最多导入" + MAX_DATA_ROWS + "行数据，当前文件共" + rows.size() + "行，请拆分后重试");
@@ -297,7 +339,152 @@ public class GoodsImportV2ServiceImpl implements GoodsImportV2Service {
 
     @Override
     public void downloadTemplate(HttpServletResponse response) {
-        throw new UnsupportedOperationException("商品批量导入v2模板下载将在后续任务实现");
+        String storeId = currentStoreId();
+        if (storeId == null) {
+            throw new ServiceException("当前登录用户不是商家，无法下载商品导入模板");
+        }
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("导入模板");
+            XSSFRow instructionRow = sheet.createRow(0);
+            instructionRow.createCell(0).setCellValue(TEMPLATE_INSTRUCTION);
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, COLUMN_COUNT - 1));
+            XSSFRow headerRow = sheet.createRow(1);
+            for (int i = 0; i < TEMPLATE_HEADERS.length; i++) {
+                headerRow.createCell(i).setCellValue(TEMPLATE_HEADERS[i]);
+                sheet.setColumnWidth(i, 4000);
+            }
+            sheet.setColumnWidth(1, 8000);
+            sheet.setColumnWidth(7, 8000);
+            addDropdown(workbook, sheet, "hiddenCategory", categoryOptions(storeId), 2);
+            addDropdown(workbook, sheet, "hiddenStoreCategory", storeCategoryOptions(storeId), 3);
+            addDropdown(workbook, sheet, "hiddenBrand", brandOptions(), 4);
+            addDropdown(workbook, sheet, "hiddenFreightTemplate", freightTemplateOptions(storeId), 5);
+            addDropdown(workbook, sheet, "hiddenGoodsUnit", goodsUnitOptions(), 6);
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition",
+                    "attachment;filename=" + URLEncoder.encode("商品导入模板.xlsx", "UTF-8"));
+            workbook.write(response.getOutputStream());
+        } catch (IOException e) {
+            throw new ServiceException("商品导入模板生成失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 收集平台分类下拉数据源：按店铺经营类目取分类树，遍历到第三级叶子，拼为「分类ID-名称」。
+     *
+     * @param storeId 当前店铺 ID
+     * @return 叶子三级分类的 id-名称 列表；店铺经营类目未配置时为空列表
+     */
+    private List<String> categoryOptions(String storeId) {
+        List<String> options = new ArrayList<>();
+        StoreDetail storeDetail = storeDetailService.getStoreDetail(storeId);
+        if (storeDetail == null || storeDetail.getGoodsManagementCategory() == null
+                || storeDetail.getGoodsManagementCategory().isEmpty()) {
+            return options;
+        }
+        List<CategoryVO> topCategories =
+                categoryService.getStoreCategory(storeDetail.getGoodsManagementCategory().split(","));
+        if (topCategories == null) {
+            return options;
+        }
+        for (CategoryVO top : topCategories) {
+            if (top.getChildren() == null) {
+                continue;
+            }
+            for (CategoryVO second : top.getChildren()) {
+                if (second.getChildren() == null) {
+                    continue;
+                }
+                for (CategoryVO leaf : second.getChildren()) {
+                    options.add(leaf.getId() + "-" + leaf.getName());
+                }
+            }
+        }
+        return options;
+    }
+
+    /**
+     * 收集店铺分类下拉数据源（本店店铺分类，「ID-名称」）。
+     *
+     * @param storeId 当前店铺 ID
+     * @return 店铺分类的 id-名称 列表
+     */
+    private List<String> storeCategoryOptions(String storeId) {
+        List<String> options = new ArrayList<>();
+        for (StoreGoodsLabelVO label : storeGoodsLabelService.listByStoreId(storeId)) {
+            options.add(label.getId() + "-" + label.getLabelName());
+        }
+        return options;
+    }
+
+    /**
+     * 收集品牌下拉数据源：静态模板无法按所选分类联动，放全量品牌「ID-名称」供选择，
+     * 品牌与分类的归属关系由导入校验层拦截。
+     *
+     * @return 全量品牌的 id-名称 列表
+     */
+    private List<String> brandOptions() {
+        List<String> options = new ArrayList<>();
+        for (Brand brand : brandService.listNotDeleted()) {
+            options.add(brand.getId() + "-" + brand.getName());
+        }
+        return options;
+    }
+
+    /**
+     * 收集运费模板下拉数据源（本店运费模板，「ID-名称」）。
+     *
+     * @param storeId 当前店铺 ID
+     * @return 运费模板的 id-名称 列表
+     */
+    private List<String> freightTemplateOptions(String storeId) {
+        List<String> options = new ArrayList<>();
+        for (FreightTemplateVO template : freightTemplateService.getFreightTemplateList(storeId)) {
+            options.add(template.getId() + "-" + template.getName());
+        }
+        return options;
+    }
+
+    /**
+     * 收集计量单位下拉数据源（平台计量单位，「ID-名称」）。
+     *
+     * @return 计量单位的 id-名称 列表
+     */
+    private List<String> goodsUnitOptions() {
+        List<String> options = new ArrayList<>();
+        for (GoodsUnit goodsUnit : goodsUnitService.list()) {
+            options.add(goodsUnit.getId() + "-" + goodsUnit.getName());
+        }
+        return options;
+    }
+
+    /**
+     * 为模板主 sheet 的某一列添加下拉：候选项写入隐藏 sheet 的 A 列，通过命名区域引用，
+     * 再用 XSSFDataValidation 绑定到数据行区域（第 3 行起，覆盖数据行上限）。
+     *
+     * @param workbook       工作簿
+     * @param mainSheet      模板主 sheet
+     * @param hiddenSheetName 隐藏 sheet 名（同时作为命名区域名，仅用 ASCII 避免公式转义）
+     * @param options        下拉候选项（id-名称）
+     * @param columnIndex    主 sheet 目标列下标（从 0 开始）
+     */
+    private static void addDropdown(XSSFWorkbook workbook, XSSFSheet mainSheet, String hiddenSheetName,
+                                    List<String> options, int columnIndex) {
+        XSSFSheet hidden = workbook.createSheet(hiddenSheetName);
+        for (int i = 0; i < options.size(); i++) {
+            hidden.createRow(i).createCell(0).setCellValue(options.get(i));
+        }
+        Name name = workbook.createName();
+        name.setNameName(hiddenSheetName);
+        name.setRefersToFormula(hiddenSheetName + "!$A$1:$A$" + Math.max(options.size(), 1));
+        workbook.setSheetHidden(workbook.getSheetIndex(hidden), true);
+        XSSFDataValidationHelper helper = new XSSFDataValidationHelper(mainSheet);
+        DataValidationConstraint constraint = helper.createFormulaListConstraint(hiddenSheetName);
+        CellRangeAddressList regions = new CellRangeAddressList(
+                DATA_START_ROW_INDEX, DATA_START_ROW_INDEX + MAX_DATA_ROWS - 1, columnIndex, columnIndex);
+        XSSFDataValidation validation = (XSSFDataValidation) helper.createValidation(constraint, regions);
+        validation.setShowErrorBox(false);
+        mainSheet.addValidationData(validation);
     }
 
     /**
