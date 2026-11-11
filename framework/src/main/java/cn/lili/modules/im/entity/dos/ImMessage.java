@@ -28,36 +28,23 @@ public class ImMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 发送者
-     */
+    @Schema(description = "发送者")
     private String fromUser;
 
-    /**
-     * 接收者
-     */
+    @Schema(description = "接收者")
     private String toUser;
 
-    /**
-     * 已阅
-     */
+    @Schema(description = "已读状态")
     private Boolean isRead;
 
-    /**
-     * 消息类型
-     */
+    @Schema(description = "消息类型")
     private MessageTypeEnum messageType;
 
-    /**
-     * 聊天id
-     */
+    @Schema(description = "聊天会话ID")
     private String talkId;
 
-    /**
-     * 消息实体
-     */
+    @Schema(description = "消息内容")
     private String text;
-
 
     public ImMessage(MessageOperation messageOperation) {
         this.setFromUser(messageOperation.getFrom());
