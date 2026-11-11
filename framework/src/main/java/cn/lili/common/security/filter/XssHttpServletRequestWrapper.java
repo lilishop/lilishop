@@ -1,7 +1,6 @@
 package cn.lili.common.security.filter;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
@@ -49,6 +48,19 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     //带有超链接的标签
     private static final String[] allowAttributes = {"style", "src", "href", "target", "width", "height"};
+
+    /**
+     * OWASP HTML 安全清洗策略（不可变且线程安全，作为静态常量全局单例复用，避免每次请求重复构建）
+     */
+    private static final PolicyFactory POLICY = new HtmlPolicyBuilder()
+            .allowStandardUrlProtocols()
+            // 所有允许的标签
+            .allowElements(allowedTags)
+            // 内容标签转化为div
+            .allowElements((elementName, attributes) -> "div", needTransformTags)
+            .allowAttributes(allowAttributes).onElements(linkTags)
+            .allowStyling()
+            .toFactory();
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -213,7 +225,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             }
 
             //将json字符串转换为字节
-            final ByteArrayInputStream bis = new ByteArrayInputStream(body.toString().getBytes());
+            final ByteArrayInputStream bis = new ByteArrayInputStream(body.toString().getBytes(StandardCharsets.UTF_8));
             //实现接口
             return new ServletInputStream() {
                 @Override
@@ -255,22 +267,19 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     }
 
+    /**
+     * 对输入内容执行 XSS 安全清洗。
+     * 直接返回经 OWASP 策略清洗后的结果，禁止二次调用 HtmlUtil.unescape 进行反转义，
+     * 避免攻击者通过 HTML 实体编码绕过过滤器并在反转义后还原出恶意可执行脚本。
+     *
+     * @param value 原始输入字符串
+     * @return 清洗后的安全字符串
+     */
     private String cleanXSS(String value) {
         if (value != null) {
-            // 自定义策略
-            PolicyFactory policy = new HtmlPolicyBuilder()
-                    .allowStandardUrlProtocols()
-                    //所有允许的标签
-                    .allowElements(allowedTags)
-                    //内容标签转化为div
-                    .allowElements((elementName, attributes) -> "div", needTransformTags)
-                    .allowAttributes(allowAttributes).onElements(linkTags)
-                    .allowStyling()
-                    .toFactory();
-            // basic prepackaged policies for links, tables, integers, images, styles, blocks
-            value = policy.sanitize(value);
+            return POLICY.sanitize(value);
         }
-        return HtmlUtil.unescape(value);
+        return null;
     }
 
     /**

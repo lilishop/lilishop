@@ -75,7 +75,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -493,30 +493,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             if (params.getCreateTimeEnd() != null) {
                 w.le("cb.create_time", params.getCreateTimeEnd());
             }
-            boolean needCredentialExists = CharSequenceUtil.isNotBlank(params.getCardNo())
-                    || params.getExpireTimeStart() != null
-                    || params.getExpireTimeEnd() != null;
-            if (needCredentialExists) {
-                StringBuilder existsSql = new StringBuilder();
-                existsSql.append("SELECT 1 FROM li_gift_card_cash_credential c ")
-                        .append("WHERE c.delete_flag = 0 ")
-                        .append("AND c.create_batch_id = cb.id");
-                if (CharSequenceUtil.isNotBlank(params.getCardNo())) {
-                    String cardNo = params.getCardNo().trim().replace("'", "''");
-                    existsSql.append(" AND c.card_no LIKE '%").append(cardNo).append("%'");
-                }
-                if (params.getExpireTimeStart() != null) {
-                    existsSql.append(" AND c.expire_time >= '")
-                            .append(formatDateTimeForSql(params.getExpireTimeStart()))
-                            .append("'");
-                }
-                if (params.getExpireTimeEnd() != null) {
-                    existsSql.append(" AND c.expire_time <= '")
-                            .append(formatDateTimeForSql(params.getExpireTimeEnd()))
-                            .append("'");
-                }
-                w.exists(existsSql.toString());
-            }
+            applyCredentialExists(w, "c.create_batch_id = cb.id",
+                    params.getCardNo(), params.getExpireTimeStart(), params.getExpireTimeEnd());
         }
         w.orderByDesc("cb.create_time");
         return createBatchMapper.pageByParams(mpPage, w);
@@ -607,28 +585,8 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
             if (params.getIssueTimeEnd() != null) {
                 w.le("ib.create_time", params.getIssueTimeEnd());
             }
-            boolean needCredentialExists = CharSequenceUtil.isNotBlank(params.getCardNo())
-                    || params.getExpireTimeStart() != null
-                    || params.getExpireTimeEnd() != null;
-            if (needCredentialExists) {
-                StringBuilder existsSql = new StringBuilder();
-                existsSql.append("SELECT 1 FROM li_gift_card_cash_credential c ")
-                        .append("WHERE c.delete_flag = 0 ")
-                        .append("AND c.issue_batch_id = ib.id");
-                if (CharSequenceUtil.isNotBlank(params.getCardNo())) {
-                    String cardNo = params.getCardNo().trim().replace("'", "''");
-                    existsSql.append(" AND c.card_no LIKE '%").append(cardNo).append("%'");
-                }
-                if (params.getExpireTimeStart() != null) {
-                    String start = formatDateTimeForSql(params.getExpireTimeStart());
-                    existsSql.append(" AND c.expire_time >= '").append(start).append("'");
-                }
-                if (params.getExpireTimeEnd() != null) {
-                    String end = formatDateTimeForSql(params.getExpireTimeEnd());
-                    existsSql.append(" AND c.expire_time <= '").append(end).append("'");
-                }
-                w.exists(existsSql.toString());
-            }
+            applyCredentialExists(w, "c.issue_batch_id = ib.id",
+                    params.getCardNo(), params.getExpireTimeStart(), params.getExpireTimeEnd());
         }
         w.orderByDesc("ib.create_time");
         return issueBatchMapper.pageByParams(mpPage, w);
@@ -1479,8 +1437,42 @@ public class GiftCardCashServiceImpl implements GiftCardCashService {
         return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private String formatDateTimeForSql(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    /**
+     * 为批次分页查询按卡密凭证条件拼接参数化 EXISTS 子查询，避免字符串直接拼接引入 SQL 注入隐患。
+     *
+     * @param wrapper 批次查询包装器
+     * @param joinCondition 关联字段条件（例如 "c.create_batch_id = cb.id" 或 "c.issue_batch_id = ib.id"）
+     * @param cardNo 卡号（支持模糊匹配）
+     * @param expireTimeStart 过期时间起始
+     * @param expireTimeEnd 过期时间截止
+     */
+    private <T> void applyCredentialExists(QueryWrapper<T> wrapper, String joinCondition,
+                                           String cardNo, Date expireTimeStart, Date expireTimeEnd) {
+        boolean needCredentialExists = CharSequenceUtil.isNotBlank(cardNo)
+                || expireTimeStart != null
+                || expireTimeEnd != null;
+        if (!needCredentialExists) {
+            return;
+        }
+        List<Object> sqlParams = new ArrayList<>();
+        StringBuilder existsSql = new StringBuilder();
+        existsSql.append("EXISTS (SELECT 1 FROM li_gift_card_cash_credential c ")
+                .append("WHERE c.delete_flag = 0 AND ")
+                .append(joinCondition);
+        if (CharSequenceUtil.isNotBlank(cardNo)) {
+            existsSql.append(" AND c.card_no LIKE {").append(sqlParams.size()).append("}");
+            sqlParams.add("%" + cardNo.trim() + "%");
+        }
+        if (expireTimeStart != null) {
+            existsSql.append(" AND c.expire_time >= {").append(sqlParams.size()).append("}");
+            sqlParams.add(expireTimeStart);
+        }
+        if (expireTimeEnd != null) {
+            existsSql.append(" AND c.expire_time <= {").append(sqlParams.size()).append("}");
+            sqlParams.add(expireTimeEnd);
+        }
+        existsSql.append(")");
+        wrapper.apply(existsSql.toString(), sqlParams.toArray());
     }
 
     /**
