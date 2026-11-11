@@ -17,7 +17,11 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.PointSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.cache.Cache;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
  * @author Bulbasaur
  * @since 2020-07-03 11:20
  */
+@Slf4j
 @Service
 public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {
 
@@ -35,11 +40,10 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     private SettingService settingService;
     @Autowired
     private MemberService memberService;
-    /**
-     * 订单
-     */
     @Autowired
     private OrderService orderService;
+    @Autowired(required = false)
+    private Cache cache;
 
     /**
      * 客户注册赠送积分
@@ -78,17 +82,24 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         switch (orderMessage.getNewStatus()) {
             case CANCELLED: {
                 Order order = orderService.getBySn(orderMessage.getOrderSn());
-                Long point = order.getPriceDetailDTO().getPayPoint();
-                if (point <= 0) {
+                if (order == null || order.getPriceDetailDTO() == null) {
                     return;
                 }
-                //如果未付款，则不去要退回相关代码执行
-                if (order.getPayStatus().equals(PayStatusEnum.UNPAID.name())) {
+                Long point = order.getPriceDetailDTO().getPayPoint();
+                if (point == null || point <= 0 || CharSequenceUtil.isBlank(order.getMemberId())) {
+                    return;
+                }
+                String cacheKey = "order:point:refund:" + order.getSn();
+                if (cache != null && Boolean.TRUE.equals(cache.hasKey(cacheKey))) {
+                    log.info("订单[{}]取消积分已返还，跳过重复处理", order.getSn());
                     return;
                 }
                 String content = "订单取消，积分返还：" + point + "分";
-                //赠送客户积分
-                memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), order.getMemberId(), content, PointSourceEnum.ORDER.name());
+                // 归还客户积分（下单时已扣减，取消时无论是否付款均应返还）
+                Boolean success = memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), order.getMemberId(), content, PointSourceEnum.ORDER.name());
+                if (Boolean.TRUE.equals(success) && cache != null) {
+                    cache.put(cacheKey, 1, 7L, TimeUnit.DAYS);
+                }
                 break;
             }
             default:

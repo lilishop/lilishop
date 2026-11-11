@@ -5,9 +5,14 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.distribution.event.DistributionPaymentRewardsEvent;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.StoreFlowService;
+import cn.lili.modules.promotion.service.GiftCardCashService;
+import java.math.BigDecimal;
+import static org.mockito.ArgumentMatchers.eq;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
@@ -57,6 +62,7 @@ class OrderServiceImplPayOrderTest {
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Order.class);
+        TableInfoHelper.initTableInfo(assistant, OrderItem.class);
     }
 
     /**
@@ -76,6 +82,10 @@ class OrderServiceImplPayOrderTest {
         ReflectionTestUtils.setField(orderService, "applicationEventPublisher", applicationEventPublisher);
         ReflectionTestUtils.setField(orderService, "rocketmqCustomProperties", rocketmqCustomProperties);
 
+        OrderItemService orderItemService = mock(OrderItemService.class);
+        GiftCardCashService giftCardCashService = mock(GiftCardCashService.class);
+        ReflectionTestUtils.setField(orderService, "orderItemService", orderItemService);
+        ReflectionTestUtils.setField(orderService, "giftCardCashService", giftCardCashService);
         when(rocketmqCustomProperties.getOrderTopic()).thenReturn("order-topic");
         when(orderLogService.save(any(OrderLog.class))).thenReturn(true);
         doReturn(true).when(orderService).updateById(any(Order.class));
@@ -169,6 +179,34 @@ class OrderServiceImplPayOrderTest {
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.PAID.name());
         // 验证未调用任何取消更新
         verify(orderService, never()).update(any());
+    }
+
+    /**
+     * 超时关单（未付款，refundMoney=false）必须执行礼品卡回卡并发送订单取消事件。
+     */
+    @Test
+    void systemCancelUnpaidOrderRecoversGiftCardAndPublishesCancelEvent() {
+        Order order = unpaidOrder("O004");
+        order.setPayStatus(PayStatusEnum.UNPAID.name());
+        order.setOrderStatus(OrderStatusEnum.UNPAID.name());
+        doReturn(order).when(orderService).getBySn("O004");
+
+        orderService.systemCancel("O004", "超时未支付自动取消", false);
+
+        // 验证礼品卡回卡被调用（orderAmount为0表示未付款回卡）
+        GiftCardCashService giftCardCashService = (GiftCardCashService) ReflectionTestUtils.getField(orderService, "giftCardCashService");
+        verify(giftCardCashService).resolveChannelRefundAfterGiftCard(eq("O004"), eq(BigDecimal.ZERO));
+
+        // 验证状态变更为已取消
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.CANCELLED.name());
+
+        // 验证取消事件被广播发布（驱动优惠券与积分恢复）
+        ArgumentCaptor<ApplicationEvent> captor = ArgumentCaptor.forClass(ApplicationEvent.class);
+        verify(applicationEventPublisher).publishEvent(captor.capture());
+        ApplicationEvent event = captor.getValue();
+        assertThat(event).isInstanceOf(TransactionCommitSendMQEvent.class);
+        TransactionCommitSendMQEvent mqEvent = (TransactionCommitSendMQEvent) event;
+        assertThat(mqEvent.getTag()).isEqualTo(OrderTagsEnum.STATUS_CHANGE.name());
     }
 
     private static Order unpaidOrder(String sn) {

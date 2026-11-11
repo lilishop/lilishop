@@ -631,13 +631,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
             orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
         }
-        if (Boolean.TRUE.equals(refundMoney) || pickupCardOrderService.isPickupOrder(order.getSn())) {
-            // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
+        // 订单取消退款/回退：礼品卡先回卡；若已付款且允许退款，则剩余现金原路退支付渠道
+        if (Boolean.TRUE.equals(refundMoney) || !PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             refundCanceledOrderBySplit(order, reason);
-            //生成店铺退款流水
-            storeFlowService.orderCancel(orderSn);
-            orderStatusMessage(order);
         }
+        // 生成店铺退款流水（仅已支付订单或提货订单需要记录）
+        if (PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
+            storeFlowService.orderCancel(orderSn);
+        }
+        // 发送订单状态变更通知（无论是否已支付，只要关单成功均广播取消事件，驱动优惠券退还、积分退还、库存回滚等）
+        orderStatusMessage(order);
     }
 
     /**

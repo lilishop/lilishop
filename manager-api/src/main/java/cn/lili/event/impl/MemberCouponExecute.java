@@ -55,6 +55,9 @@ public class MemberCouponExecute implements OrderStatusChangeEvent, AfterSaleSta
      */
     private void refundCoupon(String orderSn) {
         Order order = orderService.getBySn(orderSn);
+        if (order == null) {
+            return;
+        }
         if (CharSequenceUtil.isNotEmpty(order.getUseStoreMemberCouponIds())) {
             memberCouponService.recoveryMemberCoupon(ListUtil.toList(order.getUseStoreMemberCouponIds().split(",")));
         }
