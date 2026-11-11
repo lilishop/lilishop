@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.lili.modules.wxchannels.entity.dos.WxChannelGoods;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class WxChannelGoodsSearchParams extends cn.lili.common.vo.PageVO {
 
     @Schema(description = "商品名称")

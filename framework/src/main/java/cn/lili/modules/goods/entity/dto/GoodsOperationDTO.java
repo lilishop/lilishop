@@ -102,6 +102,7 @@ public class GoodsOperationDTO implements Serializable {
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
     @Schema(description = "销售模式（兼容字段，固定零售）", allowableValues = "RETAIL")
+    @Builder.Default
     private String salesModel = GoodsSalesModeEnum.RETAIL.name();
 
     @Schema(description = "是否有规格", hidden = true)

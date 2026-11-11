@@ -3,6 +3,7 @@ package cn.lili.modules.live.entity.vos;
 import cn.lili.modules.live.entity.dos.LiveRoom;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
  * @since 2022/6/2114:46
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Schema(title = "直播间")
 public class LiveRoomVO extends LiveRoom {

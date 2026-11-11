@@ -6,8 +6,10 @@ import cn.lili.modules.wxchannels.entity.dos.WxChannelRefund;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class WxChannelRefundSearchParams extends PageVO {
 
     @Schema(description = "退单编号")

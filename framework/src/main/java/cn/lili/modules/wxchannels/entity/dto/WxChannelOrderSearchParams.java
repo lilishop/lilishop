@@ -6,8 +6,10 @@ import cn.lili.modules.wxchannels.entity.dos.WxChannelOrder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class WxChannelOrderSearchParams extends PageVO {
 
     @Schema(description = "订单编号")

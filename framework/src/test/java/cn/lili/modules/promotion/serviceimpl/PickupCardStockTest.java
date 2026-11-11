@@ -165,7 +165,7 @@ class PickupCardStockTest {
     /** 取消处理记录写入失败时抛错，事务回滚回调必须撤回 Redis 中已补回的库存。 */
     @Test
     void failedCancellationMarkerCompensatesRedisOnRollback() {
-        when(records.selectOne(any())).thenReturn(new OrderGiftCardRecord(), null);
+        when(records.selectOne(any())).thenReturn(new OrderGiftCardRecord()).thenReturn(null);
         when(records.insert(any(OrderGiftCardRecord.class))).thenReturn(0);
         when(skus.update(any(com.baomidou.mybatisplus.core.conditions.Wrapper.class))).thenReturn(true);
         when(redis.execute(eq(script), anyList(), any(Object[].class))).thenReturn(true);

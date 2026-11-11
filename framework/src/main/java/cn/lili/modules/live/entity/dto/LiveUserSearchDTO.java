@@ -7,12 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author chc
  * @since 2022/6/2114:46
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class LiveUserSearchDTO extends PageVO {
     @Schema(title = "直播间ID")
     private String liveRoomId;

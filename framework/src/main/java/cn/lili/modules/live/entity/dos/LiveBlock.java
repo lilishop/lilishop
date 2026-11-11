@@ -4,6 +4,7 @@ import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
  * @since 2022/6/2114:46
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Schema(title = "直播黑名单")
 @TableName("li_live_block")

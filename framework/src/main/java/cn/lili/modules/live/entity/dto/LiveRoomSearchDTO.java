@@ -5,12 +5,14 @@ import cn.lili.modules.live.entity.dos.LiveRoom;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author chc
  * @since 2022/6/2114:46
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class LiveRoomSearchDTO extends PageVO {
 
     @Schema(title = "直播id")

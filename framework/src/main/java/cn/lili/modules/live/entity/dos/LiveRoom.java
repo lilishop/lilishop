@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -15,6 +16,7 @@ import java.util.Date;
  * @since 2022/6/2114:46
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Schema(title = "直播间")
 @TableName("li_live_room")

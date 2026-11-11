@@ -4,6 +4,7 @@ import cn.lili.modules.goods.entity.dos.CategoryParameter;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @since 2020-02-23 9:14:33
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(description = "商品参数DTO")
 public class GoodsParamsDTO extends Parameters {
 
