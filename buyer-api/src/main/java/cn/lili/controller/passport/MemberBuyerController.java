@@ -179,24 +179,34 @@ public class MemberBuyerController {
         }
     }
 
+    /**
+     * 当前登录用户绑定手机号
+     *
+     * @param mobile 新手机号
+     * @param code 短信验证码
+     * @param uuid 客户端UUID
+     * @return 绑定结果
+     */
     @Operation(summary = "绑定手机号")
     @Parameters({
-            @Parameter(name = "username", description = "用户名", required = true),
             @Parameter(name = "mobile", description = "手机号", required = true),
             @Parameter(name = "code", description = "验证码", required = true)
     })
     @PostMapping("/bindMobile")
-    public ResultMessage<Object> bindMobile(@NotNull(message = "用户名不能为空") @RequestParam String username,
-                                            @NotNull(message = "手机号为空") @RequestParam String mobile,
+    public ResultMessage<Object> bindMobile(@NotNull(message = "手机号为空") @RequestParam String mobile,
                                             @NotNull(message = "验证码为空") @RequestParam String code,
                                             @RequestHeader String uuid) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         if (smsUtil.verifyCode(mobile, VerificationEnums.BIND_MOBILE, uuid, code)) {
-            Member member = memberService.findByUsername(username);
-            Member memberByMobile = memberService.findByMobile(mobile);
+            Member member = memberService.getById(currentUser.getId());
             if (member == null) {
                 throw new ServiceException(ResultCode.USER_NOT_EXIST);
             }
-            if(memberByMobile != null){
+            Member memberByMobile = memberService.findByMobile(mobile);
+            if (memberByMobile != null) {
                 throw new ServiceException(ResultCode.USER_MOBILE_REPEATABLE_ERROR);
             }
             return ResultUtil.data(memberService.changeMobile(member.getId(), mobile));

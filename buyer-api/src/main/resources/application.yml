@@ -119,7 +119,6 @@ ignored:
     - /buyer/passport/member/session_login/**   # 会话登录状态校验
     - /buyer/passport/member/app_scanner        # App 扫码登录扫描确认
     - /buyer/passport/member/app_confirm        # App 扫码确认登录
-    - /buyer/passport/member/bindMobile         # 绑定手机号
     - /buyer/passport/member/logout             # 登出退出登录
     - /buyer/promotion/pintuan/**               # 拼团营销活动浏览
     - /buyer/promotion/seckill/**               # 秒杀营销活动浏览
