@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 店铺端,分类绑定参数组管理接口
+ * 店铺端,坐席设置管理接口
  *
  * @author pikachu
  * @since 2020-02-18 15:18:56

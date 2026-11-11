@@ -4,6 +4,7 @@ import cn.lili.mybatis.BaseTenantEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,8 +20,11 @@ import lombok.NoArgsConstructor;
 @TableName("li_seat")
 @Schema(description = "坐席")
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class Seat extends BaseTenantEntity {
+
+    private static final long serialVersionUID = 1L;
 
     @Schema(description = "租户id")
     private String tenantId;

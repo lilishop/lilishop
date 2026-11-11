@@ -3,6 +3,7 @@ package cn.lili.modules.im.entity.dos;
 import cn.lili.mybatis.BaseTenantEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,10 +19,13 @@ import lombok.NoArgsConstructor;
 @TableName("li_seat_setting")
 @Schema(description = "坐席设置")
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class SeatSetting extends BaseTenantEntity {
 
-    @Schema(description = "租户idid")
+    private static final long serialVersionUID = 1L;
+
+    @Schema(description = "租户ID")
     private String tenantId;
 
     @Schema(description = "欢迎语")
@@ -32,6 +36,5 @@ public class SeatSetting extends BaseTenantEntity {
 
     @Schema(description = "长时间自动回复")
     private String longTermAutoReply;
-
 
 }
