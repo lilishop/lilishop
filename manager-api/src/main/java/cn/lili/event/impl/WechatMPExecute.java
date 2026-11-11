@@ -22,7 +22,7 @@ public class WechatMPExecute implements OrderStatusChangeEvent {
 
 
     /**
-     * 订单已发货、待提货、待核验状态 如果是微信小程序的订单则进行 订单发货信息录入
+     * 支付、部分发货及交付节点记录同步进度，整笔支付全部履约后提交发货快照；完成时先补齐发货再通知收货。
      *
      * @param orderMessage 订单消息
      */
@@ -30,6 +30,9 @@ public class WechatMPExecute implements OrderStatusChangeEvent {
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
+            case PAID:
+            case UNDELIVERED:
+            case PARTS_DELIVERED:
             case TAKE:
             case STAY_PICKED_UP:
             case DELIVERED:
@@ -41,6 +44,7 @@ public class WechatMPExecute implements OrderStatusChangeEvent {
                 break;
             case COMPLETED:
                 try {
+                    wechatMPService.uploadShippingInfo(orderMessage.getOrderSn());
                     wechatMPService.notifyConfirmReceive(orderMessage.getOrderSn());
                 } catch (Exception e) {
                     log.error("微信消息发送失败", e);
