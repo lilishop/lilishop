@@ -68,9 +68,22 @@ public class CashierSupport {
     public ResultMessage<Object> payment(PaymentMethodEnum paymentMethodEnum, PaymentClientEnum paymentClientEnum,
                                          HttpServletRequest request, HttpServletResponse response,
                                          PayParam payParam) {
-        if (paymentClientEnum == null || paymentMethodEnum == null) {
+        if (paymentClientEnum == null || paymentMethodEnum == null || payParam == null) {
             throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
         }
+
+        // 校验当前客户端是否开启该支付方式
+        List<String> supports = support(payParam.getClientType());
+        if (CashierEnum.PAID_MEMBER.name().equals(payParam.getOrderType())) {
+            supports = supports.stream()
+                    .filter(method -> java.util.List.of("WECHAT", "ALIPAY", "WALLET").contains(method)).toList();
+        }
+        if (supports == null || !supports.contains(paymentMethodEnum.name())) {
+            log.warn("支付请求被拒绝：客户端[{}]未开启支付方式[{}]，orderType={}, sn={}",
+                    payParam.getClientType(), paymentMethodEnum.name(), payParam.getOrderType(), payParam.getSn());
+            throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
+        }
+
         //获取支付插件
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
         log.info("支付请求：客户端：{},支付类型：{},请求：{}", paymentClientEnum.name(), paymentMethodEnum.name(), payParam.toString());

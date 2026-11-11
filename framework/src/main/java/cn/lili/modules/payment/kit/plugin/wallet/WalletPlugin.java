@@ -109,6 +109,10 @@ public class WalletPlugin implements Payment {
         try {
             //获取支付收银参数
             CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+            if (cashierParam.getSupport() == null || !cashierParam.getSupport().contains(PaymentMethodEnum.WALLET.name())) {
+                log.warn("余额支付被拒绝：当前客户端[{}]未启用余额支付，sn={}", payParam.getClientType(), payParam.getSn());
+                throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
+            }
             this.callBack(payParam, cashierParam);
         } finally {
             lock.unlock();
