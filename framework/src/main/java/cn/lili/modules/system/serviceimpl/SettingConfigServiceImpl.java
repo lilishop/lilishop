@@ -39,6 +39,8 @@ public class SettingConfigServiceImpl implements SettingConfigService {
     private Cache<String> cache;
     @Autowired
     private DistributionSettingSupport distributionSettingSupport;
+    @Autowired
+    private cn.lili.modules.im.service.ImImageStorageSettings imImageStorageSettings;
 
     /**
      * 保存前统一执行配置转换及校验；付费会员委托专用业务服务，其他配置复用现有存储与缓存失效。
@@ -72,6 +74,11 @@ public class SettingConfigServiceImpl implements SettingConfigService {
      * @return 已完成业务规则处理的配置 JSON
      */
     private String filter(SettingEnum settingEnum, String configValue) {
+        if (settingEnum == SettingEnum.IM_SETTING) {
+            ImSetting imSetting = JSONUtil.toBean(configValue, ImSetting.class);
+            imImageStorageSettings.validate(imSetting);
+            configValue = JSONUtil.toJsonStr(imSetting);
+        }
         if (settingEnum.equals(SettingEnum.POINT_SETTING)) {
             PointSetting pointSetting = JSONUtil.toBean(configValue, PointSetting.class);
             if (pointSetting.getPointSettingItems() != null && pointSetting.getPointSettingItems().size() > 0) {

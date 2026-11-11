@@ -13,6 +13,8 @@ import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
 import cn.lili.modules.im.service.ImTalkService;
+import cn.lili.modules.im.service.ImImageService;
+import cn.lili.modules.im.entity.enums.MessageTypeEnum;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -44,6 +46,7 @@ public class WebSocketServer {
      */
     private final ImMessageService imMessageService;
     private final ImTalkService imTalkService;
+    private final ImImageService imImageService;
     private final Cache cache;
     private final JsonMapper jsonMapper;
 
@@ -118,6 +121,18 @@ public class WebSocketServer {
                 // 强制发送方为当前登录主体，防止客户端在消息体中篡改发送人
                 String senderId = UserEnums.STORE.equals(authUser.getRole()) ? authUser.getStoreId() : authUser.getId();
                 messageOperation.setFrom(senderId);
+                // 图片正文只允许引用当前登录账号上传到当前店铺会话的凭据，禁止伪造发送方及任意外链。
+                if (messageOperation.getMessageType() == MessageTypeEnum.PICTURE) {
+                    try {
+                        imImageService.validateMessage(authUser, messageOperation);
+                    } catch (cn.lili.common.exception.ServiceException e) {
+                        sendMessage(senderId,
+                            new MessageVO(MessageResultType.SYSTEM_TIPS, java.util.Map.of(
+                                "message", e.getMessage(), "pictureUrl", StrUtil.nullToEmpty(messageOperation.getContext()),
+                                "talkId", StrUtil.nullToEmpty(messageOperation.getTalkId()))));
+                        return;
+                    }
+                }
                 //保存消息
                 ImMessage imMessage = new ImMessage(messageOperation);
                 imMessageService.save(imMessage);
