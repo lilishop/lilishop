@@ -4,6 +4,7 @@ import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.validation.Phone;
 import cn.lili.common.vo.PageVO;
@@ -142,6 +143,11 @@ public class ClerkStoreController {
     @Parameter(name = "status", description = "状态", required = true)
     @DemoSite
     public ResultMessage<Object> disable(@PathVariable String clerkId, Boolean status) {
+        Clerk clerk = clerkService.getById(clerkId);
+        if (clerk == null) {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        OperationalJudgment.judgment(clerk);
         clerkService.disable(clerkId, status);
         return ResultUtil.success();
     }

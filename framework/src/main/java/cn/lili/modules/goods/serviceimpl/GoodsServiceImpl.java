@@ -557,6 +557,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean freight(List<String> goodsIds, String templateId) {
+        if (goodsIds == null || goodsIds.isEmpty()) {
+            return true;
+        }
 
         AuthUser authUser = this.checkStoreAuthority();
 
@@ -567,12 +570,26 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (authUser != null && !freightTemplate.getStoreId().equals(authUser.getStoreId())) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
+
+        List<String> distinctGoodsIds = goodsIds.stream().distinct().collect(Collectors.toList());
+        if (authUser != null) {
+            long count = this.count(new LambdaQueryWrapper<Goods>()
+                    .in(Goods::getId, distinctGoodsIds)
+                    .eq(Goods::getStoreId, authUser.getStoreId()));
+            if (count != distinctGoodsIds.size()) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
+        }
+
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getTemplateId, templateId);
-        lambdaUpdateWrapper.in(Goods::getId, goodsIds);
-        List<String> goodsCache = goodsIds.stream().map(item -> CachePrefix.GOODS.getPrefix() + item).collect(Collectors.toList());
+        lambdaUpdateWrapper.in(Goods::getId, distinctGoodsIds);
+        if (authUser != null) {
+            lambdaUpdateWrapper.eq(Goods::getStoreId, authUser.getStoreId());
+        }
+        List<String> goodsCache = distinctGoodsIds.stream().map(item -> CachePrefix.GOODS.getPrefix() + item).collect(Collectors.toList());
         cache.multiDel(goodsCache);
-        goodsSkuService.freight(goodsIds, templateId);
+        goodsSkuService.freight(distinctGoodsIds, templateId);
         return this.update(lambdaUpdateWrapper);
     }
 
@@ -657,6 +674,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      * @param reason      原因
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void scheduleGoodsMarket(List<String> goodsIds, GoodsStatusEnum status, java.util.Date triggerTime, String reason) {
         if (goodsIds == null || goodsIds.isEmpty() || triggerTime == null) {
             return;
@@ -664,13 +682,31 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (triggerTime.getTime() <= System.currentTimeMillis()) {
             throw new ServiceException("定时时间必须晚于当前时间");
         }
+        AuthUser user = UserContext.getCurrentUser();
+        boolean manager = user != null && user.getRole() == UserEnums.MANAGER;
+        if (!manager && checkStoreAuthority() == null) {
+            throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
+        }
+        List<String> distinctGoodsIds = goodsIds.stream().distinct().collect(Collectors.toList());
+        List<Goods> oldGoodsList = this.listByIds(distinctGoodsIds);
+        if (oldGoodsList.size() != distinctGoodsIds.size()) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        if (!manager) {
+            boolean allMatch = oldGoodsList.stream().allMatch(g -> user.getStoreId().equals(g.getStoreId()));
+            if (!allMatch) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
+        }
         String executor = GoodsStatusEnum.UPPER.equals(status)
                 ? TimeExecuteConstant.GOODS_UPPER_EXECUTOR
                 : TimeExecuteConstant.GOODS_DOWN_EXECUTOR;
         //记录旧计划时间，用于删除旧延时任务，避免旧任务残留提前/重复触发
-        List<Goods> oldGoodsList = this.listByIds(goodsIds);
         LambdaUpdateWrapper<Goods> uw = new LambdaUpdateWrapper<>();
-        uw.in(Goods::getId, goodsIds);
+        uw.in(Goods::getId, distinctGoodsIds);
+        if (!manager) {
+            uw.eq(Goods::getStoreId, user.getStoreId());
+        }
         long normalizedMs = (triggerTime.getTime() / 1000L) * 1000L;
         java.util.Date scheduledDate = new java.util.Date(normalizedMs);
         if (GoodsStatusEnum.UPPER.equals(status)) {
@@ -681,7 +717,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             uw.set(Goods::getScheduledDownReason, reason);
         }
         this.update(uw);
-        for (String goodsId : goodsIds) {
+        for (String goodsId : distinctGoodsIds) {
             String uniqueKey = DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.GOODS, goodsId);
             java.util.Date oldTime = oldGoodsList.stream()
                     .filter(g -> g.getId().equals(goodsId))
@@ -697,7 +733,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(executor, normalizedMs, payload, uniqueKey,
                     rocketmqCustomProperties.getPromotionTopic());
             timeTrigger.addDelay(timeTriggerMsg);
-
         }
     }
 
@@ -837,8 +872,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 throw new ServiceException(ResultCode.GOODS_TYPE_ERROR);
         }
         //检查商品是否存在--修改商品时使用
+        Goods oldGoods = null;
         if (goods.getId() != null) {
-            this.checkExist(goods.getId());
+            oldGoods = this.checkExist(goods.getId());
         } else {
             //评论次数
             goods.setCommentNum(0);
@@ -854,7 +890,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSON.parseObject(setting.getSettingValue(), GoodsSetting.class);
         //判断当前用户是否为店铺
-        if (Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE)) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        if (currentUser.getRole().equals(UserEnums.STORE)) {
+            if (oldGoods != null && !currentUser.getStoreId().equals(oldGoods.getStoreId())) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
             StoreVO storeDetail = this.storeService.getStoreDetail();
             goods.setStoreId(storeDetail.getId());
             goods.setStoreName(storeDetail.getStoreName());

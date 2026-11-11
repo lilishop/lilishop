@@ -148,6 +148,11 @@ public class GoodsStoreController {
     @Operation(summary = "修改商品")
     @PutMapping(value = "/update/{goodsId}", consumes = "application/json", produces = "application/json")
     public ResultMessage<GoodsOperationDTO> update(@Valid @RequestBody GoodsOperationDTO goodsOperationDTO, @PathVariable String goodsId) {
+        Goods goods = goodsService.getById(goodsId);
+        if (goods == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        OperationalJudgment.judgment(goods);
         goodsService.editGoods(goodsOperationDTO, goodsId);
         return ResultUtil.success();
     }

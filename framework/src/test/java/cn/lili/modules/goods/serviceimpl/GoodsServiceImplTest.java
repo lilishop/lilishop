@@ -428,6 +428,7 @@ class GoodsServiceImplTest {
     private Goods existingGoods() {
         Goods goods = new Goods();
         goods.setId(GOODS_ID);
+        goods.setStoreId(STORE_ID);
         goods.setGoodsName("existing");
         goods.setGoodsType(GoodsTypeEnum.VIRTUAL_GOODS.name());
         goods.setCategoryPath("cat-1");

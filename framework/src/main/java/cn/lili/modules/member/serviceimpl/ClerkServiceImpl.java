@@ -5,6 +5,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
@@ -144,6 +145,15 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
     @Override
     public ClerkVO get(String id) {
         Clerk clerk = this.getById(id);
+        if (clerk == null) {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null && UserEnums.STORE.equals(currentUser.getRole())) {
+            if (!currentUser.getStoreId().equals(clerk.getStoreId())) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
+        }
         ClerkVO clerkVO = new ClerkVO(clerk);
         //手机号码
         clerkVO.setMobile(memberService.getById(clerk.getMemberId()).getMobile());
@@ -348,8 +358,14 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         if (clerk == null) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null && UserEnums.STORE.equals(currentUser.getRole())) {
+            if (!currentUser.getStoreId().equals(clerk.getStoreId())) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
+        }
         //店主无法禁用
-        if (clerk.getShopkeeper() && clerk.getStatus()) {
+        if (Boolean.TRUE.equals(clerk.getShopkeeper()) && Boolean.TRUE.equals(clerk.getStatus())) {
             throw new ServiceException(ResultCode.CLERK_SUPPER);
         }
         clerk.setStatus(status);
