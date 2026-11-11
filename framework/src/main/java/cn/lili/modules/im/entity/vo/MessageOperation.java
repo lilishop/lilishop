@@ -5,47 +5,45 @@ import cn.lili.modules.im.entity.enums.MessageTypeEnum;
 import cn.lili.modules.im.entity.enums.OperationType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
+ * 消息操作VO
+ *
  * @author liushuai
  */
 @Data
+@Schema(description = "消息操作VO")
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageOperation {
 
-    /**
-     * 操作类型
-     */
+    @Schema(description = "操作类型")
     @JsonProperty("operation_type")
     @JsonAlias({"operationType", "operation_type"})
     private OperationType operationType;
-    /**
-     * 与某人聊天记录
-     */
+
+    @Schema(description = "接收方ID")
     private String to;
 
-    /**
-     * 发送者
-     */
+    @Schema(description = "发送方ID")
     private String from;
 
-    /**
-     * 聊天id
-     */
+    @Schema(description = "聊天会话ID")
     @JsonProperty("talk_id")
     @JsonAlias({"talkId", "talk_id"})
     private String talkId;
 
-    /**
-     * 消息类型
-     */
+    @Schema(description = "消息类型")
     @JsonProperty("message_type")
     @JsonAlias({"messageType", "message_type"})
     private MessageTypeEnum messageType;
-    /**
-     * 消息内容
-     */
+
+    @Schema(description = "消息内容")
     @JsonDeserialize(using = FlexibleJsonStringDeserializer.class)
     private String context;
 
