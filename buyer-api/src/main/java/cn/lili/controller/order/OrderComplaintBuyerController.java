@@ -15,6 +15,7 @@ import cn.lili.modules.order.order.entity.vo.OrderComplaintSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintVO;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
+import cn.lili.modules.order.order.service.OrderService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,6 +49,9 @@ public class OrderComplaintBuyerController {
     @Autowired
     private OrderComplaintCommunicationService orderComplaintCommunicationService;
 
+    @Autowired
+    private OrderService orderService;
+
 
     @Operation(summary = "通过id获取")
     @Parameter(name = "id", description = "投诉单ID", required = true)
@@ -70,6 +74,7 @@ public class OrderComplaintBuyerController {
     @Operation(summary = "添加交易投诉")
     @PostMapping
     public ResultMessage<OrderComplaint> add(@Valid OrderComplaintDTO orderComplaintDTO) {
+        OperationalJudgment.judgment(orderService.getBySn(orderComplaintDTO.getOrderSn()));
         return ResultUtil.data(orderComplaintService.addOrderComplain(orderComplaintDTO));
     }
 

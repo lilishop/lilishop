@@ -2,6 +2,7 @@ package cn.lili.controller.message;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -44,11 +45,7 @@ public class MemberMessageBuyerController {
     @Parameter(name = "messageId", description = "客户消息id", required = true)
     @GetMapping("/{message_id}")
     public ResultMessage<MemberMessage> get(@PathVariable("message_id") String messageId) {
-        MemberMessage memberMessage = memberMessageService.getById(messageId);
-        String memberId = UserContext.getCurrentUser().getId();
-        if (memberMessage == null || !memberId.equals(memberMessage.getMemberId())) {
-            return ResultUtil.error(ResultCode.ERROR);
-        }
+        MemberMessage memberMessage = OperationalJudgment.judgment(memberMessageService.getById(messageId));
         return ResultUtil.data(memberMessage);
     }
 
@@ -56,6 +53,7 @@ public class MemberMessageBuyerController {
     @Parameter(name = "messageId", description = "客户消息id", required = true)
     @PutMapping("/{message_id}")
     public ResultMessage<Boolean> read(@PathVariable("message_id") String messageId) {
+        OperationalJudgment.judgment(memberMessageService.getById(messageId));
         return ResultUtil.data(memberMessageService.editStatus(MessageStatusEnum.ALREADY_READY.name(), messageId));
     }
 
@@ -63,8 +61,8 @@ public class MemberMessageBuyerController {
     @Parameter(name = "messageId", description = "客户消息id", required = true)
     @DeleteMapping("/{message_id}")
     public ResultMessage<Boolean> deleteMessage(@PathVariable("message_id") String messageId) {
+        OperationalJudgment.judgment(memberMessageService.getById(messageId));
         return ResultUtil.data(memberMessageService.editStatus(MessageStatusEnum.ALREADY_REMOVE.name(), messageId));
-
     }
 
 

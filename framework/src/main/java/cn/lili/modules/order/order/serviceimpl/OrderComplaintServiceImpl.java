@@ -126,6 +126,9 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
             AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
             //查询订单信息
             OrderDetailVO orderDetailVO = orderService.queryDetail(orderComplaintDTO.getOrderSn());
+            if (!UserEnums.MANAGER.equals(currentUser.getRole()) && !currentUser.getId().equals(orderDetailVO.getOrder().getMemberId())) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
             List<OrderItem> orderItems = orderDetailVO.getOrderItems();
             OrderItem orderItem = orderItems.stream().filter(i -> orderComplaintDTO.getSkuId().equals(i.getSkuId())).findFirst().orElse(null);
 

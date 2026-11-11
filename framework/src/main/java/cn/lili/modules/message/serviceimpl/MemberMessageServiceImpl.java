@@ -6,6 +6,11 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.message.entity.dos.MemberMessage;
 import cn.lili.modules.message.mapper.MemberMessageMapper;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.message.service.MemberMessageService;
 import cn.lili.modules.message.entity.vos.MemberMessageQueryVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -47,6 +52,12 @@ public class MemberMessageServiceImpl extends ServiceImpl<MemberMessageMapper, M
         //查询消息是否存在
         MemberMessage memberMessage = this.getById(messageId);
         if (memberMessage != null) {
+            AuthUser currentUser = UserContext.getCurrentUser();
+            if (currentUser != null && UserEnums.MEMBER.equals(currentUser.getRole())) {
+                if (!currentUser.getId().equals(memberMessage.getMemberId())) {
+                    throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+                }
+            }
             memberMessage.setStatus(status);
             //执行修改
             return this.updateById(memberMessage);
@@ -60,6 +71,12 @@ public class MemberMessageServiceImpl extends ServiceImpl<MemberMessageMapper, M
         //查询消息是否存在
         MemberMessage memberMessage = this.getById(messageId);
         if (memberMessage != null) {
+            AuthUser currentUser = UserContext.getCurrentUser();
+            if (currentUser != null && UserEnums.MEMBER.equals(currentUser.getRole())) {
+                if (!currentUser.getId().equals(memberMessage.getMemberId())) {
+                    throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+                }
+            }
             //执行删除
             return this.removeById(memberMessage);
         }

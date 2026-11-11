@@ -9,6 +9,13 @@ import cn.lili.modules.order.order.mapper.OrderPackageMapper;
 import cn.lili.modules.order.order.service.OrderPackageItemService;
 import cn.lili.modules.order.order.service.OrderPackageService;
 import cn.lili.modules.system.entity.vo.Traces;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
+import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.system.service.LogisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,6 +43,9 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
     @Autowired
     private LogisticsService logisticsService;
 
+    @Autowired
+    private OrderMapper orderMapper;
+
     @Override
     public List<OrderPackage> orderPackageList(String orderSn) {
         return this.list(new LambdaQueryWrapper<OrderPackage>().eq(OrderPackage::getOrderSn, orderSn));
@@ -43,6 +53,20 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
 
     @Override
     public List<OrderPackageVO> getOrderPackageVOList(String orderSn) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>()
+                    .select(Order::getId, Order::getMemberId, Order::getStoreId)
+                    .eq(Order::getSn, orderSn));
+            if (order != null) {
+                if (UserEnums.MEMBER.equals(currentUser.getRole()) && !currentUser.getId().equals(order.getMemberId())) {
+                    throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+                }
+                if (UserEnums.STORE.equals(currentUser.getRole()) && !currentUser.getStoreId().equals(order.getStoreId())) {
+                    throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+                }
+            }
+        }
         List<OrderPackage> orderPackages = this.orderPackageList(orderSn);
         if (orderPackages == null || orderPackages.isEmpty()) {
             return Collections.emptyList();
