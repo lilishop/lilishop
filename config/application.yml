@@ -303,6 +303,8 @@ lili:
 
   # JWT 身份鉴权令牌配置
   jwt-setting:
+    # 令牌签名密钥（生产环境建议通过环境变量 LILI_JWT_SECRET 强制覆盖）
+    secret: ${LILI_JWT_SECRET:cuAihCz53DZRjZwbsGcZJ2Ai6At+T142uphtJMsk7iQ=}
     # 令牌过期时间（分钟）
     tokenExpireTime: 10000
 

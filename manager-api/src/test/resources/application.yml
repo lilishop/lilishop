@@ -127,6 +127,8 @@ lili:
 
   # JWT 细节设定
   jwt-setting:
+    # 令牌签名密钥
+    secret: ${LILI_JWT_SECRET:cuAihCz53DZRjZwbsGcZJ2Ai6At+T142uphtJMsk7iQ=}
     # Token 过期时间（分钟）
     tokenExpireTime: 30
 
