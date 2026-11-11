@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -18,9 +19,18 @@ import cn.lili.modules.order.order.entity.vo.OrderInfoVO;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.WithdrawalSetting;
+import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
+import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.vo.WechatTransferInfoVO;
+import cn.lili.modules.wallet.serviceimpl.MemberWithdrawApplyServiceImpl;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.google.gson.Gson;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,7 +54,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 买家业务服务层越权防护单元测试，覆盖包裹物流、站内信及交易投诉的底层归属校验。
+ * 买家与商家业务服务层越权防护单元测试，覆盖包裹物流、站内信、交易投诉及提现转账参数的底层归属校验。
  *
  * @author Bulbasaur
  * @since 2026-11-11
@@ -55,6 +65,9 @@ class BuyerServiceIdorSecurityTest {
     private static final String OTHER_BUYER_ID = "buyer-2";
     private static final String ORDER_SN = "SN-1001";
     private static final String MESSAGE_ID = "msg-1001";
+    private static final String WITHDRAW_APPLY_ID = "apply-1001";
+    private static final String CURRENT_STORE_ID = "store-1";
+    private static final String OTHER_STORE_ID = "store-2";
 
     private OrderPackageServiceImpl orderPackageService;
     private OrderMapper orderMapper;
@@ -65,6 +78,9 @@ class BuyerServiceIdorSecurityTest {
     private OrderService orderService;
     private OrderItemService orderItemService;
 
+    private MemberWithdrawApplyServiceImpl memberWithdrawApplyService;
+    private SettingService settingService;
+
     private MockedStatic<UserContext> userContextMock;
 
     @BeforeAll
@@ -74,6 +90,7 @@ class BuyerServiceIdorSecurityTest {
         TableInfoHelper.initTableInfo(assistant, Order.class);
         TableInfoHelper.initTableInfo(assistant, MemberMessage.class);
         TableInfoHelper.initTableInfo(assistant, OrderComplaint.class);
+        TableInfoHelper.initTableInfo(assistant, MemberWithdrawApply.class);
     }
 
     @BeforeEach
@@ -97,6 +114,10 @@ class BuyerServiceIdorSecurityTest {
         orderItemService = mock(OrderItemService.class);
         ReflectionTestUtils.setField(orderComplaintService, "orderService", orderService);
         ReflectionTestUtils.setField(orderComplaintService, "orderItemService", orderItemService);
+
+        memberWithdrawApplyService = spy(new MemberWithdrawApplyServiceImpl());
+        settingService = mock(SettingService.class);
+        ReflectionTestUtils.setField(memberWithdrawApplyService, "settingService", settingService);
     }
 
     @AfterEach
@@ -111,6 +132,24 @@ class BuyerServiceIdorSecurityTest {
         Order otherOrder = new Order();
         otherOrder.setSn(ORDER_SN);
         otherOrder.setMemberId(OTHER_BUYER_ID);
+        when(orderMapper.selectOne(any(Wrapper.class))).thenReturn(otherOrder);
+
+        ServiceException ex = assertThrows(ServiceException.class,
+                () -> orderPackageService.getOrderPackageVOList(ORDER_SN));
+        assertThat(ex.getResultCode()).isEqualTo(ResultCode.USER_AUTHORITY_ERROR);
+    }
+
+    @Test
+    void getOrderPackageVOListOtherStoreThrowsAuthorityError() {
+        AuthUser storeUser = new AuthUser();
+        storeUser.setId("store-user-1");
+        storeUser.setStoreId(CURRENT_STORE_ID);
+        storeUser.setRole(UserEnums.STORE);
+        userContextMock.when(UserContext::getCurrentUser).thenReturn(storeUser);
+
+        Order otherOrder = new Order();
+        otherOrder.setSn(ORDER_SN);
+        otherOrder.setStoreId(OTHER_STORE_ID);
         when(orderMapper.selectOne(any(Wrapper.class))).thenReturn(otherOrder);
 
         ServiceException ex = assertThrows(ServiceException.class,
@@ -164,5 +203,53 @@ class BuyerServiceIdorSecurityTest {
                 () -> orderComplaintService.addOrderComplain(dto));
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.USER_AUTHORITY_ERROR);
         verify(orderComplaintService, never()).save(any(OrderComplaint.class));
+    }
+
+    @Test
+    void getWechatTransferInfoOtherMemberThrowsAuthorityError() {
+        MemberWithdrawApply otherApply = new MemberWithdrawApply();
+        otherApply.setId(WITHDRAW_APPLY_ID);
+        otherApply.setMemberId(OTHER_BUYER_ID);
+        doReturn(otherApply).when(memberWithdrawApplyService).getById(WITHDRAW_APPLY_ID);
+
+        ServiceException ex = assertThrows(ServiceException.class,
+                () -> memberWithdrawApplyService.getWechatTransferInfo(WITHDRAW_APPLY_ID));
+        assertThat(ex.getResultCode()).isEqualTo(ResultCode.USER_AUTHORITY_ERROR);
+    }
+
+    @Test
+    void getWechatTransferInfoNotExistThrowsWalletApplyError() {
+        doReturn(null).when(memberWithdrawApplyService).getById(WITHDRAW_APPLY_ID);
+
+        ServiceException ex = assertThrows(ServiceException.class,
+                () -> memberWithdrawApplyService.getWechatTransferInfo(WITHDRAW_APPLY_ID));
+        assertThat(ex.getResultCode()).isEqualTo(ResultCode.WALLET_APPLY_ERROR);
+    }
+
+    @Test
+    void getWechatTransferInfoOwnMemberSuccess() {
+        MemberWithdrawApply ownApply = new MemberWithdrawApply();
+        ownApply.setId(WITHDRAW_APPLY_ID);
+        ownApply.setMemberId(BUYER_ID);
+        ownApply.setWechatPackage("wx-package-test");
+        doReturn(ownApply).when(memberWithdrawApplyService).getById(WITHDRAW_APPLY_ID);
+
+        WithdrawalSetting withdrawalSetting = new WithdrawalSetting();
+        withdrawalSetting.setWechatAppId("wx-app-123");
+        Setting settingWithdrawal = new Setting();
+        settingWithdrawal.setSettingValue(new Gson().toJson(withdrawalSetting));
+        when(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name())).thenReturn(settingWithdrawal);
+
+        WechatPaymentSetting wechatPaymentSetting = new WechatPaymentSetting();
+        wechatPaymentSetting.setMchId("mch-888");
+        Setting settingPayment = new Setting();
+        settingPayment.setSettingValue(JSONUtil.toJsonStr(wechatPaymentSetting));
+        when(settingService.get(SettingEnum.WECHAT_PAYMENT.name())).thenReturn(settingPayment);
+
+        WechatTransferInfoVO vo = memberWithdrawApplyService.getWechatTransferInfo(WITHDRAW_APPLY_ID);
+        assertThat(vo).isNotNull();
+        assertThat(vo.getAppId()).isEqualTo("wx-app-123");
+        assertThat(vo.getMchId()).isEqualTo("mch-888");
+        assertThat(vo.getWechatPackage()).isEqualTo("wx-package-test");
     }
 }

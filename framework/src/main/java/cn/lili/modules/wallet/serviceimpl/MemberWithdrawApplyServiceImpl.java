@@ -5,6 +5,9 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -130,14 +133,24 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
 
     @Override
     public WechatTransferInfoVO getWechatTransferInfo(String id) {
-        WechatTransferInfoVO wechatTransferInfoVO=new WechatTransferInfoVO();
+        MemberWithdrawApply memberWithdrawApply = this.getById(id);
+        if (memberWithdrawApply == null) {
+            throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
+        }
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null && UserEnums.MEMBER.equals(currentUser.getRole())) {
+            if (!currentUser.getId().equals(memberWithdrawApply.getMemberId())) {
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+            }
+        }
+        WechatTransferInfoVO wechatTransferInfoVO = new WechatTransferInfoVO();
         WithdrawalSetting withdrawalSetting = new Gson().fromJson(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name()).getSettingValue(),
                 WithdrawalSetting.class);
         Setting systemSetting = settingService.get(SettingEnum.WECHAT_PAYMENT.name());
         WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
         wechatTransferInfoVO.setAppId(withdrawalSetting.getWechatAppId());
         wechatTransferInfoVO.setMchId(wechatPaymentSetting.getMchId());
-        wechatTransferInfoVO.setWechatPackage(this.getById(id).getWechatPackage());
+        wechatTransferInfoVO.setWechatPackage(memberWithdrawApply.getWechatPackage());
         return wechatTransferInfoVO;
     }
 

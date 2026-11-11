@@ -243,6 +243,7 @@ public class OrderStoreController {
     @Parameter(name = "orderSn", description = "订单sn", required = true)
     @GetMapping("/getPackage/{orderSn}")
     public ResultMessage<Object> getPackage(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderPackageService.getOrderPackageVOList(orderSn));
     }
 
@@ -250,6 +251,7 @@ public class OrderStoreController {
     @Parameter(name = "orderSn", description = "订单sn", required = true)
     @GetMapping("/getTracesList/{orderSn}")
     public ResultMessage<Object> getTracesList(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderPackageService.getOrderPackageVOList(orderSn));
     }
 
