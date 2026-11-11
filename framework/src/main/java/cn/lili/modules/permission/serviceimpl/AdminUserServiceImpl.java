@@ -8,6 +8,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.security.support.LoginFailLimitSupport;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
@@ -66,6 +67,8 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private ManagerTokenGenerate managerTokenGenerate;
     @Autowired
     private Cache cache;
+    @Autowired
+    private LoginFailLimitSupport loginFailLimitSupport;
 
     @Override
     public IPage<AdminUserVO> adminUserPage(Page initPage, QueryWrapper<AdminUser> initWrapper) {
@@ -123,14 +126,16 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     @Override
     @SystemLogPoint(description = "管理员登录", customerLog = "'管理员登录请求:'+#username")
     public Token login(String username, String password) {
+        loginFailLimitSupport.checkLoginLock(UserEnums.MANAGER, username);
         AdminUser adminUser = this.findByUsername(username);
 
         if (adminUser == null || !adminUser.getStatus()) {
-            throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
+            loginFailLimitSupport.recordPasswordFail(UserEnums.MANAGER, username);
         }
         if (!new BCryptPasswordEncoder().matches(password, adminUser.getPassword())) {
-            throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
+            loginFailLimitSupport.recordPasswordFail(UserEnums.MANAGER, username);
         }
+        loginFailLimitSupport.clearLoginFail(UserEnums.MANAGER, username);
         try {
             return managerTokenGenerate.createToken(adminUser, false);
         } catch (Exception e) {
@@ -218,7 +223,10 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         String password = StringUtils.md5("123456");
         String newEncryptPass = new BCryptPasswordEncoder().encode(password);
         if (null != adminUsers && !adminUsers.isEmpty()) {
-            adminUsers.forEach(item -> item.setPassword(newEncryptPass));
+            adminUsers.forEach(item -> {
+                item.setPassword(newEncryptPass);
+                loginFailLimitSupport.clearLoginFail(UserEnums.MANAGER, item.getUsername());
+            });
             this.updateBatchById(adminUsers);
             this.logout(ids);
         }

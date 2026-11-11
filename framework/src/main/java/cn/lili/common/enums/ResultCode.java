@@ -215,6 +215,7 @@ public enum ResultCode {
     CLERK_CURRENT_SUPPER(20032, "无法删除当前登录店员"),
     CANT_EDIT_CLERK_SHOPKEEPER(20033, "无法在店员管理编辑店员信息"),
     USER_MOBILE_REPEATABLE_ERROR(20034, "该手机号已存在"),
+    USER_PASSWORD_ERROR_LOCKED(20035, "密码错误次数过多，账号已临时锁定"),
     /**
      * 权限
      */

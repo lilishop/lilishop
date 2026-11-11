@@ -15,6 +15,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.security.support.LoginFailLimitSupport;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveFilterScene;
 import cn.lili.common.sensitive.SensitiveWordsHelper;
@@ -126,6 +127,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Autowired
     private Cache cache;
     @Autowired
+    private LoginFailLimitSupport loginFailLimitSupport;
+    @Autowired
     @Lazy
     private MemberShareRegisterService memberShareRegisterService;
 
@@ -180,6 +183,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Token usernameLogin(String username, String password) {
+        loginFailLimitSupport.checkLoginLock(UserEnums.MEMBER, username);
         Member member = this.findMember(username);
         //判断用户是否存在
         if (member == null || !member.getDisabled()) {
@@ -187,8 +191,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //判断密码是否输入正确
         if (!new BCryptPasswordEncoder().matches(password, member.getPassword())) {
-            throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
+            loginFailLimitSupport.recordPasswordFail(UserEnums.MEMBER, username);
         }
+        loginFailLimitSupport.clearLoginFail(UserEnums.MEMBER, username);
         loginBindUser(member);
         return memberTokenGenerate.createToken(member, false);
     }
@@ -202,6 +207,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         lambdaUpdateWrapper.set(Member::getPassword, password);
         this.update(lambdaUpdateWrapper);
         revokeMemberTokens(ids);
+        if (ids != null && !ids.isEmpty()) {
+            List<Member> members = this.listByIds(ids);
+            if (members != null) {
+                members.forEach(m -> loginFailLimitSupport.clearLoginFail(UserEnums.MEMBER, m.getUsername()));
+            }
+        }
     }
 
     @Override
@@ -222,7 +233,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Token usernameStoreLogin(String username, String password) {
-
+        loginFailLimitSupport.checkLoginLock(UserEnums.STORE, username);
         Member member = this.findMember(username);
         //判断用户是否存在
         if (member == null || !member.getDisabled()) {
@@ -230,8 +241,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //判断密码是否输入正确
         if (!new BCryptPasswordEncoder().matches(password, member.getPassword())) {
-            throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
+            loginFailLimitSupport.recordPasswordFail(UserEnums.STORE, username);
         }
+        loginFailLimitSupport.clearLoginFail(UserEnums.STORE, username);
         //对店铺状态的判定处理
         return checkMemberStore(member);
     }
@@ -492,6 +504,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         boolean updated = this.update(lambdaUpdateWrapper);
         if (updated) {
             revokeMemberTokens(Collections.singletonList(member.getId()));
+            loginFailLimitSupport.clearLoginFail(UserEnums.MEMBER, member.getUsername());
         }
         return updated;
     }

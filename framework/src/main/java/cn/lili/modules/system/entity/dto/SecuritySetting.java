@@ -29,4 +29,10 @@ public class SecuritySetting implements Serializable {
 
     @Schema(description = "管理端与商家端Token过期时间（单位：分钟）")
     private Long managerTokenExpireTime = 86400L;
+
+    @Schema(description = "登录密码错误最大允许重试次数")
+    private Integer passwordMaxRetry = 5;
+
+    @Schema(description = "登录密码超限后账号锁定时间（单位：分钟）")
+    private Long passwordLockMinutes = 30L;
 }

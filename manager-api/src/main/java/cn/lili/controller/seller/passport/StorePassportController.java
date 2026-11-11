@@ -57,8 +57,8 @@ public class StorePassportController {
             try {
                 return ResultUtil.data(this.memberService.usernameStoreLogin(username, password));
             } catch (ServiceException e) {
-                if (ResultCode.USER_PASSWORD_ERROR.equals(e.getResultCode())) {
-                    return ResultUtil.error(ResultCode.USER_PASSWORD_ERROR);
+                if (ResultCode.USER_PASSWORD_ERROR.equals(e.getResultCode()) || ResultCode.USER_PASSWORD_ERROR_LOCKED.equals(e.getResultCode())) {
+                    return ResultUtil.error(e.getResultCode().code(), e.getMessage());
                 }
                 throw e;
             }
