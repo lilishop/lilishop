@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ import java.util.Objects;
  * @author pikachu
  * @since 2020-02-25 14:10:16
  */
+@Slf4j
 @Service
 public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> implements RechargeService {
 
@@ -87,10 +89,28 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
 
     @Override
     public void paySuccess(String sn, String receivableNo, String paymentMethod) {
+        this.paySuccess(sn, receivableNo, paymentMethod, null);
+    }
+
+    @Override
+    public void paySuccess(String sn, String receivableNo, String paymentMethod, Double price) {
         //根据sn获取支付账单
         Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
         //如果支付账单不为空则进行一下逻辑
-        if (recharge != null && !recharge.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+        if (recharge == null) {
+            log.error("充值账单[{}]不存在", sn);
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        if (price != null) {
+            java.math.BigDecimal paidAmount = java.math.BigDecimal.valueOf(price).setScale(2, java.math.RoundingMode.HALF_UP);
+            java.math.BigDecimal rechargeAmount = java.math.BigDecimal.valueOf(recharge.getRechargeMoney()).setScale(2, java.math.RoundingMode.HALF_UP);
+            if (paidAmount.compareTo(rechargeAmount) != 0) {
+                log.error("充值单[{}]支付金额不一致，拒绝充值：通知金额={}, 充值应付金额={}",
+                        sn, paidAmount, rechargeAmount);
+                throw new ServiceException(ResultCode.PAY_INCONSISTENT_ERROR);
+            }
+        }
+        if (!recharge.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             //将此账单支付状态更改为已支付
             recharge.setPayStatus(PayStatusEnum.PAID.name());
             recharge.setReceivableNo(receivableNo);

@@ -710,11 +710,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void payOrder(String orderSn, String paymentMethod, String receivableNo) {
+        this.payOrder(orderSn, paymentMethod, receivableNo, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void payOrder(String orderSn, String paymentMethod, String receivableNo, Double price) {
 
         Order order = this.getBySn(orderSn);
         if (order == null) {
             log.error("订单[ {} ]不存在，无法完成支付入账", orderSn);
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+
+        // 金额一致性核对（防“一分钱支付”篡改漏洞）
+        if (price != null) {
+            BigDecimal paidAmount = toMoney(price);
+            BigDecimal orderAmount = toMoney(order.getFlowPrice());
+            if (paidAmount.compareTo(orderAmount) != 0) {
+                log.error("订单[{}]支付金额不一致，拒绝入账：通知金额={}, 订单应付金额={}",
+                        orderSn, paidAmount, orderAmount);
+                throw new ServiceException(ResultCode.PAY_INCONSISTENT_ERROR);
+            }
         }
 
         // 1. 如果订单已支付，就不能再次进行支付

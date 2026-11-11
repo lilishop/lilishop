@@ -423,11 +423,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     public AfterSale refund(String afterSaleSn, String remark) {
         //根据售后单号获取售后单
         AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
+        //退款（若渠道退款失败将抛出业务异常阻断并回滚）
+        refundSupport.refund(afterSale);
         afterSale.setServiceStatus(AfterSaleStatusEnum.COMPLETE.name());
         //根据售后编号修改售后单
         this.updateAfterSale(afterSaleSn, afterSale);
-        //退款
-        refundSupport.refund(afterSale);
         //发送退款消息
         this.sendAfterSaleMessage(afterSale);
         notifyAppointmentRefundIfNeeded(afterSale);

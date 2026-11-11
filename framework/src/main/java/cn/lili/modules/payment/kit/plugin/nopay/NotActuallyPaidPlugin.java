@@ -10,6 +10,8 @@ import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,7 @@ public class NotActuallyPaidPlugin implements Payment {
             refundLogService.save(refundLog);
         } catch (Exception e) {
             log.error("未实际支付订单退款记录失败", e);
+            throw new ServiceException(ResultCode.PAY_ERROR, "未实际支付订单退款记录失败: " + e.getMessage());
         }
     }
 

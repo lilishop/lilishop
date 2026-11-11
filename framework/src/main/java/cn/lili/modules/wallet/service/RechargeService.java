@@ -45,6 +45,16 @@ public interface RechargeService extends IService<Recharge> {
     void paySuccess(String sn, String receivableNo, String paymentMethod);
 
     /**
+     * 充值支付成功入账（含金额一致性核验）
+     *
+     * @param sn            充值订单编号
+     * @param receivableNo  流水no
+     * @param paymentMethod 支付方式
+     * @param price         实际支付金额
+     */
+    void paySuccess(String sn, String receivableNo, String paymentMethod, Double price);
+
+    /**
      * 根据充值订单号查询充值信息
      *
      * @param sn 充值订单号

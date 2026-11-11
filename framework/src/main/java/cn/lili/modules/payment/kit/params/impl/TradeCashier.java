@@ -109,7 +109,8 @@ public class TradeCashier implements CashierExecute {
         if (paymentSuccessParams.getPayParam().getOrderType().equals(CashierEnum.TRADE.name())) {
             tradeService.payTrade(paymentSuccessParams.getPayParam().getSn(),
                     paymentSuccessParams.getPaymentMethod(),
-                    paymentSuccessParams.getReceivableNo());
+                    paymentSuccessParams.getReceivableNo(),
+                    paymentSuccessParams.getPrice());
             log.info("交易{}支付成功,方式{},流水号{},", paymentSuccessParams.getPayParam().getSn(),
                     paymentSuccessParams.getPaymentMethod(),
                     paymentSuccessParams.getReceivableNo());

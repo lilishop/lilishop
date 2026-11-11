@@ -10,6 +10,8 @@ import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +43,8 @@ public class BankTransferPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            log.error("线下收款错误",e);
+            log.error("线下收款错误", e);
+            throw new ServiceException(ResultCode.PAY_ERROR, "线下退款记录失败: " + e.getMessage());
         }
     }
 

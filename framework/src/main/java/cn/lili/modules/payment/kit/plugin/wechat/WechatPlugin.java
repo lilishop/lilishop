@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.plugin.wechat;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.context.ThreadContextHolder;
@@ -752,6 +753,28 @@ public class WechatPlugin implements Payment {
         // 以支付通知回调为例，验签、解密并转换成 Transaction
         Transaction transaction = parser.parse(requestParam, Transaction.class);
 
+        // 1. 校验商户号 mchid 是否匹配本商户配置
+        if (CharSequenceUtil.isEmpty(transaction.getMchid()) || !transaction.getMchid().equals(setting.getMchId())) {
+            log.error("微信支付异步通知：商户号不匹配，通知 mchid={}, 系统配置 mchid={}", transaction.getMchid(), setting.getMchId());
+            throw new ServiceException(ResultCode.PAY_ERROR, "微信支付商户号不匹配");
+        }
+
+        // 2. 校验应用ID appid 是否属于系统配置的合法 AppID 范围
+        List<String> validAppIds = java.util.stream.Stream.of(
+                setting.getJsapiAppId(), setting.getNativeAppId(), setting.getMpAppId(),
+                setting.getH5AppId(), setting.getAppAppId()
+        ).filter(CharSequenceUtil::isNotEmpty).toList();
+        if (!validAppIds.isEmpty() && !validAppIds.contains(transaction.getAppid())) {
+            log.error("微信支付异步通知：应用ID不匹配，通知 appid={}, 系统配置 appIds={}", transaction.getAppid(), validAppIds);
+            throw new ServiceException(ResultCode.PAY_ERROR, "微信支付应用ID不匹配");
+        }
+
+        // 3. 校验交易状态 trade_state 是否为成功状态
+        if (transaction.getTradeState() == null || !Transaction.TradeStateEnum.SUCCESS.equals(transaction.getTradeState())) {
+            log.warn("微信支付异步通知：非成功交易状态 trade_state={}", transaction.getTradeState());
+            return;
+        }
+
         // 将 Hutool URLDecoder 替换为标准库
         String payParamJson = java.net.URLDecoder.decode(transaction.getAttach(), StandardCharsets.UTF_8.name());
 
@@ -801,9 +824,28 @@ public class WechatPlugin implements Payment {
             Refund refund = refundService.create(request);
 
             log.info("微信退款响应 {}", refund);
+            if (refund != null) {
+                if (com.wechat.pay.java.service.refund.model.Status.CLOSED.equals(refund.getStatus())
+                        || com.wechat.pay.java.service.refund.model.Status.ABNORMAL.equals(refund.getStatus())) {
+                    refundLog.setErrorMessage("微信退款状态异常: " + refund.getStatus());
+                    refundLogService.save(refundLog);
+                    throw new ServiceException(ResultCode.PAY_ERROR, "微信退款失败: " + refund.getStatus());
+                }
+                refundLog.setReceivableNo(refund.getRefundId());
+                if (com.wechat.pay.java.service.refund.model.Status.SUCCESS.equals(refund.getStatus())) {
+                    refundLog.setIsRefund(true);
+                }
+            }
             refundLogService.save(refundLog);
+        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
+            log.error("微信退款申请接口异常，orderSn={}, errorCode={}, errorMessage={}",
+                    refundLog.getOrderSn(), e.getErrorCode(), e.getErrorMessage(), e);
+            throw new ServiceException(ResultCode.PAY_ERROR, "微信退款申请失败: " + e.getErrorMessage());
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("微信退款申请失败", e);
+            log.error("微信退款申请失败，orderSn={}", refundLog.getOrderSn(), e);
+            throw new ServiceException(ResultCode.PAY_ERROR, "微信退款申请失败: " + (e.getMessage() != null ? e.getMessage() : "渠道异常"));
         }
 
     }
@@ -846,12 +888,17 @@ public class WechatPlugin implements Payment {
             RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo,
                     refund.getTransactionId()));
             if (refundLog != null) {
-                refundLog.setIsRefund(true);
-                refundLog.setReceivableNo(refund.getRefundId());
+                if (refund.getStatus() != null && com.wechat.pay.java.service.refund.model.Status.SUCCESS.equals(refund.getStatus())) {
+                    refundLog.setIsRefund(true);
+                    refundLog.setReceivableNo(refund.getRefundId());
+                } else {
+                    refundLog.setIsRefund(false);
+                    refundLog.setErrorMessage("微信退款异步通知非成功状态: " + refund.getStatus());
+                }
                 refundLogService.saveOrUpdate(refundLog);
             }
         } catch (Exception e) {
-            log.error("微信退款失败", e);
+            log.error("微信退款异步通知处理失败", e);
         }
     }
 

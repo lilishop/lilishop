@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.plugin.alipay;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
@@ -29,7 +30,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
-import cn.hutool.json.JSONUtil;
 import cn.hutool.json.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.*;
@@ -207,18 +207,24 @@ public class AliPayPlugin implements Payment {
         //交互退款
         try {
             AlipayTradeRefundResponse alipayTradeRefundResponse = AliPayApi.tradeRefundToResponse(model);
-            log.error("支付宝退款，参数：{},支付宝响应：{}", JSONUtil.toJsonStr(model), JSONUtil.toJsonStr(alipayTradeRefundResponse));
+            log.info("支付宝退款，参数：{},支付宝响应：{}", JSONUtil.toJsonStr(model), JSONUtil.toJsonStr(alipayTradeRefundResponse));
             if (alipayTradeRefundResponse.isSuccess()) {
                 refundLog.setIsRefund(true);
                 refundLog.setReceivableNo(refundLog.getOutOrderNo());
+                refundLogService.save(refundLog);
             } else {
-                refundLog.setErrorMessage(String.format("错误码：%s,错误原因：%s", alipayTradeRefundResponse.getSubCode(),
-                        alipayTradeRefundResponse.getSubMsg()));
+                String errorMsg = String.format("错误码：%s,错误原因：%s", alipayTradeRefundResponse.getSubCode(),
+                        alipayTradeRefundResponse.getSubMsg());
+                refundLog.setErrorMessage(errorMsg);
+                refundLogService.save(refundLog);
+                log.error("支付宝退款业务失败，orderSn={}, errorMsg={}", refundLog.getOrderSn(), errorMsg);
+                throw new ServiceException(ResultCode.PAY_ERROR, "支付宝退款失败：" + alipayTradeRefundResponse.getSubMsg());
             }
-            refundLogService.save(refundLog);
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             log.error("支付退款异常：", e);
-            throw new ServiceException(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR, "支付宝退款异常：" + (e.getMessage() != null ? e.getMessage() : "请稍后重试"));
         }
 
     }
@@ -346,6 +352,12 @@ public class AliPayPlugin implements Payment {
             if (!"TRADE_FINISHED".equals(map.get("trade_status")) &&
                     !"TRADE_SUCCESS".equals(map.get("trade_status"))) {
                 log.info("支付回调通知：非成功终态 trade_status={}", map.get("trade_status"));
+                return false;
+            }
+            // 校验 app_id 是否匹配本商户配置
+            String notifyAppId = map.get("app_id");
+            if (CharSequenceUtil.isEmpty(notifyAppId) || !notifyAppId.equals(alipayPaymentSetting.getAppId())) {
+                log.error("支付回调通知：app_id 不匹配，通知 appId={}, 系统配置 appId={}", notifyAppId, alipayPaymentSetting.getAppId());
                 return false;
             }
             String payParamStr = map.get("passback_params");

@@ -142,8 +142,11 @@ public class WalletPlugin implements Payment {
                     DepositServiceTypeEnum.WALLET_REFUND.name()));
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("退款失败", e);
+            log.error("余额退款失败", e);
+            throw new ServiceException(ResultCode.PAY_ERROR, "余额退款失败: " + (e.getMessage() != null ? e.getMessage() : "未知异常"));
         } finally {
             lock.unlock();
         }

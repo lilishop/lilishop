@@ -178,17 +178,34 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void payTrade(String tradeSn, String paymentName, String receivableNo) {
+        this.payTrade(tradeSn, paymentName, receivableNo, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void payTrade(String tradeSn, String paymentName, String receivableNo, Double price) {
+        Trade trade = this.getBySn(tradeSn);
+        if (trade == null) {
+            log.error("交易[{}]不存在，无法完成支付入账", tradeSn);
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        if (price != null) {
+            java.math.BigDecimal paidAmount = java.math.BigDecimal.valueOf(price).setScale(2, java.math.RoundingMode.HALF_UP);
+            java.math.BigDecimal tradeAmount = java.math.BigDecimal.valueOf(trade.getFlowPrice()).setScale(2, java.math.RoundingMode.HALF_UP);
+            if (paidAmount.compareTo(tradeAmount) != 0) {
+                log.error("交易[{}]支付金额不一致，拒绝入账：通知金额={}, 交易应付金额={}",
+                        tradeSn, paidAmount, tradeAmount);
+                throw new ServiceException(ResultCode.PAY_INCONSISTENT_ERROR);
+            }
+        }
         LambdaQueryWrapper<Order> orderQueryWrapper = new LambdaQueryWrapper<>();
         orderQueryWrapper.eq(Order::getTradeSn, tradeSn);
         List<Order> orders = orderService.list(orderQueryWrapper);
         for (Order order : orders) {
-            orderService.payOrder(order.getSn(), paymentName, receivableNo);
+            orderService.payOrder(order.getSn(), paymentName, receivableNo, order.getFlowPrice());
         }
-        Trade trade = this.getBySn(tradeSn);
-        if (trade != null) {
-            trade.setPayStatus(PayStatusEnum.PAID.name());
-            this.saveOrUpdate(trade);
-        }
+        trade.setPayStatus(PayStatusEnum.PAID.name());
+        this.saveOrUpdate(trade);
 
     }
 

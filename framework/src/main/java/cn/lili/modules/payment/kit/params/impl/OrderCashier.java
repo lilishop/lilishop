@@ -99,7 +99,8 @@ public class OrderCashier implements CashierExecute {
         if (payParam.getOrderType().equals(CashierEnum.ORDER.name())) {
             orderService.payOrder(payParam.getSn(),
                     paymentSuccessParams.getPaymentMethod(),
-                    paymentSuccessParams.getReceivableNo());
+                    paymentSuccessParams.getReceivableNo(),
+                    paymentSuccessParams.getPrice());
             log.info("订单{}支付成功,金额{},方式{}", payParam.getSn(),
                     paymentSuccessParams.getPaymentMethod(),
                     paymentSuccessParams.getReceivableNo());

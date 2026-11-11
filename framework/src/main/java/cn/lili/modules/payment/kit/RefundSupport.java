@@ -65,6 +65,9 @@ public class RefundSupport {
                 .refundReason(afterSale.getReason())
                 .build();
         PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(order.getPaymentMethod());
+        if (paymentMethodEnum == null) {
+            throw new cn.lili.common.exception.ServiceException(cn.lili.common.enums.ResultCode.PAY_NOT_SUPPORT);
+        }
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
         payment.refund(refundLog);
 

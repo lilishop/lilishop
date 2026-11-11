@@ -44,6 +44,16 @@ public interface TradeService extends IService<Trade> {
      */
     void payTrade(String tradeSn, String paymentName, String receivableNo);
 
+    /**
+     * 整笔交易付款（含金额核验）
+     *
+     * @param tradeSn      交易编号
+     * @param paymentName  支付方式
+     * @param receivableNo 第三方流水号
+     * @param price        实际支付金额
+     */
+    void payTrade(String tradeSn, String paymentName, String receivableNo, Double price);
+
     void updateTradePrice(String tradeSn);
 
     /**
