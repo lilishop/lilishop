@@ -1,12 +1,14 @@
 package cn.lili.modules.im.entity.vo;
 
 import cn.lili.modules.im.entity.enums.MessageResultType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * MessageVO
+ * 消息返回VO
  *
  * @author Chopper
  * @version v1.0
@@ -14,15 +16,14 @@ import lombok.Data;
  */
 @Data
 @Builder
+@Schema(description = "消息返回VO")
+@NoArgsConstructor
 @AllArgsConstructor
 public class MessageVO {
 
-    /**
-     * 消息类型
-     */
+    @Schema(description = "返回消息类型")
     private MessageResultType messageResultType;
-    /**
-     * 消息内容
-     */
+
+    @Schema(description = "消息内容")
     private Object result;
 }
