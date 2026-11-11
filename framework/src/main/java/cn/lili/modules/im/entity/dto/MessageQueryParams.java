@@ -6,11 +6,14 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.im.entity.dos.ImMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
- * MessageQueryParams
+ * 历史消息查询参数
  *
  * @author Chopper
  * @version v1.0
@@ -18,21 +21,20 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Schema(description = "历史消息查询参数")
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageQueryParams extends PageVO {
 
     private static final long serialVersionUID = 3504156704697214077L;
 
-    /**
-     * 聊天窗口
-     */
+    @Schema(description = "聊天会话ID")
     private String talkId;
-    /**
-     * 最后一个消息
-     */
+
+    @Schema(description = "最后一条消息ID")
     private String lastMessageId;
-    /**
-     * 获取消息数量
-     */
+
+    @Schema(description = "获取消息数量")
     private Integer num;
 
     public LambdaQueryWrapper<ImMessage> initQueryWrapper() {
@@ -49,7 +51,6 @@ public class MessageQueryParams extends PageVO {
             lambdaQueryWrapper.lt(ImMessage::getId, lastMessageId);
         }
         lambdaQueryWrapper.orderByDesc(ImMessage::getCreateTime);
-//        lambdaQueryWrapper.last("limit " + num);
         return lambdaQueryWrapper;
     }
 }
