@@ -2,6 +2,10 @@ package cn.lili.modules.payment.kit.plugin.wechat;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
+import cn.lili.common.context.ThreadContextHolder;
+import cn.lili.modules.payment.kit.dto.PaymentQueryResult;
+import com.wechat.pay.java.service.payments.nativepay.model.CloseOrderRequest;
+import com.wechat.pay.java.service.payments.nativepay.model.QueryOrderByOutTradeNoRequest;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -461,10 +465,52 @@ public class WechatPlugin implements Payment {
 
     @Override
     public void notify(HttpServletRequest request) {
+        notify(request, ThreadContextHolder.getHttpResponse());
+    }
+
+    @Override
+    public void notify(HttpServletRequest request, HttpServletResponse response) {
         try {
             verifyNotify(request);
+            if (response != null) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setContentType("application/json;charset=UTF-8");
+                Map<String, String> result = new HashMap<>(4);
+                result.put("code", "SUCCESS");
+                result.put("message", "成功");
+                response.getWriter().write(new Gson().toJson(result));
+                response.getWriter().flush();
+            }
+        } catch (ValidationException e) {
+            log.error("微信支付通知验签失败", e);
+            if (response != null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                Map<String, String> result = new HashMap<>(4);
+                result.put("code", "FAIL");
+                result.put("message", "签名验证失败");
+                try {
+                    response.getWriter().write(new Gson().toJson(result));
+                    response.getWriter().flush();
+                } catch (Exception writeEx) {
+                    log.error("微信支付响应写入异常", writeEx);
+                }
+            }
         } catch (Exception e) {
-            log.error("支付异常", e);
+            log.error("微信支付通知处理异常", e);
+            if (response != null) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("application/json;charset=UTF-8");
+                Map<String, String> result = new HashMap<>(4);
+                result.put("code", "FAIL");
+                result.put("message", e.getMessage() != null ? e.getMessage() : "系统异常");
+                try {
+                    response.getWriter().write(new Gson().toJson(result));
+                    response.getWriter().flush();
+                } catch (Exception writeEx) {
+                    log.error("微信支付响应写入异常", writeEx);
+                }
+            }
         }
     }
 
@@ -669,7 +715,7 @@ public class WechatPlugin implements Payment {
      * @param request
      * @throws Exception
      */
-    private void verifyNotify(HttpServletRequest request) throws Exception {
+    void verifyNotify(HttpServletRequest request) throws Exception {
 
         // 构造 RequestParam
         RequestParam requestParam = new RequestParam.Builder()
@@ -703,30 +749,24 @@ public class WechatPlugin implements Payment {
         // 初始化 NotificationParser
         NotificationParser parser = new NotificationParser(config);
 
-        try {
-            // 以支付通知回调为例，验签、解密并转换成 Transaction
-            Transaction transaction = parser.parse(requestParam, Transaction.class);
+        // 以支付通知回调为例，验签、解密并转换成 Transaction
+        Transaction transaction = parser.parse(requestParam, Transaction.class);
 
-            // 将 Hutool URLDecoder 替换为标准库
-            String payParamJson = java.net.URLDecoder.decode(transaction.getAttach(), StandardCharsets.UTF_8.name());
+        // 将 Hutool URLDecoder 替换为标准库
+        String payParamJson = java.net.URLDecoder.decode(transaction.getAttach(), StandardCharsets.UTF_8.name());
 
-            PayParam payParam = new Gson().fromJson(payParamJson, PayParam.class);
+        PayParam payParam = new Gson().fromJson(payParamJson, PayParam.class);
 
-            Double totalAmount = CurrencyUtil.reversalFen(transaction.getAmount().getTotal());
+        Double totalAmount = CurrencyUtil.reversalFen(transaction.getAmount().getTotal());
 
-            PaymentSuccessParams paymentSuccessParams = new PaymentSuccessParams(
-                    PaymentMethodEnum.WECHAT.name(),
-                    transaction.getTransactionId(),
-                    totalAmount,
-                    payParam
-            );
+        PaymentSuccessParams paymentSuccessParams = new PaymentSuccessParams(
+                PaymentMethodEnum.WECHAT.name(),
+                transaction.getTransactionId(),
+                totalAmount,
+                payParam
+        );
 
-            paymentService.success(paymentSuccessParams);
-        } catch (ValidationException e) {
-            // 签名验证失败，返回 401 UNAUTHORIZED 状态码
-            log.error("sign verification failed", e);
-
-        }
+        paymentService.success(paymentSuccessParams);
 
     }
 
@@ -870,15 +910,143 @@ public class WechatPlugin implements Payment {
      * @param payParam   支付参数
      * @param outOrderNo 订单号
      */
+    /**
+     * 主动查询微信支付订单状态
+     *
+     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
+     * @return 查单结果
+     */
+    @Override
+    public PaymentQueryResult query(String outTradeNo) {
+        if (StringUtils.isEmpty(outTradeNo)) {
+            return PaymentQueryResult.builder().exists(false).isPaid(false).isClosed(false).paymentMethod(PaymentMethodEnum.WECHAT.name()).build();
+        }
+        try {
+            WechatPaymentSetting setting = wechatPaymentSetting();
+            Config config = getWechatConfig(setting);
+            NativePayService service = new NativePayService.Builder().config(config).build();
+
+            QueryOrderByOutTradeNoRequest request = new QueryOrderByOutTradeNoRequest();
+            request.setMchid(setting.getMchId());
+            request.setOutTradeNo(outTradeNo);
+
+            Transaction transaction = service.queryOrderByOutTradeNo(request);
+            if (transaction == null) {
+                return PaymentQueryResult.builder()
+                        .exists(false)
+                        .isPaid(false)
+                        .isClosed(false)
+                        .paymentMethod(PaymentMethodEnum.WECHAT.name())
+                        .build();
+            }
+
+            Transaction.TradeStateEnum tradeState = transaction.getTradeState();
+            boolean isPaid = Transaction.TradeStateEnum.SUCCESS.equals(tradeState);
+            boolean isClosed = Transaction.TradeStateEnum.CLOSED.equals(tradeState)
+                    || Transaction.TradeStateEnum.REVOKED.equals(tradeState);
+            Double totalAmount = null;
+            if (transaction.getAmount() != null && transaction.getAmount().getTotal() != null) {
+                totalAmount = CurrencyUtil.reversalFen(transaction.getAmount().getTotal());
+            }
+
+            return PaymentQueryResult.builder()
+                    .exists(true)
+                    .isPaid(isPaid)
+                    .isClosed(isClosed)
+                    .paymentMethod(PaymentMethodEnum.WECHAT.name())
+                    .receivableNo(transaction.getTransactionId())
+                    .totalAmount(totalAmount)
+                    .rawStatus(tradeState != null ? tradeState.name() : null)
+                    .build();
+        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
+            // 404 或 ORDERNOTEXIST 说明渠道无此订单
+            if (e.getHttpStatusCode() == 404 || "ORDERNOTEXIST".equalsIgnoreCase(e.getErrorCode())) {
+                log.info("微信支付查单：渠道订单不存在，outTradeNo={}", outTradeNo);
+                return PaymentQueryResult.builder()
+                        .exists(false)
+                        .isPaid(false)
+                        .isClosed(false)
+                        .paymentMethod(PaymentMethodEnum.WECHAT.name())
+                        .rawStatus(e.getErrorCode())
+                        .errorMessage(e.getErrorMessage())
+                        .build();
+            }
+            log.error("微信支付查单服务异常，outTradeNo={}", outTradeNo, e);
+            throw new ServiceException("微信支付查单服务异常: " + e.getErrorMessage());
+        } catch (ServiceException se) {
+            // 配置缺失等业务异常，返回不存在
+            log.warn("微信支付查单配置异常或未支持，outTradeNo={}", outTradeNo, se);
+            return PaymentQueryResult.builder()
+                    .exists(false)
+                    .isPaid(false)
+                    .isClosed(false)
+                    .paymentMethod(PaymentMethodEnum.WECHAT.name())
+                    .errorMessage(se.getMessage())
+                    .build();
+        } catch (Exception e) {
+            log.error("微信支付查单未知异常，outTradeNo={}", outTradeNo, e);
+            throw new ServiceException("微信支付查单未知异常: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 关闭微信未支付订单
+     *
+     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
+     */
+    @Override
+    public void close(String outTradeNo) {
+        if (StringUtils.isEmpty(outTradeNo)) {
+            return;
+        }
+        try {
+            WechatPaymentSetting setting = wechatPaymentSetting();
+            Config config = getWechatConfig(setting);
+            NativePayService service = new NativePayService.Builder().config(config).build();
+
+            CloseOrderRequest closeRequest = new CloseOrderRequest();
+            closeRequest.setMchid(setting.getMchId());
+            closeRequest.setOutTradeNo(outTradeNo);
+            service.closeOrder(closeRequest);
+            log.info("微信支付关单成功，outTradeNo={}", outTradeNo);
+        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
+            // 若订单不存在或已关闭，视为正常
+            if (e.getHttpStatusCode() == 404 || "ORDERNOTEXIST".equalsIgnoreCase(e.getErrorCode())
+                    || "ORDER_CLOSED".equalsIgnoreCase(e.getErrorCode())) {
+                log.info("微信支付关单忽略：订单不存在或已关闭，outTradeNo={}, code={}", outTradeNo, e.getErrorCode());
+                return;
+            }
+            log.warn("微信支付关单异常，outTradeNo={}", outTradeNo, e);
+        } catch (Exception e) {
+            log.warn("微信支付关单异常，outTradeNo={}", outTradeNo, e);
+        }
+    }
+
+    /**
+     * 获取微信配置对象
+     *
+     * @param setting 微信支付设置
+     * @return 微信 SDK 配置
+     */
+    private Config getWechatConfig(WechatPaymentSetting setting) {
+        if ("CERT".equals(setting.getPublicType())) {
+            return this.getCertificateConfig(setting);
+        } else {
+            return this.getPublicKeyConfig(setting);
+        }
+    }
+
     private void updateOrderPayNo(PayParam payParam, String outOrderNo) {
         if ("ORDER".equals(payParam.getOrderType())) {
             orderService.update(new LambdaUpdateWrapper<Order>()
                     .eq(Order::getSn, payParam.getSn())
-                    .set(Order::getPayOrderNo, outOrderNo));
+                    .set(Order::getPayOrderNo, outOrderNo)
+                    .set(Order::getPaymentMethod, PaymentMethodEnum.WECHAT.name()));
         } else if ("TRADE".equals(payParam.getOrderType())) {
             orderService.update(new LambdaUpdateWrapper<Order>()
                     .eq(Order::getTradeSn, payParam.getSn())
-                    .set(Order::getPayOrderNo, outOrderNo));
+                    .set(Order::getPayOrderNo, outOrderNo)
+                    .set(Order::getPaymentMethod, PaymentMethodEnum.WECHAT.name()));
         }
     }
 

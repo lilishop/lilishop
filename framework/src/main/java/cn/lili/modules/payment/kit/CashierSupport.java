@@ -10,7 +10,10 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.entity.enums.CashierEnum;
 import cn.lili.modules.payment.entity.enums.PaymentClientEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.common.context.ThreadContextHolder;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentQueryResult;
 import cn.lili.modules.payment.kit.params.CashierExecute;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -137,12 +140,54 @@ public class CashierSupport {
      */
     public void notify(PaymentMethodEnum paymentMethodEnum,
                        HttpServletRequest request) {
+        notify(paymentMethodEnum, request, ThreadContextHolder.getHttpResponse());
+    }
+
+    /**
+     * 支付通知（带响应对象）
+     *
+     * @param paymentMethodEnum 支付渠道
+     * @param request           请求
+     * @param response          响应
+     */
+    public void notify(PaymentMethodEnum paymentMethodEnum,
+                       HttpServletRequest request,
+                       HttpServletResponse response) {
 
         log.info("支付异步通知：支付类型：{}", paymentMethodEnum.name());
 
         //获取支付插件
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
-        payment.notify(request);
+        payment.notify(request, response);
+    }
+
+    /**
+     * 主动查询支付渠道支付结果
+     *
+     * @param paymentMethodEnum 支付渠道
+     * @param outTradeNo        外部商户单号
+     * @return 查单结果
+     */
+    public PaymentQueryResult query(PaymentMethodEnum paymentMethodEnum, String outTradeNo) {
+        if (paymentMethodEnum == null || StringUtils.isEmpty(outTradeNo)) {
+            return PaymentQueryResult.builder().exists(false).isPaid(false).isClosed(false).build();
+        }
+        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+        return payment.query(outTradeNo);
+    }
+
+    /**
+     * 关闭渠道订单
+     *
+     * @param paymentMethodEnum 支付渠道
+     * @param outTradeNo        外部商户单号
+     */
+    public void close(PaymentMethodEnum paymentMethodEnum, String outTradeNo) {
+        if (paymentMethodEnum == null || StringUtils.isEmpty(outTradeNo)) {
+            return;
+        }
+        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+        payment.close(outTradeNo);
     }
 
     /**

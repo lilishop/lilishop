@@ -6,6 +6,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentQueryResult;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 
@@ -92,6 +93,35 @@ public interface Payment {
      */
     default void callBack(HttpServletRequest request) {
         throw new ServiceException(ResultCode.PAY_ERROR);
+    }
+
+    /**
+     * 异步通知（带响应对象）
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     */
+    default void notify(HttpServletRequest request, HttpServletResponse response) {
+        notify(request);
+    }
+
+    /**
+     * 主动查询支付渠道订单状态
+     *
+     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
+     * @return 查单结果
+     */
+    default PaymentQueryResult query(String outTradeNo) {
+        throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
+    }
+
+    /**
+     * 关闭支付渠道未支付订单
+     *
+     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
+     */
+    default void close(String outTradeNo) {
+        // 默认空实现
     }
 
     /**
