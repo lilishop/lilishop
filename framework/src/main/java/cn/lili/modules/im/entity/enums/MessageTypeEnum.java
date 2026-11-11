@@ -1,19 +1,14 @@
 package cn.lili.modules.im.entity.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * 消息类型
  *
  * @author liushuai
  */
+@Schema(description = "消息类型")
 public enum MessageTypeEnum {
-    /**
-     * 消息类型枚举
-     * <p>
-     * 普通消息
-     * 图片
-     * 语音
-     * 视频
-     */
     MESSAGE,
     PICTURE,
     VOICE,
