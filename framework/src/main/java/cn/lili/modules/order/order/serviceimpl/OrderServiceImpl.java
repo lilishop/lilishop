@@ -578,14 +578,60 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Transactional(rollbackFor = Exception.class)
     public void systemCancel(String orderSn, String reason, Boolean refundMoney) {
         Order order = this.getBySn(orderSn);
+        if (order == null) {
+            log.warn("系统关单失败：订单[{}]不存在", orderSn);
+            return;
+        }
+        // 若订单已是取消状态，幂等返回
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
+            log.info("系统关单跳过：订单[{}]已处于取消状态", orderSn);
+            return;
+        }
+
+        // 若不需要退款（如超时未支付关单、拼团结束未付款自动关单），严格限定当前状态必须为 UNPAID 并进行 CAS 更新
+        if (Boolean.FALSE.equals(refundMoney)) {
+            if (!OrderStatusEnum.UNPAID.name().equals(order.getOrderStatus())) {
+                log.warn("系统关单拒绝：订单[{}]非待付款状态，拒绝未支付关单，当前状态：{}", orderSn, order.getOrderStatus());
+                return;
+            }
+            boolean updated = this.update(new LambdaUpdateWrapper<Order>()
+                    .eq(Order::getSn, orderSn)
+                    .eq(Order::getOrderStatus, OrderStatusEnum.UNPAID.name())
+                    .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
+                    .set(Order::getCancelReason, reason));
+            if (!updated) {
+                log.warn("系统关单并发冲突：订单[{}]状态已被并发改变，取消终止", orderSn);
+                return;
+            }
+        } else {
+            // 需要退款的系统取消（如缺货取消、成团失败取消等）
+            if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
+                log.warn("系统关单拒绝：订单[{}]已完成，不允许系统取消", orderSn);
+                return;
+            }
+            boolean updated = this.update(new LambdaUpdateWrapper<Order>()
+                    .eq(Order::getSn, orderSn)
+                    .in(Order::getOrderStatus, Arrays.asList(
+                            OrderStatusEnum.UNPAID.name(),
+                            OrderStatusEnum.PAID.name(),
+                            OrderStatusEnum.UNDELIVERED.name(),
+                            OrderStatusEnum.STAY_PICKED_UP.name()
+                    ))
+                    .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
+                    .set(Order::getCancelReason, reason));
+            if (!updated) {
+                log.warn("系统关单并发冲突：订单[{}]状态已被并发改变，取消终止", orderSn);
+                return;
+            }
+        }
+
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
-        this.updateById(order);
         // 普通订单标记退款，提货取消不标记为已退款。
         if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
             orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
         }
-        if (refundMoney || pickupCardOrderService.isPickupOrder(order.getSn())) {
+        if (Boolean.TRUE.equals(refundMoney) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
             refundCanceledOrderBySplit(order, reason);
             //生成店铺退款流水
@@ -663,21 +709,69 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void payOrder(String orderSn, String paymentMethod, String receivableNo) {
 
         Order order = this.getBySn(orderSn);
-        //如果订单已支付，就不能再次进行支付
-        if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+        if (order == null) {
+            log.error("订单[ {} ]不存在，无法完成支付入账", orderSn);
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+
+        // 1. 如果订单已支付，就不能再次进行支付
+        if (PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
             log.error("订单[ {} ]检测到重复付款，请处理", orderSn);
             throw new ServiceException(ResultCode.PAY_DOUBLE_ERROR);
         }
+
+        // 2. 检查订单是否已取消，严防“死单复活”与超卖，触发原路自动退款
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
+            log.warn("订单[{}]已处于取消状态，收到延迟支付通知，拒绝入账复活，触发原路自动退款：paymentMethod={}, receivableNo={}",
+                    orderSn, paymentMethod, receivableNo);
+            refundLatePaymentForCancelledOrder(order, paymentMethod, receivableNo);
+            return;
+        }
+
+        // 3. 严格限定仅待付款订单允许支付入账
+        if (!OrderStatusEnum.UNPAID.name().equals(order.getOrderStatus())) {
+            log.warn("订单[{}]非待付款状态，拒绝支付入账：orderStatus={}, payStatus={}",
+                    orderSn, order.getOrderStatus(), order.getPayStatus());
+            throw new ServiceException(ResultCode.PAY_BAN);
+        }
+
         boolean pickupOrder = pickupCardOrderService.isPickupOrder(orderSn);
 
-        //修改订单状态
+        // 4. 使用 CAS 原子更新防并发（仅当状态仍为 UNPAID 时流转为 PAID）
+        boolean updated = this.update(new LambdaUpdateWrapper<Order>()
+                .eq(Order::getSn, orderSn)
+                .eq(Order::getOrderStatus, OrderStatusEnum.UNPAID.name())
+                .eq(Order::getPayStatus, PayStatusEnum.UNPAID.name())
+                .set(Order::getPaymentTime, new Date())
+                .set(Order::getPaymentMethod, paymentMethod)
+                .set(Order::getPayStatus, PayStatusEnum.PAID.name())
+                .set(Order::getOrderStatus, OrderStatusEnum.PAID.name())
+                .set(Order::getReceivableNo, receivableNo)
+                .set(Order::getCanReturn, !pickupOrder && !PaymentMethodEnum.BANK_TRANSFER.name().equals(paymentMethod)));
+
+        if (!updated) {
+            // 复查最新订单状态进行并发幂等或退款分流
+            Order fresh = this.getBySn(orderSn);
+            if (fresh != null && PayStatusEnum.PAID.name().equals(fresh.getPayStatus())) {
+                log.warn("订单[{}]已被其他并发线程入账成功，跳过重复处理", orderSn);
+                return;
+            }
+            if (fresh != null && OrderStatusEnum.CANCELLED.name().equals(fresh.getOrderStatus())) {
+                log.warn("订单[{}]并发期间已被取消，拒绝入账复活，触发原路自动退款：paymentMethod={}, receivableNo={}",
+                        orderSn, paymentMethod, receivableNo);
+                refundLatePaymentForCancelledOrder(fresh, paymentMethod, receivableNo);
+                return;
+            }
+            log.error("订单[{}]支付状态CAS更新失败，当前状态异常", orderSn);
+            throw new ServiceException(ResultCode.PAY_ERROR);
+        }
+
         order.setPaymentTime(new Date());
         order.setPaymentMethod(paymentMethod);
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setReceivableNo(receivableNo);
-        order.setCanReturn(!pickupOrder && !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
-        this.updateById(order);
+        order.setCanReturn(!pickupOrder && !PaymentMethodEnum.BANK_TRANSFER.name().equals(paymentMethod));
 
         //记录店铺订单支付流水
         storeFlowService.payOrder(orderSn);
@@ -700,6 +794,54 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);
         orderLogService.save(orderLog);
 
+    }
+
+    /**
+     * 已取消订单收到延迟支付时的原路退款处理
+     *
+     * @param order         已取消订单
+     * @param paymentMethod 支付方式
+     * @param receivableNo  第三方支付流水号
+     */
+    private void refundLatePaymentForCancelledOrder(Order order, String paymentMethod, String receivableNo) {
+        if (order == null || pickupCardOrderService.isPickupOrder(order.getSn())) {
+            return;
+        }
+        BigDecimal refundAmount = toMoney(order.getFlowPrice());
+        if (refundAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("已取消订单[{}]实付金额为0，无需发起渠道退款", order.getSn());
+            return;
+        }
+        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(paymentMethod);
+        if (paymentMethodEnum == null) {
+            log.error("已取消订单[{}]退款失败：未识别支付方式[{}]", order.getSn(), paymentMethod);
+            return;
+        }
+        RefundLog refundLog = RefundLog.builder()
+                .isRefund(false)
+                .totalAmount(refundAmount.doubleValue())
+                .payPrice(refundAmount.doubleValue())
+                .memberId(order.getMemberId())
+                .paymentName(paymentMethod)
+                .afterSaleNo("LATE_PAY_REFUND")
+                .paymentReceivableNo(receivableNo)
+                .outOrderNo("RF" + SnowFlake.getIdStr())
+                .orderSn(order.getSn())
+                .refundReason("订单已取消，迟到付款自动原路退款")
+                .build();
+        try {
+            Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+            if (payment != null) {
+                payment.refund(refundLog);
+                log.info("已取消订单[{}]迟到支付原路退款成功发起：receivableNo={}, refundAmount={}",
+                        order.getSn(), receivableNo, refundAmount);
+            }
+        } catch (Exception e) {
+            log.error("已取消订单[{}]迟到支付原路退款请求失败：receivableNo={}", order.getSn(), receivableNo, e);
+        }
+        String logMsg = "订单已取消，收到延迟支付通知[方式: " + paymentMethod + "，流水: " + receivableNo + "]，已自动触发原路退款";
+        OrderLog orderLog = new OrderLog(order.getSn(), "-1", UserEnums.SYSTEM.getRole(), "系统操作", logMsg);
+        orderLogService.save(orderLog);
     }
 
     @Override

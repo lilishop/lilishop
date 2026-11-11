@@ -79,6 +79,7 @@ class OrderServiceImplPayOrderTest {
         when(rocketmqCustomProperties.getOrderTopic()).thenReturn("order-topic");
         when(orderLogService.save(any(OrderLog.class))).thenReturn(true);
         doReturn(true).when(orderService).updateById(any(Order.class));
+        doReturn(true).when(orderService).update(any());
     }
 
     /**
@@ -127,6 +128,49 @@ class OrderServiceImplPayOrderTest {
     /**
      * 构造未支付订单。
      */
+    /**
+     * 已取消订单收到延迟支付时拒绝入账复活，不产生店铺流水与分销，记录日志。
+     */
+    @Test
+    void payOrderRefusesCancelledOrderAndDoesNotReviveIt() {
+        Order order = unpaidOrder("O002");
+        order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
+        order.setFlowPrice(100.0);
+        order.setMemberId("M001");
+        doReturn(order).when(orderService).getBySn("O002");
+
+        orderService.payOrder("O002", PaymentMethodEnum.WECHAT.name(), "recv-late-1");
+
+        // 订单状态绝不被复活为 PAID
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.CANCELLED.name());
+        assertThat(order.getPayStatus()).isEqualTo(PayStatusEnum.UNPAID.name());
+        // 不记录店铺支付流水
+        verify(storeFlowService, never()).payOrder("O002");
+        // 不发布入账与分销事件
+        verify(applicationEventPublisher, never()).publishEvent(any());
+        // 记录系统退款操作日志
+        verify(orderLogService).save(any(OrderLog.class));
+    }
+
+    /**
+     * 超时关单（无需退款）仅允许针对 UNPAID 订单，若已是 PAID 状态则拒绝关单。
+     */
+    @Test
+    void systemCancelRejectsAlreadyPaidOrderWhenRefundMoneyIsFalse() {
+        Order order = unpaidOrder("O003");
+        order.setOrderStatus(OrderStatusEnum.PAID.name());
+        order.setPayStatus(PayStatusEnum.PAID.name());
+        doReturn(order).when(orderService).getBySn("O003");
+
+        // 尝试超时关单
+        orderService.systemCancel("O003", "超时未支付自动取消", false);
+
+        // 验证订单状态未被变更为 CANCELLED
+        assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.PAID.name());
+        // 验证未调用任何取消更新
+        verify(orderService, never()).update(any());
+    }
+
     private static Order unpaidOrder(String sn) {
         Order order = new Order();
         order.setSn(sn);

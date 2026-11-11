@@ -125,6 +125,13 @@ public class CancelOrderTaskExecute implements EveryMinuteExecute {
             }
         }
 
+        // 关单前再次核查订单当前状态，防范查单及关单耗时期间订单已被并发支付
+        Order recheckOrder = orderService.getBySn(freshOrder.getSn());
+        if (recheckOrder == null || !OrderStatusEnum.UNPAID.name().equals(recheckOrder.getOrderStatus())) {
+            log.info("超时关单前再次核查：订单已非待付款状态，跳过取消处理，orderSn={}", freshOrder.getSn());
+            return;
+        }
+
         // 取消系统订单
         orderService.systemCancel(freshOrder.getSn(), "超时未支付自动取消", false);
         log.info("超时未支付订单系统取消完成：orderSn={}", freshOrder.getSn());

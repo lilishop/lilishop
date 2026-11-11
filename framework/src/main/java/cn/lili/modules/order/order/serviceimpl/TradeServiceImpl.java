@@ -172,8 +172,11 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
             orderService.payOrder(order.getSn(), paymentName, receivableNo);
         }
         Trade trade = this.getBySn(tradeSn);
-        trade.setPayStatus(PayStatusEnum.PAID.name());
-        this.saveOrUpdate(trade);
+        if (trade != null) {
+            trade.setPayStatus(PayStatusEnum.PAID.name());
+            this.saveOrUpdate(trade);
+        }
+
     }
 
     @Override

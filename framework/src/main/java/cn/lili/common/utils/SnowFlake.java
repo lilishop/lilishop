@@ -34,6 +34,9 @@ public class SnowFlake {
     }
 
     public static long getId() {
+        if (snowflake == null) {
+            initialize(1L, 1L);
+        }
         return snowflake.nextId();
     }
 
@@ -48,6 +51,9 @@ public class SnowFlake {
     }
 
     public static String getIdStr() {
+        if (snowflake == null) {
+            initialize(1L, 1L);
+        }
         return snowflake.nextId() + "";
     }
 }
