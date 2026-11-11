@@ -161,6 +161,12 @@ public class WalletPlugin implements Payment {
         if ("ORDER_CANCEL".equals(refundLog.getAfterSaleNo())) {
             return "订单[" + refundLog.getOrderSn() + "]，订单取消，退还金额[" + refundLog.getTotalAmount() + "]";
         }
+        if (refundLog.getAfterSaleNo() != null && refundLog.getAfterSaleNo().startsWith("DUP_PAY")) {
+            return "订单[" + refundLog.getOrderSn() + "]，重复付款原路退回，退还金额[" + refundLog.getTotalAmount() + "]";
+        }
+        if (refundLog.getAfterSaleNo() != null && refundLog.getAfterSaleNo().startsWith("LATE_PAY")) {
+            return "订单[" + refundLog.getOrderSn() + "]，订单取消迟到付款原路退回，退还金额[" + refundLog.getTotalAmount() + "]";
+        }
         return "订单[" + refundLog.getOrderSn() + "]，售后单[" + refundLog.getAfterSaleNo() + "]，退还金额[" + refundLog.getTotalAmount() + "]";
     }
 

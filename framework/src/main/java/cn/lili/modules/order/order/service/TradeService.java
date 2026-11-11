@@ -46,4 +46,14 @@ public interface TradeService extends IService<Trade> {
 
     void updateTradePrice(String tradeSn);
 
+    /**
+     * 重复支付交易原路退款
+     *
+     * @param tradeSn       交易编号
+     * @param paymentMethod 支付方式
+     * @param receivableNo  第三方支付流水号
+     * @param price         支付金额
+     */
+    void refundDuplicatePayment(String tradeSn, String paymentMethod, String receivableNo, Double price);
+
 }

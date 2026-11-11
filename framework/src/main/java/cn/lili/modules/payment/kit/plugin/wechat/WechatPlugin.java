@@ -777,7 +777,7 @@ public class WechatPlugin implements Payment {
 
             AmountReq amount = new AmountReq();
             amount.setRefund(CurrencyUtil.getFenLong(refundLog.getTotalAmount()));
-            amount.setTotal(CurrencyUtil.getFenLong(orderService.getPaymentTotal(refundLog.getOrderSn())));
+            amount.setTotal(CurrencyUtil.getFenLong(refundLog.getPayPrice() != null && refundLog.getPayPrice() > 0 ? refundLog.getPayPrice() : orderService.getPaymentTotal(refundLog.getOrderSn())));
             amount.setCurrency("CNY");
             //获取微信设置
             WechatPaymentSetting setting = wechatPaymentSetting();

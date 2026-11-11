@@ -756,6 +756,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             // 复查最新订单状态进行并发幂等或退款分流
             Order fresh = this.getBySn(orderSn);
             if (fresh != null && PayStatusEnum.PAID.name().equals(fresh.getPayStatus())) {
+                if (CharSequenceUtil.isNotEmpty(receivableNo) && !receivableNo.equals(fresh.getReceivableNo())) {
+                    log.warn("订单[{}]并发期间已被其他支付流水[{}]入账，当前流水[{}]判定为重复付款，触发原路自动退款",
+                            orderSn, fresh.getReceivableNo(), receivableNo);
+                    this.refundDuplicatePayment(fresh, paymentMethod, receivableNo);
+                    return;
+                }
                 log.warn("订单[{}]已被其他并发线程入账成功，跳过重复处理", orderSn);
                 return;
             }
@@ -843,6 +849,48 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             log.error("已取消订单[{}]迟到支付原路退款请求失败：receivableNo={}", order.getSn(), receivableNo, e);
         }
         String logMsg = "订单已取消，收到延迟支付通知[方式: " + paymentMethod + "，流水: " + receivableNo + "]，已自动触发原路退款";
+        OrderLog orderLog = new OrderLog(order.getSn(), "-1", UserEnums.SYSTEM.getRole(), "系统操作", logMsg);
+        orderLogService.save(orderLog);
+    }
+
+    @Override
+    public void refundDuplicatePayment(Order order, String paymentMethod, String receivableNo) {
+        if (order == null || pickupCardOrderService.isPickupOrder(order.getSn())) {
+            return;
+        }
+        BigDecimal refundAmount = toMoney(order.getFlowPrice());
+        if (refundAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn("已支付订单[{}]实付金额为0，无需发起渠道退款", order.getSn());
+            return;
+        }
+        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(paymentMethod);
+        if (paymentMethodEnum == null) {
+            log.error("已支付订单[{}]重复付款退款失败：未识别支付方式[{}]", order.getSn(), paymentMethod);
+            return;
+        }
+        RefundLog refundLog = RefundLog.builder()
+                .isRefund(false)
+                .totalAmount(refundAmount.doubleValue())
+                .payPrice(refundAmount.doubleValue())
+                .memberId(order.getMemberId())
+                .paymentName(paymentMethod)
+                .afterSaleNo("DUP_PAY_" + SnowFlake.getIdStr())
+                .paymentReceivableNo(receivableNo)
+                .outOrderNo("RF" + SnowFlake.getIdStr())
+                .orderSn(order.getSn())
+                .refundReason("订单重复支付，第二笔款项自动原路退回")
+                .build();
+        try {
+            Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+            if (payment != null) {
+                payment.refund(refundLog);
+                log.info("已支付订单[{}]重复付款原路退款成功发起：receivableNo={}, refundAmount={}",
+                        order.getSn(), receivableNo, refundAmount);
+            }
+        } catch (Exception e) {
+            log.error("已支付订单[{}]重复付款原路退款请求失败：receivableNo={}", order.getSn(), receivableNo, e);
+        }
+        String logMsg = "订单已支付，收到重复付款通知[方式: " + paymentMethod + "，流水: " + receivableNo + "]，已自动触发原路退款";
         OrderLog orderLog = new OrderLog(order.getSn(), "-1", UserEnums.SYSTEM.getRole(), "系统操作", logMsg);
         orderLogService.save(orderLog);
     }
@@ -1480,9 +1528,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public Double getPaymentTotal(String orderSn) {
         Order order = this.getBySn(orderSn);
+        if (order == null) {
+            Trade trade = tradeService.getBySn(orderSn);
+            if (trade != null) {
+                return trade.getFlowPrice();
+            }
+            return 0D;
+        }
         Trade trade = tradeService.getBySn(order.getTradeSn());
         //如果交易不为空，则返回交易的金额，否则返回订单金额
-        if (CharSequenceUtil.isNotEmpty(trade.getPayStatus())
+        if (trade != null && CharSequenceUtil.isNotEmpty(trade.getPayStatus())
                 && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }

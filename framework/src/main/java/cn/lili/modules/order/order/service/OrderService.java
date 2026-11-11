@@ -156,6 +156,15 @@ public interface OrderService extends IService<Order> {
     void payOrder(String orderSn, String paymentMethod, String receivableNo);
 
     /**
+     * 重复支付订单原路自动退款
+     *
+     * @param order         已支付订单
+     * @param paymentMethod 重复支付的支付方式
+     * @param receivableNo  第三方支付流水号
+     */
+    void refundDuplicatePayment(Order order, String paymentMethod, String receivableNo);
+
+    /**
      * 订单确认成功
      *
      * @param orderSn

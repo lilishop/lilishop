@@ -1,10 +1,16 @@
 package cn.lili.modules.payment.kit.params.impl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.CashierEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.kit.Payment;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.CashierExecute;
@@ -76,7 +82,7 @@ public class RechargeCashier implements CashierExecute {
                 BaseSetting baseSetting = JSONUtil.toBean(settingService.get(SettingEnum.BASE_SETTING.name()).getSettingValue(), BaseSetting.class);
                 cashierParam.setTitle(baseSetting.getSiteName());
             } catch (Exception e) {
-                cashierParam.setTitle("多用户商城，在线充值");
+                cashierParam.setTitle("多用户商城，在线支付");
             }
             cashierParam.setDetail("余额充值");
             cashierParam.setCreateTime(recharge.getCreateTime());
@@ -97,5 +103,53 @@ public class RechargeCashier implements CashierExecute {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isSamePayment(PaymentSuccessParams paymentSuccessParams) {
+        PayParam payParam = paymentSuccessParams.getPayParam();
+        if (CashierEnum.RECHARGE.name().equals(payParam.getOrderType())) {
+            Recharge recharge = rechargeService.getRecharge(payParam.getSn());
+            if (recharge != null && PayStatusEnum.PAID.name().equals(recharge.getPayStatus())) {
+                return CharSequenceUtil.isNotEmpty(recharge.getReceivableNo())
+                        && recharge.getReceivableNo().equals(paymentSuccessParams.getReceivableNo())
+                        && paymentSuccessParams.getPaymentMethod() != null
+                        && paymentSuccessParams.getPaymentMethod().equals(recharge.getRechargeWay());
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void refundDuplicatePayment(PaymentSuccessParams paymentSuccessParams) {
+        PayParam payParam = paymentSuccessParams.getPayParam();
+        if (CashierEnum.RECHARGE.name().equals(payParam.getOrderType())) {
+            Recharge recharge = rechargeService.getRecharge(payParam.getSn());
+            if (recharge != null) {
+                PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(paymentSuccessParams.getPaymentMethod());
+                if (paymentMethodEnum != null) {
+                    RefundLog refundLog = RefundLog.builder()
+                            .isRefund(false)
+                            .totalAmount(recharge.getRechargeMoney())
+                            .payPrice(recharge.getRechargeMoney())
+                            .memberId(recharge.getMemberId())
+                            .paymentName(paymentSuccessParams.getPaymentMethod())
+                            .afterSaleNo("DUP_PAY_" + SnowFlake.getIdStr())
+                            .paymentReceivableNo(paymentSuccessParams.getReceivableNo())
+                            .outOrderNo("RF" + SnowFlake.getIdStr())
+                            .orderSn(recharge.getRechargeSn())
+                            .refundReason("充值订单重复支付，第二笔款项自动原路退回")
+                            .build();
+                    try {
+                        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+                        if (payment != null) {
+                            payment.refund(refundLog);
+                        }
+                    } catch (Exception e) {
+                        log.error("充值单[{}]重复付款原路退款失败：receivableNo={}", recharge.getRechargeSn(), paymentSuccessParams.getReceivableNo(), e);
+                    }
+                }
+            }
+        }
     }
 }

@@ -28,6 +28,15 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.rocketmq.tags.OrderTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.SpringContextUtil;
+import cn.lili.modules.order.trade.entity.dos.OrderLog;
+import cn.lili.modules.order.trade.service.OrderLogService;
+import cn.lili.modules.payment.entity.RefundLog;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.kit.Payment;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -45,8 +54,12 @@ import java.util.stream.Collectors;
  * @author Chopper
  * @since 2020/11/17 7:39 下午
  */
+@Slf4j
 @Service
 public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements TradeService {
+
+    @Autowired
+    private OrderLogService orderLogService;
 
     /**
      * 缓存
@@ -182,6 +195,55 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Override
     public void updateTradePrice(String tradeSn) {
         this.baseMapper.updateTradePrice(tradeSn);
+    }
+
+    @Override
+    public void refundDuplicatePayment(String tradeSn, String paymentMethod, String receivableNo, Double price) {
+        Trade trade = this.getBySn(tradeSn);
+        if (trade == null) {
+            log.error("交易[{}]不存在，无法执行重复付款原路退款", tradeSn);
+            return;
+        }
+        Double refundAmount = (price != null && price > 0) ? price : trade.getFlowPrice();
+        if (refundAmount == null || refundAmount <= 0) {
+            log.warn("交易[{}]实付金额为0，无需发起重复付款原路退款", tradeSn);
+            return;
+        }
+        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(paymentMethod);
+        if (paymentMethodEnum == null) {
+            log.error("交易[{}]重复付款退款失败：未识别支付方式[{}]", tradeSn, paymentMethod);
+            return;
+        }
+        RefundLog refundLog = RefundLog.builder()
+                .isRefund(false)
+                .totalAmount(refundAmount)
+                .payPrice(refundAmount)
+                .memberId(trade.getMemberId())
+                .paymentName(paymentMethod)
+                .afterSaleNo("DUP_PAY_" + SnowFlake.getIdStr())
+                .paymentReceivableNo(receivableNo)
+                .outOrderNo("RF" + SnowFlake.getIdStr())
+                .orderSn(tradeSn)
+                .refundReason("交易重复支付，第二笔款项自动原路退回")
+                .build();
+        try {
+            Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+            if (payment != null) {
+                payment.refund(refundLog);
+                log.info("交易[{}]重复付款原路退款成功发起：receivableNo={}, refundAmount={}",
+                        tradeSn, receivableNo, refundAmount);
+            }
+        } catch (Exception e) {
+            log.error("交易[{}]重复付款原路退款请求失败：receivableNo={}", tradeSn, receivableNo, e);
+        }
+        List<Order> orders = orderService.getByTradeSn(tradeSn);
+        if (orders != null) {
+            for (Order order : orders) {
+                String logMsg = "交易已支付，收到重复付款通知[方式: " + paymentMethod + "，流水: " + receivableNo + "]，已自动触发原路退款";
+                OrderLog orderLog = new OrderLog(order.getSn(), "-1", UserEnums.SYSTEM.getRole(), "系统操作", logMsg);
+                orderLogService.save(orderLog);
+            }
+        }
     }
 
     /**

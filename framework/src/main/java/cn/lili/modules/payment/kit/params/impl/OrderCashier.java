@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.params.impl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -116,5 +117,31 @@ public class OrderCashier implements CashierExecute {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isSamePayment(PaymentSuccessParams paymentSuccessParams) {
+        PayParam payParam = paymentSuccessParams.getPayParam();
+        if (CashierEnum.ORDER.name().equals(payParam.getOrderType())) {
+            Order order = orderService.getBySn(payParam.getSn());
+            if (order != null && PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+                return CharSequenceUtil.isNotEmpty(order.getReceivableNo())
+                        && order.getReceivableNo().equals(paymentSuccessParams.getReceivableNo())
+                        && paymentSuccessParams.getPaymentMethod() != null
+                        && paymentSuccessParams.getPaymentMethod().equals(order.getPaymentMethod());
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void refundDuplicatePayment(PaymentSuccessParams paymentSuccessParams) {
+        PayParam payParam = paymentSuccessParams.getPayParam();
+        if (CashierEnum.ORDER.name().equals(payParam.getOrderType())) {
+            Order order = orderService.getBySn(payParam.getSn());
+            if (order != null) {
+                orderService.refundDuplicatePayment(order, paymentSuccessParams.getPaymentMethod(), paymentSuccessParams.getReceivableNo());
+            }
+        }
     }
 }

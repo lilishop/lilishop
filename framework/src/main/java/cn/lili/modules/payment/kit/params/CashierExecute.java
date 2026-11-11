@@ -42,4 +42,22 @@ public interface CashierExecute {
      * @return
      */
     CashierEnum cashierEnum();
+
+    /**
+     * 判断是否为相同支付流水的幂等通知重发
+     *
+     * @param paymentSuccessParams 支付参数
+     * @return true-相同流水重发，无需重复处理或退款；false-非相同流水
+     */
+    default boolean isSamePayment(PaymentSuccessParams paymentSuccessParams) {
+        return false;
+    }
+
+    /**
+     * 收到重复付款时的自动原路退款处理
+     *
+     * @param paymentSuccessParams 支付参数
+     */
+    default void refundDuplicatePayment(PaymentSuccessParams paymentSuccessParams) {
+    }
 }
