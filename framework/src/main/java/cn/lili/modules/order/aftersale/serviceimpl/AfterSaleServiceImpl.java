@@ -1,6 +1,10 @@
 package cn.lili.modules.order.aftersale.serviceimpl;
 
 import cn.lili.modules.promotion.service.PickupCardOrderService;
+import cn.hutool.core.collection.CollUtil;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -273,19 +277,33 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_DOUBLE_ERROR);
         }
-        //判断退款金额与付款金额是否正确,退款金额不能大于付款金额
-        if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) < 0) {
-            throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
-        }
-
-        afterSale.setActualRefundPrice(actualRefundPrice);
-
-        //判断审核状态
-        //如果售后类型为：退款，审核状态为已通过并且退款方式为原路退回，售后单状态为已完成。
-        //如果售后类型为：退款，审核状态已通过并且退款方式为线下退回，售后单状态为待退款。
-        //如果售后类型不为退款，售后单状态为：已通过。
         AfterSaleStatusEnum afterSaleStatusEnum;
         if (serviceStatus.equals(AfterSaleStatusEnum.PASS.name())) {
+            if (actualRefundPrice == null || actualRefundPrice < 0) {
+                throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+            }
+            double otherRefundedPrice = calculateRefundedPrice(afterSale.getOrderItemSn(), afterSale.getSn());
+            double remainingItemAllowed = Math.max(0.0, CurrencyUtil.sub(afterSale.getFlowPrice(), otherRefundedPrice));
+            if (BigDecimal.valueOf(actualRefundPrice).setScale(2, RoundingMode.HALF_UP)
+                    .compareTo(BigDecimal.valueOf(remainingItemAllowed).setScale(2, RoundingMode.HALF_UP)) > 0) {
+                throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+            }
+
+            Order order = orderService.getBySn(afterSale.getOrderSn());
+            if (order != null) {
+                double orderFlowPrice = order.getFlowPrice() == null ? 0.0 : order.getFlowPrice();
+                if (order.getPriceDetailDTO() != null && order.getPriceDetailDTO().getGiftCardPrice() != null) {
+                    orderFlowPrice = CurrencyUtil.add(orderFlowPrice, order.getPriceDetailDTO().getGiftCardPrice());
+                }
+                double otherOrderRefunded = calculateOrderRefundedPrice(afterSale.getOrderSn(), afterSale.getSn());
+                double remainingOrderAllowed = Math.max(0.0, CurrencyUtil.sub(orderFlowPrice, otherOrderRefunded));
+                if (BigDecimal.valueOf(actualRefundPrice).setScale(2, RoundingMode.HALF_UP)
+                        .compareTo(BigDecimal.valueOf(remainingOrderAllowed).setScale(2, RoundingMode.HALF_UP)) > 0) {
+                    throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+                }
+            }
+
+            afterSale.setActualRefundPrice(actualRefundPrice);
             if (afterSale.getServiceType().equals(AfterSaleTypeEnum.RETURN_MONEY.name())) {
                 if (afterSale.getRefundWay().equals(AfterSaleRefundWayEnum.ORIGINAL.name())) {
                     //如果为退款操作 && 在线支付 则直接进行退款
@@ -298,6 +316,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 afterSaleStatusEnum = AfterSaleStatusEnum.PASS;
             }
         } else {
+            afterSale.setActualRefundPrice(actualRefundPrice != null ? actualRefundPrice : 0.0);
             afterSaleStatusEnum = AfterSaleStatusEnum.REFUSE;
         }
         afterSale.setServiceStatus(afterSaleStatusEnum.name());
@@ -476,9 +495,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
         Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
 
-        //流水金额=实际支付金额+补贴金额(礼品卡)
-        Double flowPrice=CurrencyUtil.add(orderItem.getFlowPrice(),
-                orderItem.getPriceDetailDTO().getGiftCardPrice());
+        Double flowPrice = getItemFlowPrice(orderItem);
         afterSale.setStoreId(order.getStoreId());
         afterSale.setStoreName(order.getStoreName());
 
@@ -507,15 +524,21 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSale.setAfterSaleImage(afterSaleDTO.getImages());
         }
 
+        double alreadyRefundPrice = calculateRefundedPrice(orderItem.getSn(), null);
+        double remainingRefundPrice = Math.max(0.0, CurrencyUtil.sub(flowPrice, alreadyRefundPrice));
+
+        int returnedGoodsNum = orderItem.getReturnGoodsNumber() == null ? 0 : orderItem.getReturnGoodsNumber();
+        int remainingGoodsNum = orderItem.getNum() - returnedGoodsNum;
+
         if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType()) && afterSaleDTO.getApplyRefundPrice() != null) {
             afterSale.setApplyRefundPrice(afterSaleDTO.getApplyRefundPrice());
-        } else if (afterSale.getNum().equals(orderItem.getNum())) {
-            //计算退回金额
-            afterSale.setApplyRefundPrice(flowPrice);
+        } else if (afterSale.getNum().equals(remainingGoodsNum)) {
+            afterSale.setApplyRefundPrice(Math.min(remainingRefundPrice, flowPrice));
         } else {
             //单价计算
             double utilPrice = CurrencyUtil.div(flowPrice, orderItem.getNum());
-            afterSale.setApplyRefundPrice(CurrencyUtil.mul(afterSale.getNum(), utilPrice));
+            double applyPrice = CurrencyUtil.mul(afterSale.getNum(), utilPrice);
+            afterSale.setApplyRefundPrice(Math.min(applyPrice, remainingRefundPrice));
         }
 
 
@@ -601,9 +624,32 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
         }
 
-        //申请商品数量不能超过商品总数量-售后商品数量
-        if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getReturnGoodsNumber())) {
+        if (afterSaleDTO.getNum() == null || afterSaleDTO.getNum() <= 0) {
             throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
+        }
+
+        int returnedNum = orderItem.getReturnGoodsNumber() == null ? 0 : orderItem.getReturnGoodsNumber();
+        if (afterSaleDTO.getNum() > (orderItem.getNum() - returnedNum)) {
+            throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
+        }
+
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())
+                || RefundStatusEnum.ALL_REFUND.name().equals(orderItem.getIsRefund())) {
+            throw new ServiceException(ResultCode.AFTER_SALES_BAN);
+        }
+
+        double itemFlowPrice = getItemFlowPrice(orderItem);
+        double alreadyRefundPrice = calculateRefundedPrice(orderItem.getSn(), null);
+        double remainingRefundPrice = Math.max(0.0, CurrencyUtil.sub(itemFlowPrice, alreadyRefundPrice));
+        if (remainingRefundPrice <= 0) {
+            throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+        }
+        if (afterSaleDTO.getApplyRefundPrice() != null) {
+            if (afterSaleDTO.getApplyRefundPrice() < 0
+                    || BigDecimal.valueOf(afterSaleDTO.getApplyRefundPrice()).setScale(2, RoundingMode.HALF_UP)
+                    .compareTo(BigDecimal.valueOf(remainingRefundPrice).setScale(2, RoundingMode.HALF_UP)) > 0) {
+                throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+            }
         }
         // 预约无退货，仅退款；金额按剩余可退校验（支持部分退）
         if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
@@ -810,7 +856,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper = new LambdaUpdateWrapper<OrderItem>()
                 .eq(OrderItem::getSn, orderItem.getSn())
                 .set(OrderItem::getAfterSaleStatus, orderItem.getAfterSaleStatus())
-                .set(OrderItem::getReturnGoodsNumber, orderItem.getReturnGoodsNumber());
+                .set(OrderItem::getReturnGoodsNumber, orderItem.getReturnGoodsNumber())
+                .set(OrderItem::getRefundPrice, orderItem.getRefundPrice());
 
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {
             if (orderItem.getReturnGoodsNumber().equals(orderItem.getNum())) {
@@ -829,4 +876,67 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         orderItemService.update(lambdaUpdateWrapper);
     }
 
+
+    private double getItemFlowPrice(OrderItem orderItem) {
+        double flowPrice = orderItem.getFlowPrice() == null ? 0.0 : orderItem.getFlowPrice();
+        PriceDetailDTO priceDetailDTO = orderItem.getPriceDetailDTO();
+        if (priceDetailDTO != null && priceDetailDTO.getGiftCardPrice() != null) {
+            flowPrice = CurrencyUtil.add(flowPrice, priceDetailDTO.getGiftCardPrice());
+        }
+        return flowPrice;
+    }
+
+    private double calculateRefundedPrice(String orderItemSn, String excludeAfterSaleSn) {
+        LambdaQueryWrapper<AfterSale> queryWrapper = new LambdaQueryWrapper<AfterSale>()
+                .eq(AfterSale::getOrderItemSn, orderItemSn)
+                .in(AfterSale::getServiceStatus,
+                        AfterSaleStatusEnum.APPLY.name(),
+                        AfterSaleStatusEnum.PASS.name(),
+                        AfterSaleStatusEnum.BUYER_RETURN.name(),
+                        AfterSaleStatusEnum.SELLER_CONFIRM.name(),
+                        AfterSaleStatusEnum.WAIT_REFUND.name(),
+                        AfterSaleStatusEnum.COMPLETE.name());
+        if (CharSequenceUtil.isNotEmpty(excludeAfterSaleSn)) {
+            queryWrapper.ne(AfterSale::getSn, excludeAfterSaleSn);
+        }
+        List<AfterSale> list = this.list(queryWrapper);
+        if (CollUtil.isEmpty(list)) {
+            return 0.0;
+        }
+        double total = 0.0;
+        for (AfterSale a : list) {
+            Double price = a.getActualRefundPrice() != null ? a.getActualRefundPrice() : a.getApplyRefundPrice();
+            if (price != null && price > 0) {
+                total = CurrencyUtil.add(total, price);
+            }
+        }
+        return total;
+    }
+
+    private double calculateOrderRefundedPrice(String orderSn, String excludeAfterSaleSn) {
+        LambdaQueryWrapper<AfterSale> queryWrapper = new LambdaQueryWrapper<AfterSale>()
+                .eq(AfterSale::getOrderSn, orderSn)
+                .in(AfterSale::getServiceStatus,
+                        AfterSaleStatusEnum.APPLY.name(),
+                        AfterSaleStatusEnum.PASS.name(),
+                        AfterSaleStatusEnum.BUYER_RETURN.name(),
+                        AfterSaleStatusEnum.SELLER_CONFIRM.name(),
+                        AfterSaleStatusEnum.WAIT_REFUND.name(),
+                        AfterSaleStatusEnum.COMPLETE.name());
+        if (CharSequenceUtil.isNotEmpty(excludeAfterSaleSn)) {
+            queryWrapper.ne(AfterSale::getSn, excludeAfterSaleSn);
+        }
+        List<AfterSale> list = this.list(queryWrapper);
+        if (CollUtil.isEmpty(list)) {
+            return 0.0;
+        }
+        double total = 0.0;
+        for (AfterSale a : list) {
+            Double price = a.getActualRefundPrice() != null ? a.getActualRefundPrice() : a.getApplyRefundPrice();
+            if (price != null && price > 0) {
+                total = CurrencyUtil.add(total, price);
+            }
+        }
+        return total;
+    }
 }

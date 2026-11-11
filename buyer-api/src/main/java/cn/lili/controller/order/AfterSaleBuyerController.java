@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.constraints.NotNull;
@@ -80,7 +81,7 @@ public class AfterSaleBuyerController {
     @Operation(summary = "申请售后")
     @Parameter(name = "orderItemSn", description = "订单货物编号", required = true)
     @PostMapping("/save/{orderItemSn}")
-    public ResultMessage<AfterSale> save(AfterSaleDTO afterSaleDTO) {
+    public ResultMessage<AfterSale> save(@Validated AfterSaleDTO afterSaleDTO) {
         return ResultUtil.data(afterSaleService.saveAfterSale(afterSaleDTO));
 
     }
