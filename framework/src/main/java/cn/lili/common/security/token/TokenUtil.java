@@ -64,6 +64,38 @@ public class TokenUtil {
     }
 
     /**
+     * 获取刷新令牌（RefreshToken）过期时间（单位：分钟）
+     * 默认买家端为 30 天（43200 分钟），支持通过安全设置及配置文件扩展；其他端使用访问令牌的 2 倍时长
+     *
+     * @param authUser        授权用户
+     * @param tokenExpireTime 当前访问令牌过期时间
+     * @return 刷新令牌过期时间（分钟）
+     */
+    private Long getRefreshTokenExpireTime(AuthUser authUser, Long tokenExpireTime) {
+        if (authUser != null) {
+            try {
+                SettingService settingService = SpringContextUtil.getBean(SettingService.class);
+                if (settingService != null) {
+                    Setting setting = settingService.get(SettingEnum.SECURITY_SETTING.name());
+                    if (setting != null && CharSequenceUtil.isNotBlank(setting.getSettingValue())) {
+                        SecuritySetting securitySetting = JSONUtil.toBean(setting.getSettingValue(), SecuritySetting.class);
+                        if (UserEnums.MEMBER.equals(authUser.getRole()) && securitySetting.getBuyerRefreshTokenExpireTime() != null) {
+                            return securitySetting.getBuyerRefreshTokenExpireTime();
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            if (authUser.getLongTerm() || UserEnums.MEMBER.equals(authUser.getRole())) {
+                return tokenProperties != null && tokenProperties.getRefreshTokenExpireTime() > 0
+                        ? tokenProperties.getRefreshTokenExpireTime()
+                        : 30 * 24 * 60L;
+            }
+        }
+        return tokenExpireTime != null ? tokenExpireTime * 2 : 120L;
+    }
+
+    /**
      * 构建token
      *
      * @param authUser 私有声明
@@ -77,8 +109,8 @@ public class TokenUtil {
 
         cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + accessToken, 1,
                 tokenExpireTime, TimeUnit.MINUTES);
-        //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
-        Long expireTime = authUser.getLongTerm() ? 15 * 24 * 60L : tokenExpireTime * 2;
+        //刷新token生成策略：买家端或长期有效设备默认30天，其他角色使用普通token2倍时长
+        Long expireTime = getRefreshTokenExpireTime(authUser, tokenExpireTime);
         String refreshToken = createToken(authUser, expireTime);
 
         cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
@@ -118,7 +150,6 @@ public class TokenUtil {
         //获取是否长期有效的token
         boolean longTerm = authUser.getLongTerm();
 
-
         //如果缓存中有刷新token &&
         if (cache.hasKey(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken)) {
             Token token = new Token();
@@ -128,14 +159,12 @@ public class TokenUtil {
             cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + accessToken, 1, tokenExpireTime,
                     TimeUnit.MINUTES);
 
-            //如果是信任登录设备，则刷新token长度继续延长
-            Long expirationTime = tokenExpireTime * 2;
+            Long expirationTime = getRefreshTokenExpireTime(authUser, tokenExpireTime);
             if (longTerm) {
-                expirationTime = 60 * 24 * 15L;
                 authUser.setLongTerm(true);
             }
 
-            //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
+            //刷新token生成策略：买家端或长期有效设备默认30天，其他角色使用普通token2倍时长
             String refreshToken = createToken(authUser, expirationTime);
 
             cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + refreshToken, 1, expirationTime, TimeUnit.MINUTES);

@@ -19,6 +19,7 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveFilterScene;
 import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.utils.*;
+import java.util.Collections;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
@@ -200,6 +201,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         lambdaUpdateWrapper.in(Member::getId, ids);
         lambdaUpdateWrapper.set(Member::getPassword, password);
         this.update(lambdaUpdateWrapper);
+        revokeMemberTokens(ids);
     }
 
     @Override
@@ -377,6 +379,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         lambdaUpdateWrapper.eq(Member::getId, member.getId());
         lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(newPassword));
         this.update(lambdaUpdateWrapper);
+        revokeMemberTokens(Collections.singletonList(member.getId()));
         return member;
     }
 
@@ -404,6 +407,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             lambdaUpdateWrapper.eq(Member::getId, member.getId());
             lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(password));
             this.update(lambdaUpdateWrapper);
+            revokeMemberTokens(Collections.singletonList(member.getId()));
         }
         throw new ServiceException(ResultCode.UNINITIALIZED_PASSWORD);
 
@@ -470,19 +474,26 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public boolean resetByMobile(String uuid, String password) {
-        String phone = cache.get(CachePrefix.FIND_MOBILE + uuid).toString();
-        //根据手机号获取客户判定是否存在此客户
-        if (phone != null) {
-            //修改密码
-            LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-            lambdaUpdateWrapper.eq(Member::getMobile, phone);
-            lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(password));
-            cache.remove(CachePrefix.FIND_MOBILE + uuid);
-            return this.update(lambdaUpdateWrapper);
-        } else {
+        Object phoneObj = cache.get(CachePrefix.FIND_MOBILE + uuid);
+        if (phoneObj == null) {
             throw new ServiceException(ResultCode.USER_PHONE_NOT_EXIST);
         }
-
+        String phone = phoneObj.toString();
+        //根据手机号获取客户判定是否存在此客户
+        Member member = this.findByMobile(phone);
+        if (member == null) {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        //修改密码
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.eq(Member::getMobile, phone);
+        lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(password));
+        cache.remove(CachePrefix.FIND_MOBILE + uuid);
+        boolean updated = this.update(lambdaUpdateWrapper);
+        if (updated) {
+            revokeMemberTokens(Collections.singletonList(member.getId()));
+        }
+        return updated;
     }
 
     @Override
@@ -505,8 +516,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getNickName())) {
             managerMemberEditDTO.setNickName(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, managerMemberEditDTO.getNickName()));
         }
-        //如果密码不为空则加密密码
-        if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getPassword())) {
+        boolean passwordChanged = CharSequenceUtil.isNotBlank(managerMemberEditDTO.getPassword());
+        if (passwordChanged) {
             managerMemberEditDTO.setPassword(new BCryptPasswordEncoder().encode(managerMemberEditDTO.getPassword()));
         }
         //查询客户信息
@@ -514,6 +525,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         //传递修改客户信息
         BeanUtil.copyProperties(managerMemberEditDTO, member);
         this.updateById(member);
+        if (passwordChanged) {
+            revokeMemberTokens(Collections.singletonList(member.getId()));
+        }
         return member;
     }
 
@@ -706,18 +720,25 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MANAGER, userId));
     }
 
+    @Override
+    public void revokeMemberTokens(List<String> memberIds) {
+        if (memberIds != null && !memberIds.isEmpty()) {
+            memberIds.forEach(memberId -> {
+                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
+                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
+                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE, memberId));
+                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.STORE, memberId));
+            });
+        }
+    }
+
     /**
      * 禁用客户token删除
      *
      * @param memberIds 客户id
      */
     public void disableMemberLogout(List<String> memberIds) {
-        if (memberIds != null) {
-            memberIds.forEach(memberId -> {
-                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
-                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
-            });
-        }
+        revokeMemberTokens(memberIds);
     }
 
     /**

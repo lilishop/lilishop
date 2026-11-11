@@ -321,6 +321,13 @@ public interface MemberService extends IService<Member> {
     void resetPassword(List<String> ids);
 
     /**
+     * 吊销会员及其关联角色的所有有效令牌缓存（包含买家端和商家端会话）
+     *
+     * @param memberIds 会员ID集合
+     */
+    void revokeMemberTokens(List<String> memberIds);
+
+    /**
      * 更新客户登录时间为最新时间
      *
      * @param memberId 客户id

@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -205,6 +206,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         String newEncryptPass = new BCryptPasswordEncoder().encode(newPassword);
         user.setPassword(newEncryptPass);
         this.updateById(user);
+        this.logout(Collections.singletonList(user.getId()));
     }
 
     @Override
@@ -218,6 +220,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         if (null != adminUsers && !adminUsers.isEmpty()) {
             adminUsers.forEach(item -> item.setPassword(newEncryptPass));
             this.updateBatchById(adminUsers);
+            this.logout(ids);
         }
     }
 

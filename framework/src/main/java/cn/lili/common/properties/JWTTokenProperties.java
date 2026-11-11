@@ -28,4 +28,9 @@ public class JWTTokenProperties {
      * token默认过期时间
      */
     private long tokenExpireTime = 60;
+
+    /**
+     * 刷新令牌默认过期时间（单位：分钟，默认 30 天 = 43200 分钟）
+     */
+    private long refreshTokenExpireTime = 43200;
 }

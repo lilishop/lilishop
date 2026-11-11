@@ -22,7 +22,10 @@ public class SecuritySetting implements Serializable {
     private Boolean isDemoSite = false;
 
     @Schema(description = "买家端Token过期时间（单位：分钟）")
-    private Long buyerTokenExpireTime = 259200L;
+    private Long buyerTokenExpireTime = 1440L;
+
+    @Schema(description = "买家端刷新令牌过期时间（单位：分钟）")
+    private Long buyerRefreshTokenExpireTime = 43200L;
 
     @Schema(description = "管理端与商家端Token过期时间（单位：分钟）")
     private Long managerTokenExpireTime = 86400L;
