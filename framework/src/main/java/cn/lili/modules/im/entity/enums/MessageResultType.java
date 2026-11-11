@@ -1,23 +1,15 @@
 package cn.lili.modules.im.entity.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * 返回消息类型枚举
  *
  * @author liushuai
  */
+@Schema(description = "返回消息类型")
 public enum MessageResultType {
-    /**
-     * 返回消息类型枚举
-     * <p>
-     * 好友列表
-     * 增加好友
-     * 消息
-     * 阅读消息
-     * 未读消息
-     * 历史消息
-     * 系统提示
-     * 下线提醒
-     */
+
     FRIENDS,
     ADD_FRIENDS,
     MESSAGE,
