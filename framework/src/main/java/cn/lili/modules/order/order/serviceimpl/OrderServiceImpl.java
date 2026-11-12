@@ -556,14 +556,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setCancelReason(reason);
             //修改订单
             this.updateById(order);
-            // 普通订单标记退款，提货取消不标记为已退款。
-            if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
-                orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
-            }
+            // 只有已付款的普通订单才标记为已退款；未付款订单或提货订单不标记为已退款。订单取消时失效售后与投诉状态
+            boolean isPaid = PayStatusEnum.PAID.name().equals(order.getPayStatus());
+            boolean isPickupOrder = pickupCardOrderService.isPickupOrder(order.getSn());
+            boolean needMarkRefund = isPaid && !isPickupOrder;
+            orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
+                    .eq(OrderItem::getOrderSn, orderSn)
+                    .set(needMarkRefund, OrderItem::getIsRefund, RefundStatusEnum.ALL_REFUND.name())
+                    .setSql(needMarkRefund, "refund_price = flow_price")
+                    .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
+                    .set(OrderItem::getComplainStatus, OrderComplaintStatusEnum.EXPIRED.name()));
             // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
             refundCanceledOrderBySplit(order, reason);
-            //生成店铺退款流水
-            storeFlowService.orderCancel(orderSn);
+            // 生成店铺退款流水（仅已支付订单或提货订单需要记录）
+            if (isPaid || isPickupOrder) {
+                storeFlowService.orderCancel(orderSn);
+            }
             //发送消息
             orderStatusMessage(order);
             return order;
@@ -627,10 +635,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
-        // 普通订单标记退款，提货取消不标记为已退款。
-        if (!pickupCardOrderService.isPickupOrder(order.getSn())) {
-            orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
-        }
+        // 只有已付款的普通订单才标记为已退款；未付款订单或提货订单不标记为已退款。订单取消时失效售后与投诉状态
+        boolean isPaid = PayStatusEnum.PAID.name().equals(order.getPayStatus());
+        boolean isPickupOrder = pickupCardOrderService.isPickupOrder(order.getSn());
+        boolean needMarkRefund = isPaid && !isPickupOrder;
+        orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, orderSn)
+                .set(needMarkRefund, OrderItem::getIsRefund, RefundStatusEnum.ALL_REFUND.name())
+                .setSql(needMarkRefund, "refund_price = flow_price")
+                .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
+                .set(OrderItem::getComplainStatus, OrderComplaintStatusEnum.EXPIRED.name()));
         // 订单取消退款/回退：礼品卡先回卡；若已付款且允许退款，则剩余现金原路退支付渠道
         if (Boolean.TRUE.equals(refundMoney) || !PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             refundCanceledOrderBySplit(order, reason);

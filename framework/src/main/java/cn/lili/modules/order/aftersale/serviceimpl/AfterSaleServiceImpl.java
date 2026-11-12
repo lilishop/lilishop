@@ -209,6 +209,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (!order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_NOT_PAY_ERROR);
         }
+        //订单已取消或已退款，不能申请售后
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())
+                || RefundStatusEnum.ALL_REFUND.name().equals(orderItem.getIsRefund())) {
+            throw new ServiceException(ResultCode.AFTER_SALES_BAN);
+        }
         //判断支付方式是否为线上支付
         if (order.getPaymentMethod().equals(PaymentMethodEnum.BANK_TRANSFER.name())) {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.OFFLINE.name());

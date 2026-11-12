@@ -12,11 +12,14 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
 import cn.lili.modules.order.order.entity.dos.OrderComplaintCommunication;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderComplaintDTO;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.*;
 import cn.lili.modules.order.order.mapper.OrderComplaintMapper;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
@@ -129,11 +132,26 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
             if (!UserEnums.MANAGER.equals(currentUser.getRole()) && !currentUser.getId().equals(orderDetailVO.getOrder().getMemberId())) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
+            Order order = orderDetailVO.getOrder();
+            if (order == null) {
+                throw new ServiceException(ResultCode.COMPLAINT_ORDER_ITEM_EMPTY_ERROR);
+            }
+            // 校验订单状态：已取消订单或未付款订单不允许发起投诉
+            if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())
+                    || !PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+                throw new ServiceException(ResultCode.COMPLAINT_ORDER_STATUS_ERROR);
+            }
+
             List<OrderItem> orderItems = orderDetailVO.getOrderItems();
             OrderItem orderItem = orderItems.stream().filter(i -> orderComplaintDTO.getSkuId().equals(i.getSkuId())).findFirst().orElse(null);
 
             if (orderItem == null) {
                 throw new ServiceException(ResultCode.COMPLAINT_ORDER_ITEM_EMPTY_ERROR);
+            }
+            // 校验商品投诉状态：已失效或已取消不允许发起投诉
+            if (OrderComplaintStatusEnum.EXPIRED.name().equals(orderItem.getComplainStatus())
+                    || OrderComplaintStatusEnum.CANCEL.name().equals(orderItem.getComplainStatus())) {
+                throw new ServiceException(ResultCode.COMPLAINT_ORDER_STATUS_ERROR);
             }
 
             //新建交易投诉
