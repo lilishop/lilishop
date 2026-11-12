@@ -155,16 +155,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         if ("0".equals(parentId)) {
             return categoryTree();
         }
-        //循环代码，找到对象，把他的子分类返回
+        // 递归查找指定 parentId 节点并返回其子分类列表
         List<CategoryVO> topCatList = categoryTree();
-        for (CategoryVO item : topCatList) {
-            if (item.getId().equals(parentId)) {
-                return item.getChildren();
-            } else {
-                return getChildren(parentId, item.getChildren());
-            }
-        }
-        return new ArrayList<>();
+        List<CategoryVO> children = getChildren(parentId, topCatList);
+        return children != null ? children : new ArrayList<>();
     }
 
     @Override
@@ -376,22 +370,28 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     /**
-     * 递归自身，找到id等于parentId的对象，获取他的children 返回
+     * 递归在分类树中查找指定父ID的子分类列表
      *
-     * @param parentId       父ID
-     * @param categoryVOList 分类VO
-     * @return 子分类列表VO
+     * @param parentId       父ID（目标分类ID）
+     * @param categoryVOList 当前层级分类列表
+     * @return 目标分类的子分类列表；若未找到匹配节点则返回 null
      */
     private List<CategoryVO> getChildren(String parentId, List<CategoryVO> categoryVOList) {
+        if (categoryVOList == null || categoryVOList.isEmpty()) {
+            return null;
+        }
         for (CategoryVO item : categoryVOList) {
             if (item.getId().equals(parentId)) {
-                return item.getChildren();
+                return item.getChildren() != null ? item.getChildren() : new ArrayList<>();
             }
             if (item.getChildren() != null && !item.getChildren().isEmpty()) {
-                return getChildren(parentId, item.getChildren());
+                List<CategoryVO> children = getChildren(parentId, item.getChildren());
+                if (children != null) {
+                    return children;
+                }
             }
         }
-        return categoryVOList;
+        return null;
     }
 
     /**
