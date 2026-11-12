@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
@@ -87,6 +88,7 @@ public class KanjiaGoodsActivityBuyerController {
 
     @PostMapping
     @Parameter(name = "id", description = "砍价活动商品ID", required = true)
+    @PreventDuplicateSubmissions
     @Operation(summary = "发起砍价活动")
     public ResultMessage<KanjiaActivityLog> launchKanJiaActivity(String id) {
         KanjiaActivityLog kanjiaActivityLog = kanJiaActivityService.add(id);
@@ -95,6 +97,7 @@ public class KanjiaGoodsActivityBuyerController {
 
     @PostMapping("/help/{kanjiaActivityId}")
     @Parameter(name = "kanJiaActivityId", description = "砍价活动ID", required = true)
+    @PreventDuplicateSubmissions
     @Operation(summary = "帮砍一刀")
     public ResultMessage<KanjiaActivityLog> helpKanJia(@PathVariable String kanjiaActivityId) {
         KanjiaActivityLog kanjiaActivityLog = kanJiaActivityService.helpKanJia(kanjiaActivityId);

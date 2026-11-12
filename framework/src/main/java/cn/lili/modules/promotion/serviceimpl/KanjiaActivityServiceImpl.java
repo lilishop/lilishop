@@ -33,14 +33,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 
 /**
@@ -61,6 +68,10 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     private MemberService memberService;
     @Autowired
     private GoodsSkuService goodsSkuService;
+    @Autowired
+    private RedissonClient redissonClient;
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Override
     public KanjiaActivity getKanjiaActivity(KanjiaActivitySearchParams kanJiaActivitySearchParams) {
@@ -145,52 +156,94 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     @Override
     public KanjiaActivityLog helpKanJia(String kanjiaActivityId) {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        //获取客户信息
-        Member member = memberService.getById(authUser.getId());
-        //根据砍价发起活动id查询砍价活动信息
-        KanjiaActivity kanjiaActivity = this.getById(kanjiaActivityId);
-        //判断活动非空或非正在进行中的活动
-        if (kanjiaActivity == null || !kanjiaActivity.getStatus().equals(PromotionsStatusEnum.START.name())) {
-            throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
-        } else if (member == null) {
-            throw new ServiceException(ResultCode.USER_NOT_EXIST);
-        }
-        //根据skuId查询当前sku是否参与活动并且是在活动进行中
-        KanjiaActivityGoods kanJiaActivityGoods = kanjiaActivityGoodsService.getById(kanjiaActivity.getKanjiaActivityGoodsId());
-        if (kanJiaActivityGoods == null) {
-            throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
-        }
-        //判断是否已参与
-        LambdaQueryWrapper<KanjiaActivityLog> lambdaQueryWrapper = new LambdaQueryWrapper<KanjiaActivityLog>()
-                .eq(KanjiaActivityLog::getKanjiaActivityId, kanjiaActivityId)
-                .eq(KanjiaActivityLog::getKanjiaMemberId, member.getId());
-        if (kanjiaActivityLogService.count(lambdaQueryWrapper) > 0) {
+        RLock lock = redissonClient.getLock("KANJIA_ACTIVITY_LOCK:" + kanjiaActivityId);
+        boolean locked = false;
+        try {
+            // 等待3秒，leaseTime=-1启用看门狗自动续期，避免长时间业务执行锁提前失效
+            locked = lock.tryLock(3, -1, TimeUnit.SECONDS);
+            if (!locked) {
+                throw new ServiceException(ResultCode.PROMOTION_LOG_EXIST);
+            }
+
+            return executeInTransaction(() -> {
+                //获取客户信息
+                Member member = memberService.getById(authUser.getId());
+                //根据砍价发起活动id查询砍价活动信息
+                KanjiaActivity kanjiaActivity = this.getById(kanjiaActivityId);
+                //判断活动非空或非正在进行中的活动
+                if (kanjiaActivity == null || !kanjiaActivity.getStatus().equals(PromotionsStatusEnum.START.name())) {
+                    throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+                } else if (member == null) {
+                    throw new ServiceException(ResultCode.USER_NOT_EXIST);
+                }
+                //根据skuId查询当前sku是否参与活动并且是在活动进行中
+                KanjiaActivityGoods kanJiaActivityGoods = kanjiaActivityGoodsService.getById(kanjiaActivity.getKanjiaActivityGoodsId());
+                if (kanJiaActivityGoods == null) {
+                    throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+                }
+                //判断是否已参与
+                LambdaQueryWrapper<KanjiaActivityLog> lambdaQueryWrapper = new LambdaQueryWrapper<KanjiaActivityLog>()
+                        .eq(KanjiaActivityLog::getKanjiaActivityId, kanjiaActivityId)
+                        .eq(KanjiaActivityLog::getKanjiaMemberId, member.getId());
+                if (kanjiaActivityLogService.count(lambdaQueryWrapper) > 0) {
+                    throw new ServiceException(ResultCode.PROMOTION_LOG_EXIST);
+                }
+
+                //添加砍价记录
+                KanjiaActivityDTO kanjiaActivityDTO = new KanjiaActivityDTO();
+                kanjiaActivityDTO.setKanjiaActivityGoodsId(kanjiaActivity.getKanjiaActivityGoodsId());
+                kanjiaActivityDTO.setKanjiaActivityId(kanjiaActivityId);
+                //获取砍价金额
+                Double price = this.getKanjiaPrice(kanJiaActivityGoods, kanjiaActivity.getSurplusPrice());
+                kanjiaActivityDTO.setKanjiaPrice(price);
+                //计算剩余金额
+                kanjiaActivityDTO.setSurplusPrice(CurrencyUtil.sub(kanjiaActivity.getSurplusPrice(), price));
+                kanjiaActivityDTO.setKanjiaMemberId(member.getId());
+                kanjiaActivityDTO.setKanjiaMemberName(member.getUsername());
+                kanjiaActivityDTO.setKanjiaMemberFace(member.getFace());
+                KanjiaActivityLog kanjiaActivityLog = kanjiaActivityLogService.addKanJiaActivityLog(kanjiaActivityDTO);
+
+                //如果可砍金额为0的话说明活动成功了
+                if (Double.doubleToLongBits(kanjiaActivityDTO.getSurplusPrice()) == Double.doubleToLongBits(0D)) {
+                    kanjiaActivity.setStatus(KanJiaStatusEnum.SUCCESS.name());
+                }
+                kanjiaActivity.setSurplusPrice(kanjiaActivityLog.getSurplusPrice());
+                this.updateById(kanjiaActivity);
+                return kanjiaActivityLog;
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ServiceException(ResultCode.ERROR);
+        } catch (DuplicateKeyException e) {
+            // 数据库联合唯一索引兜底，当并发穿透时避免抛出500异常
             throw new ServiceException(ResultCode.PROMOTION_LOG_EXIST);
+        } finally {
+            if (locked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
-
-        //添加砍价记录
-        KanjiaActivityDTO kanjiaActivityDTO = new KanjiaActivityDTO();
-        kanjiaActivityDTO.setKanjiaActivityGoodsId(kanjiaActivity.getKanjiaActivityGoodsId());
-        kanjiaActivityDTO.setKanjiaActivityId(kanjiaActivityId);
-        //获取砍价金额
-        Double price = this.getKanjiaPrice(kanJiaActivityGoods, kanjiaActivity.getSurplusPrice());
-        kanjiaActivityDTO.setKanjiaPrice(price);
-        //计算剩余金额
-        kanjiaActivityDTO.setSurplusPrice(CurrencyUtil.sub(kanjiaActivity.getSurplusPrice(), price));
-        kanjiaActivityDTO.setKanjiaMemberId(member.getId());
-        kanjiaActivityDTO.setKanjiaMemberName(member.getUsername());
-        kanjiaActivityDTO.setKanjiaMemberFace(member.getFace());
-        KanjiaActivityLog kanjiaActivityLog = kanjiaActivityLogService.addKanJiaActivityLog(kanjiaActivityDTO);
-
-        //如果可砍金额为0的话说明活动成功了
-        if (Double.doubleToLongBits(kanjiaActivityDTO.getSurplusPrice()) == Double.doubleToLongBits(0D)) {
-            kanjiaActivity.setStatus(KanJiaStatusEnum.SUCCESS.name());
-        }
-        kanjiaActivity.setSurplusPrice(kanjiaActivityLog.getSurplusPrice());
-        this.updateById(kanjiaActivity);
-        return kanjiaActivityLog;
     }
 
+
+
+    @Override
+    public IPage<KanjiaActivity> getForPage(KanjiaActivityQuery kanjiaActivityQuery, PageVO page) {
+        QueryWrapper<KanjiaActivity> queryWrapper = kanjiaActivityQuery.wrapper();
+        return this.page(PageUtil.initPage(page), queryWrapper);
+    }
+
+    /**
+     * 结束砍价活动
+     *
+     * @param kanjiaId 砍价活动id
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean endKanjiaActivity(String kanjiaId) {
+        return this.update(new LambdaUpdateWrapper<KanjiaActivity>()
+                .eq(KanjiaActivity::getId, kanjiaId)
+                .set(KanjiaActivity::getStatus, KanJiaStatusEnum.END.name()));
+    }
 
     /**
      * 随机获取砍一刀价格
@@ -221,23 +274,17 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
 
     }
 
-
-    @Override
-    public IPage<KanjiaActivity> getForPage(KanjiaActivityQuery kanjiaActivityQuery, PageVO page) {
-        QueryWrapper<KanjiaActivity> queryWrapper = kanjiaActivityQuery.wrapper();
-        return this.page(PageUtil.initPage(page), queryWrapper);
-    }
-
     /**
-     * 结束砍价活动
+     * 在事务中执行操作；若无事务管理器则直接在当前上下文执行。
      *
-     * @param kanjiaId 砍价活动id
-     * @return 是否更新成功
+     * @param action 事务内执行的逻辑
+     * @param <T>    返回值类型
+     * @return 业务执行结果
      */
-    @Override
-    public boolean endKanjiaActivity(String kanjiaId) {
-        return this.update(new LambdaUpdateWrapper<KanjiaActivity>()
-                .eq(KanjiaActivity::getId, kanjiaId)
-                .set(KanjiaActivity::getStatus, KanJiaStatusEnum.END.name()));
+    private <T> T executeInTransaction(Supplier<T> action) {
+        if (transactionManager != null) {
+            return new TransactionTemplate(transactionManager).execute(status -> action.get());
+        }
+        return action.get();
     }
 }

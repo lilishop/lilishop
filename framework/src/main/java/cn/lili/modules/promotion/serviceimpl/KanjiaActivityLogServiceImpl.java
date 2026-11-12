@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +69,12 @@ public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogM
                 KanjiaActivityLog kanJiaActivityLog = new KanjiaActivityLog();
                 kanJiaActivityLog.setKanjiaActivityId(kanjiaActivity.getId());
                 BeanUtil.copyProperties(kanjiaActivityDTO, kanJiaActivityLog);
-                boolean result = this.save(kanJiaActivityLog);
+                boolean result;
+                try {
+                    result = this.save(kanJiaActivityLog);
+                } catch (DuplicateKeyException e) {
+                    throw new ServiceException(ResultCode.KANJIA_ACTIVITY_LOG_MEMBER_ERROR);
+                }
                 if (result) {
                     return kanJiaActivityLog;
                 }
