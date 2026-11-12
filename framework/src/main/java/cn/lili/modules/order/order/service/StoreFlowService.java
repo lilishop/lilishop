@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.store.entity.dos.Bill;
@@ -29,10 +30,24 @@ public interface StoreFlowService extends IService<StoreFlow> {
     void payOrder(String orderSn);
 
     /**
+     * 支付订单
+     *
+     * @param order 订单实体
+     */
+    void payOrder(Order order);
+
+    /**
      * 订单取消
      * @param orderSn 订单
      */
     void orderCancel(String orderSn);
+
+    /**
+     * 订单取消
+     *
+     * @param order 订单实体
+     */
+    void orderCancel(Order order);
 
     /**
      * 订单退款

@@ -15,6 +15,8 @@ import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionGradeService;
 import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
+import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.distribution.service.DistributionRewardService;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.distribution.service.DistributionWalletAccountService;
@@ -23,15 +25,14 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.mapper.OrderMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.DistributionSettlementSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,13 +61,16 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
     private static final int IN_QUERY_BATCH_SIZE = 500;
 
     @Autowired
+    private OrderMapper orderMapper;
+
     private OrderService orderService;
 
     @Autowired
     private OrderItemService orderItemService;
 
     @Autowired
-    @Lazy
+    private DistributionOrderMapper distributionOrderMapper;
+
     private DistributionOrderService distributionOrderService;
 
     @Autowired
@@ -90,7 +94,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handlePaymentRewards(String orderSn) {
-        Order order = orderService.getBySn(orderSn);
+        Order order = getOrderBySn(orderSn);
         if (order == null || !PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             return;
         }
@@ -197,7 +201,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         settleInviteCommission(order, commissionDelta, gradeRefreshIds);
 
         order.setSettleTime(now);
-        distributionOrderService.updateById(order);
+        updateDistributionOrderById(order);
 
         // 累加分销员有效佣金指标并刷新等级
         for (Map.Entry<String, BigDecimal> entry : commissionDelta.entrySet()) {
@@ -218,7 +222,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         refundDirectCommission(order, wasSettled);
         refundInviteCommission(order, wasSettled);
         order.setDistributionOrderStatus(DistributionOrderStatusEnum.REFUND.name());
-        distributionOrderService.updateById(order);
+        updateDistributionOrderById(order);
     }
 
     @Override
@@ -227,7 +231,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         if (orderSn == null || orderSn.isBlank()) {
             return;
         }
-        List<DistributionOrder> orders = distributionOrderService.list(new LambdaQueryWrapper<DistributionOrder>()
+        List<DistributionOrder> orders = listDistributionOrders(new LambdaQueryWrapper<DistributionOrder>()
                 .eq(DistributionOrder::getOrderSn, orderSn)
                 .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.NO_COMPLETED.name()));
         // 整单取消时仅处理仍处于冻结状态的明细
@@ -241,7 +245,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         if (orderSn == null || orderSn.isBlank()) {
             return false;
         }
-        return distributionOrderService.count(new LambdaQueryWrapper<DistributionOrder>()
+        return countDistributionOrders(new LambdaQueryWrapper<DistributionOrder>()
                 .eq(DistributionOrder::getOrderSn, orderSn)) > 0;
     }
 
@@ -260,9 +264,9 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         if (orderItemSn == null || orderItemSn.isBlank()) {
             return null;
         }
-        return distributionOrderService.getOne(new LambdaQueryWrapper<DistributionOrder>()
+        return getOneDistributionOrder(new LambdaQueryWrapper<DistributionOrder>()
                 .eq(DistributionOrder::getOrderItemSn, orderItemSn)
-                .last("LIMIT 1"), false);
+                .last("LIMIT 1"));
     }
 
     /**
@@ -366,7 +370,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         refundDirectCommission(order, false);
         refundInviteCommission(order, false);
         order.setDistributionOrderStatus(DistributionOrderStatusEnum.REFUND.name());
-        distributionOrderService.updateById(order);
+        updateDistributionOrderById(order);
     }
 
     /**
@@ -523,7 +527,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
      * @return 已写入的分销订单明细编号
      */
     private Set<String> loadExistingDistributionOrderItemSns(String orderSn) {
-        return distributionOrderService.list(new LambdaQueryWrapper<DistributionOrder>()
+        return listDistributionOrders(new LambdaQueryWrapper<DistributionOrder>()
                         .eq(DistributionOrder::getOrderSn, orderSn)
                         .select(DistributionOrder::getOrderItemSn))
                 .stream()
@@ -539,7 +543,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
      * @return 订单明细编号到分销订单的映射
      */
     private Map<String, DistributionOrder> loadDistributionOrdersByOrderSn(String orderSn) {
-        return distributionOrderService.list(new LambdaQueryWrapper<DistributionOrder>()
+        return listDistributionOrders(new LambdaQueryWrapper<DistributionOrder>()
                         .eq(DistributionOrder::getOrderSn, orderSn))
                 .stream()
                 .filter(order -> order.getOrderItemSn() != null && !order.getOrderItemSn().isBlank())
@@ -661,7 +665,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         distributionOrder.setNum(orderItem.getNum());
         distributionOrder.setRefundNum(0);
         try {
-            distributionOrderService.save(distributionOrder);
+            saveDistributionOrder(distributionOrder);
             existingDistributionOrderItems.add(orderItemSn);
             distributionOrderByItem.put(orderItemSn, distributionOrder);
             return distributionOrder;
@@ -797,5 +801,61 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         private BigDecimal directCommission;
         private BigDecimal inviteCommission;
         private BigDecimal commissionPool;
+    }
+
+    private Order getOrderBySn(String orderSn) {
+        if (orderMapper != null) {
+            return orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        }
+        if (orderService != null) {
+            return orderService.getBySn(orderSn);
+        }
+        return null;
+    }
+
+    private void saveDistributionOrder(DistributionOrder order) {
+        if (distributionOrderService != null) {
+            distributionOrderService.save(order);
+        } else if (distributionOrderMapper != null) {
+            distributionOrderMapper.insert(order);
+        }
+    }
+
+    private void updateDistributionOrderById(DistributionOrder order) {
+        if (distributionOrderService != null) {
+            distributionOrderService.updateById(order);
+        } else if (distributionOrderMapper != null) {
+            distributionOrderMapper.updateById(order);
+        }
+    }
+
+    private List<DistributionOrder> listDistributionOrders(LambdaQueryWrapper<DistributionOrder> wrapper) {
+        if (distributionOrderService != null) {
+            return distributionOrderService.list(wrapper);
+        }
+        if (distributionOrderMapper != null) {
+            return distributionOrderMapper.selectList(wrapper);
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    private long countDistributionOrders(LambdaQueryWrapper<DistributionOrder> wrapper) {
+        if (distributionOrderService != null) {
+            return distributionOrderService.count(wrapper);
+        }
+        if (distributionOrderMapper != null) {
+            return distributionOrderMapper.selectCount(wrapper);
+        }
+        return 0L;
+    }
+
+    private DistributionOrder getOneDistributionOrder(LambdaQueryWrapper<DistributionOrder> wrapper) {
+        if (distributionOrderService != null) {
+            return distributionOrderService.getOne(wrapper, false);
+        }
+        if (distributionOrderMapper != null) {
+            return distributionOrderMapper.selectOne(wrapper);
+        }
+        return null;
     }
 }

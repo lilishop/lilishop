@@ -18,7 +18,7 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.enums.ProfitSharingStatusEnum;
 import cn.lili.modules.order.order.mapper.StoreFlowMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.service.RefundLogService;
@@ -58,9 +58,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     /**
      * 订单
      */
-    @Lazy
     @Autowired
-    private OrderService orderService;
+    private OrderMapper orderMapper;
     /**
      * 订单货物
      */
@@ -89,16 +88,23 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
      */
     @Override
     public void payOrder(String orderSn) {
-        //根据订单编号获取子订单列表
-        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
-        //根据订单编号获取订单数据
-        Order order = orderService.getBySn(orderSn);
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order != null) {
+            payOrder(order);
+        }
+    }
 
+    @Override
+    public void payOrder(Order order) {
+        if (order == null) {
+            return;
+        }
+        //根据订单编号获取子订单列表
+        List<OrderItem> orderItems = orderItemService.getByOrderSn(order.getSn());
         //循环子订单记录流水
         for (OrderItem item : orderItems) {
             StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.PAY);
             saveProfitSharing(storeFlow);
-
             //添加付款交易流水
             this.save(storeFlow);
         }
@@ -106,11 +112,19 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
     @Override
     public void orderCancel(String orderSn) {
-        //根据订单编号获取订单数据
-        Order order = orderService.getBySn(orderSn);
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order != null) {
+            orderCancel(order);
+        }
+    }
+
+    @Override
+    public void orderCancel(Order order) {
+        if (order == null) {
+            return;
+        }
         // 判断订单是否是付款
-        if (!PayStatusEnum.PAID.name()
-                .equals((order.getPayStatus()))) {
+        if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
             return;
         }
         List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());

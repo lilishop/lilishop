@@ -9,7 +9,7 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.StoreFlowService;
+import cn.lili.modules.order.order.event.OrderPaidEvent;
 import cn.lili.modules.promotion.service.GiftCardCashService;
 import java.math.BigDecimal;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +51,6 @@ import static org.mockito.Mockito.when;
 class OrderServiceImplPayOrderTest {
 
     private OrderServiceImpl orderService;
-    private StoreFlowService storeFlowService;
     private OrderLogService orderLogService;
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -72,12 +71,10 @@ class OrderServiceImplPayOrderTest {
     void setUp() {
         orderService = spy(new OrderServiceImpl());
         ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
-        storeFlowService = mock(StoreFlowService.class);
         orderLogService = mock(OrderLogService.class);
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
         RocketmqCustomProperties rocketmqCustomProperties = mock(RocketmqCustomProperties.class);
 
-        ReflectionTestUtils.setField(orderService, "storeFlowService", storeFlowService);
         ReflectionTestUtils.setField(orderService, "orderLogService", orderLogService);
         ReflectionTestUtils.setField(orderService, "applicationEventPublisher", applicationEventPublisher);
         ReflectionTestUtils.setField(orderService, "rocketmqCustomProperties", rocketmqCustomProperties);
@@ -105,17 +102,18 @@ class OrderServiceImplPayOrderTest {
 
         assertThat(order.getPayStatus()).isEqualTo(PayStatusEnum.PAID.name());
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.PAID.name());
-        verify(storeFlowService).payOrder("O001");
         verify(orderLogService).save(any(OrderLog.class));
 
         ArgumentCaptor<ApplicationEvent> eventCaptor = ArgumentCaptor.forClass(ApplicationEvent.class);
-        verify(applicationEventPublisher, times(2)).publishEvent(eventCaptor.capture());
+        verify(applicationEventPublisher, times(3)).publishEvent(eventCaptor.capture());
         List<ApplicationEvent> events = eventCaptor.getAllValues();
-        assertThat(events.get(0)).isInstanceOf(TransactionCommitSendMQEvent.class);
-        TransactionCommitSendMQEvent mqEvent = (TransactionCommitSendMQEvent) events.get(0);
+        assertThat(events.get(0)).isInstanceOf(OrderPaidEvent.class);
+        assertThat(((OrderPaidEvent) events.get(0)).getOrder().getSn()).isEqualTo("O001");
+        assertThat(events.get(1)).isInstanceOf(TransactionCommitSendMQEvent.class);
+        TransactionCommitSendMQEvent mqEvent = (TransactionCommitSendMQEvent) events.get(1);
         assertThat(mqEvent.getTag()).isEqualTo(OrderTagsEnum.STATUS_CHANGE.name());
-        assertThat(events.get(1)).isInstanceOf(DistributionPaymentRewardsEvent.class);
-        assertThat(((DistributionPaymentRewardsEvent) events.get(1)).getOrderSn()).isEqualTo("O001");
+        assertThat(events.get(2)).isInstanceOf(DistributionPaymentRewardsEvent.class);
+        assertThat(((DistributionPaymentRewardsEvent) events.get(2)).getOrderSn()).isEqualTo("O001");
     }
 
     /**
@@ -132,7 +130,6 @@ class OrderServiceImplPayOrderTest {
                 .isInstanceOf(ServiceException.class);
 
         verify(applicationEventPublisher, never()).publishEvent(any());
-        verify(storeFlowService, never()).payOrder(anyString());
     }
 
     /**
@@ -155,7 +152,6 @@ class OrderServiceImplPayOrderTest {
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.CANCELLED.name());
         assertThat(order.getPayStatus()).isEqualTo(PayStatusEnum.UNPAID.name());
         // 不记录店铺支付流水
-        verify(storeFlowService, never()).payOrder("O002");
         // 不发布入账与分销事件
         verify(applicationEventPublisher, never()).publishEvent(any());
         // 记录系统退款操作日志

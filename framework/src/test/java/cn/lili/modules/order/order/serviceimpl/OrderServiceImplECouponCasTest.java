@@ -9,7 +9,6 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.promotion.service.GiftCardCashService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -83,7 +82,6 @@ class OrderServiceImplECouponCasTest {
         ReflectionTestUtils.setField(orderService, "applicationEventPublisher", applicationEventPublisher);
         ReflectionTestUtils.setField(orderService, "rocketmqCustomProperties", rocketmqCustomProperties);
         ReflectionTestUtils.setField(orderService, "liliMessageTemplate", mock(LiliMessageTemplate.class));
-        ReflectionTestUtils.setField(orderService, "storeFlowService", mock(StoreFlowService.class));
         ReflectionTestUtils.setField(orderService, "giftCardCashService", giftCardCashService);
         ReflectionTestUtils.setField(orderService, "settingService", settingService);
 
@@ -180,8 +178,7 @@ class OrderServiceImplECouponCasTest {
      */
     @Test
     void completeAndCancelRaceOnlyOneCasUpdateSucceeds() throws Exception {
-        Order order = paidECoupon("O-RACE");
-        doReturn(order).when(orderService).getBySn("O-RACE");
+        doAnswer(invocation -> paidECoupon("O-RACE")).when(orderService).getBySn("O-RACE");
         doReturn(java.util.Collections.emptyList()).when(orderItemService).getByOrderSn("O-RACE");
 
         AtomicInteger casUpdates = new AtomicInteger(0);
@@ -209,8 +206,9 @@ class OrderServiceImplECouponCasTest {
             boolean cancelOk = cancelFuture.get(10, TimeUnit.SECONDS);
 
             assertThat(completeOk ^ cancelOk).isTrue();
-            assertThat(casUpdates.get()).isEqualTo(2);
-            verify(orderService, times(2)).update(any(LambdaUpdateWrapper.class));
+            int expectedUpdates = completeOk ? 3 : 2;
+            assertThat(casUpdates.get()).isEqualTo(expectedUpdates);
+            verify(orderService, times(expectedUpdates)).update(any(LambdaUpdateWrapper.class));
         } finally {
             pool.shutdownNow();
         }

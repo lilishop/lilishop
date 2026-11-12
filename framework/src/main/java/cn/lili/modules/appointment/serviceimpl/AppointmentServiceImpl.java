@@ -31,6 +31,8 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.event.TradeIntoDbEvent;
+import org.springframework.context.event.EventListener;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.entity.dto.AppointmentOrderSetting;
@@ -317,6 +319,18 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentGoodsExtMappe
             appointmentCheckoutSupport.persistOrderExt(orderVO.getSn(), checkout);
         }
         AppointmentCheckoutContextHolder.remove(tradeDTO.getMemberId());
+    }
+
+    /**
+     * 监听交易单落库完成领域事件，执行预约扩展数据暂存
+     *
+     * @param event 交易单落库完成事件
+     */
+    @EventListener
+    public void onTradeIntoDb(TradeIntoDbEvent event) {
+        if (event != null && event.getTradeDTO() != null) {
+            stashCheckoutForPayment(event.getTradeDTO());
+        }
     }
 
     @Override
