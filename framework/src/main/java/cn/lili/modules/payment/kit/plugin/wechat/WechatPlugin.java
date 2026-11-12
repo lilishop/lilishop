@@ -2,11 +2,7 @@ package cn.lili.modules.payment.kit.plugin.wechat;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.cache.Cache;
 import cn.lili.common.context.ThreadContextHolder;
-import cn.lili.modules.payment.kit.dto.PaymentQueryResult;
-import com.wechat.pay.java.service.payments.nativepay.model.CloseOrderRequest;
-import com.wechat.pay.java.service.payments.nativepay.model.QueryOrderByOutTradeNoRequest;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -29,38 +25,17 @@ import cn.lili.modules.payment.kit.core.kit.HttpKit;
 import cn.lili.modules.payment.kit.core.kit.IpKit;
 import cn.lili.modules.payment.kit.core.utils.DateTimeZoneUtil;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentQueryResult;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
-import cn.lili.modules.payment.service.RefundLogService;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.WithdrawalSetting;
-import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
-import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
-import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.gson.Gson;
-import com.google.gson.annotations.SerializedName;
 import com.wechat.pay.java.core.Config;
-import com.wechat.pay.java.core.RSAAutoCertificateConfig;
-import com.wechat.pay.java.core.RSAPublicKeyConfig;
-import com.wechat.pay.java.core.cipher.PrivacyEncryptor;
 import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.core.http.Constant;
-import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
-import com.wechat.pay.java.core.http.HttpClient;
-import com.wechat.pay.java.core.http.HttpHeaders;
-import com.wechat.pay.java.core.http.HttpMethod;
-import com.wechat.pay.java.core.http.HttpRequest;
-import com.wechat.pay.java.core.http.HttpResponse;
-import com.wechat.pay.java.core.http.JsonRequestBody;
-import com.wechat.pay.java.core.http.MediaType;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
@@ -74,10 +49,8 @@ import com.wechat.pay.java.service.payments.nativepay.NativePayService;
 import com.wechat.pay.java.service.payments.nativepay.model.Amount;
 import com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse;
-import com.wechat.pay.java.service.refund.RefundService;
-import com.wechat.pay.java.service.refund.model.AmountReq;
-import com.wechat.pay.java.service.refund.model.CreateRequest;
-import com.wechat.pay.java.service.refund.model.Refund;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -85,7 +58,6 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,101 +71,62 @@ import java.util.Map;
 @Slf4j
 @Component
 public class WechatPlugin implements Payment {
-    /**
-     * 收银台
-     */
+
     @Autowired
     private CashierSupport cashierSupport;
-    /**
-     * 支付日志
-     */
+
     @Autowired
     private PaymentService paymentService;
-    /**
-     * 缓存
-     */
-    @Autowired
-    private Cache<String> cache;
-    /**
-     * 退款日志
-     */
-    @Autowired
-    private RefundLogService refundLogService;
-    /**
-     * 配置
-     */
-    @Autowired
-    private SettingService settingService;
-    /**
-     * 联合登录
-     */
+
     @Autowired
     private ConnectService connectService;
-    /**
-     * 联合登录
-     */
+
     @Autowired
     private OrderService orderService;
+
     @Autowired
-    private MemberWithdrawApplyService memberWithdrawApplyService;
+    private WechatConfigSupport wechatConfigSupport;
 
+    @Autowired
+    private WechatTransferSupport wechatTransferSupport;
 
+    @Autowired
+    private WechatRefundSupport wechatRefundSupport;
+
+    @Autowired
+    private WechatOrderQuerySupport wechatOrderQuerySupport;
 
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response1, PayParam payParam) {
-
         try {
-            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+            WechatPrepayContext ctx = buildPrepayContext(payParam);
+            String appid = ctx.getSetting().getH5AppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
 
-            //支付参数准备
             SceneInfo sceneInfo = new SceneInfo();
             sceneInfo.setPayerClientIp(IpKit.getRealIp(request));
             H5Info h5Info = new H5Info();
             h5Info.setType("WAP");
             sceneInfo.setH5Info(h5Info);
 
-            //支付金额
-            Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
-            //第三方付款订单
-            String outOrderNo = SnowFlake.getIdStr();
-            //过期时间
-            String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
-
-            //回传数据
-            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
-
-
-            WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getH5AppId();
-            if (appid == null) {
-                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
-            }
-
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 构建service
-            H5Service service = new H5Service.Builder().config(config).build();
-
+            H5Service service = new H5Service.Builder().config(ctx.getConfig()).build();
             com.wechat.pay.java.service.payments.h5.model.PrepayRequest prepayRequest = new com.wechat.pay.java.service.payments.h5.model.PrepayRequest();
             com.wechat.pay.java.service.payments.h5.model.Amount amount = new com.wechat.pay.java.service.payments.h5.model.Amount();
-            amount.setTotal(fen);
+            amount.setTotal(ctx.getFen());
             prepayRequest.setAmount(amount);
             prepayRequest.setAppid(appid);
-            prepayRequest.setMchid(setting.getMchId());
-            prepayRequest.setDescription(cashierParam.getDetail());
-            prepayRequest.setNotifyUrl(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            prepayRequest.setAttach(attach);
-            prepayRequest.setTimeExpire(timeExpire);
-            prepayRequest.setOutTradeNo(outOrderNo);
+            prepayRequest.setMchid(ctx.getSetting().getMchId());
+            prepayRequest.setDescription(ctx.getCashierParam().getDetail());
+            prepayRequest.setNotifyUrl(notifyUrl(ctx.getSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
+            prepayRequest.setAttach(ctx.getAttach());
+            prepayRequest.setTimeExpire(ctx.getTimeExpire());
+            prepayRequest.setOutTradeNo(ctx.getOutOrderNo());
             prepayRequest.setSceneInfo(sceneInfo);
-            // 调用下单方法，得到应答
-            com.wechat.pay.java.service.payments.h5.model.PrepayResponse response = service.prepay(prepayRequest);
-            updateOrderPayNo(payParam, outOrderNo);
 
+            com.wechat.pay.java.service.payments.h5.model.PrepayResponse response = service.prepay(prepayRequest);
+            updateOrderPayNo(payParam, ctx.getOutOrderNo());
             return ResultUtil.data(response.getH5Url());
         } catch (Exception e) {
             log.error("微信H5支付错误", e);
@@ -203,61 +136,42 @@ public class WechatPlugin implements Payment {
 
     @Override
     public ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
-
         try {
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name()).build()
+                    ConnectQueryDTO.builder()
+                            .userId(UserContext.getCurrentUser().getId())
+                            .unionType(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name())
+                            .build()
             );
             if (connect == null) {
                 return null;
             }
 
-
-            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
-
-            //支付金额
-            Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
-            //第三方付款订单
-            String outOrderNo = SnowFlake.getIdStr();
-            //过期时间
-            String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
-
-            // 将 Hutool URLEncoder 替换为标准库
-            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
-
-            WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getJsapiAppId();
+            WechatPrepayContext ctx = buildPrepayContext(payParam);
+            String appid = ctx.getSetting().getJsapiAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 使用官方扩展类生成前端调起支付参数，避免自行签名
-            JsapiServiceExtension service = new JsapiServiceExtension.Builder().config(config).build();
-
+            JsapiServiceExtension service = new JsapiServiceExtension.Builder().config(ctx.getConfig()).build();
             com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest prepayRequest = new com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest();
             com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
-
             com.wechat.pay.java.service.payments.jsapi.model.Payer payer = new com.wechat.pay.java.service.payments.jsapi.model.Payer();
             payer.setOpenid(connect.getUnionId());
-            amount.setTotal(fen);
+            amount.setTotal(ctx.getFen());
             prepayRequest.setAmount(amount);
             prepayRequest.setAppid(appid);
-            prepayRequest.setMchid(setting.getMchId());
-            prepayRequest.setDescription(cashierParam.getDetail());
-            prepayRequest.setNotifyUrl(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            prepayRequest.setAttach(attach);
-            prepayRequest.setTimeExpire(timeExpire);
-            prepayRequest.setOutTradeNo(outOrderNo);
+            prepayRequest.setMchid(ctx.getSetting().getMchId());
+            prepayRequest.setDescription(ctx.getCashierParam().getDetail());
+            prepayRequest.setNotifyUrl(notifyUrl(ctx.getSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
+            prepayRequest.setAttach(ctx.getAttach());
+            prepayRequest.setTimeExpire(ctx.getTimeExpire());
+            prepayRequest.setOutTradeNo(ctx.getOutOrderNo());
             prepayRequest.setPayer(payer);
+
             com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse response =
                     service.prepayWithRequestPayment(prepayRequest);
-            updateOrderPayNo(payParam, outOrderNo);
+            updateOrderPayNo(payParam, ctx.getOutOrderNo());
 
             Map<String, String> map = WechatRequestPaymentParamConverter.fromJsapiResponse(response);
             log.info("唤起支付参数:{}", map);
@@ -270,51 +184,29 @@ public class WechatPlugin implements Payment {
 
     @Override
     public ResultMessage<Object> appPay(HttpServletRequest request, PayParam payParam) {
-
         try {
-
-            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
-
-            //支付金额
-            Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
-            //第三方付款订单
-            String outOrderNo = SnowFlake.getIdStr();
-            //过期时间
-            String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
-
-            // 将 Hutool URLEncoder 替换为标准库
-            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
-
-            WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getAppAppId();
+            WechatPrepayContext ctx = buildPrepayContext(payParam);
+            String appid = ctx.getSetting().getAppAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 使用官方扩展类生成前端调起支付参数，避免自行签名
-            AppServiceExtension service = new AppServiceExtension.Builder().config(config).build();
-
+            AppServiceExtension service = new AppServiceExtension.Builder().config(ctx.getConfig()).build();
             com.wechat.pay.java.service.payments.app.model.PrepayRequest prepayRequest = new com.wechat.pay.java.service.payments.app.model.PrepayRequest();
             com.wechat.pay.java.service.payments.app.model.Amount amount = new com.wechat.pay.java.service.payments.app.model.Amount();
-            amount.setTotal(fen);
+            amount.setTotal(ctx.getFen());
             prepayRequest.setAmount(amount);
             prepayRequest.setAppid(appid);
-            prepayRequest.setMchid(setting.getMchId());
-            prepayRequest.setDescription(cashierParam.getDetail());
-            prepayRequest.setNotifyUrl(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            prepayRequest.setAttach(attach);
-            prepayRequest.setTimeExpire(timeExpire);
-            prepayRequest.setOutTradeNo(outOrderNo);
+            prepayRequest.setMchid(ctx.getSetting().getMchId());
+            prepayRequest.setDescription(ctx.getCashierParam().getDetail());
+            prepayRequest.setNotifyUrl(notifyUrl(ctx.getSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
+            prepayRequest.setAttach(ctx.getAttach());
+            prepayRequest.setTimeExpire(ctx.getTimeExpire());
+            prepayRequest.setOutTradeNo(ctx.getOutOrderNo());
 
             com.wechat.pay.java.service.payments.app.model.PrepayWithRequestPaymentResponse response =
                     service.prepayWithRequestPayment(prepayRequest);
-            updateOrderPayNo(payParam, outOrderNo);
+            updateOrderPayNo(payParam, ctx.getOutOrderNo());
             Map<String, String> map = WechatRequestPaymentParamConverter.fromAppResponse(response);
             log.info("唤起支付参数:{}", map);
             return ResultUtil.data(map);
@@ -326,54 +218,29 @@ public class WechatPlugin implements Payment {
 
     @Override
     public ResultMessage<Object> nativePay(HttpServletRequest request, PayParam payParam) {
-
         try {
-
-            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
-
-            //支付金额
-            Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
-            //第三方付款订单
-            String outOrderNo = SnowFlake.getIdStr();
-            //过期时间
-            String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
-
-            // 将 Hutool URLEncoder 替换为标准库
-            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
-
-            WechatPaymentSetting setting = wechatPaymentSetting();
-
-            String appid = setting.getNativeAppId();
+            WechatPrepayContext ctx = buildPrepayContext(payParam);
+            String appid = ctx.getSetting().getNativeAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 构建service
-            NativePayService service = new NativePayService.Builder().config(config).build();
-
+            NativePayService service = new NativePayService.Builder().config(ctx.getConfig()).build();
             PrepayRequest prepayRequest = new PrepayRequest();
             Amount amount = new Amount();
-            amount.setTotal(fen);
+            amount.setTotal(ctx.getFen());
             prepayRequest.setAmount(amount);
             prepayRequest.setAppid(appid);
-            prepayRequest.setMchid(setting.getMchId());
-            prepayRequest.setDescription(cashierParam.getDetail());
-            prepayRequest.setNotifyUrl(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            prepayRequest.setAttach(attach);
-            prepayRequest.setTimeExpire(timeExpire);
-            prepayRequest.setOutTradeNo(outOrderNo);
+            prepayRequest.setMchid(ctx.getSetting().getMchId());
+            prepayRequest.setDescription(ctx.getCashierParam().getDetail());
+            prepayRequest.setNotifyUrl(notifyUrl(ctx.getSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
+            prepayRequest.setAttach(ctx.getAttach());
+            prepayRequest.setTimeExpire(ctx.getTimeExpire());
+            prepayRequest.setOutTradeNo(ctx.getOutOrderNo());
 
-            // 调用下单方法，得到应答
             PrepayResponse response = service.prepay(prepayRequest);
-            updateOrderPayNo(payParam, outOrderNo);
+            updateOrderPayNo(payParam, ctx.getOutOrderNo());
             return ResultUtil.data(response.getCodeUrl());
-
         } catch (ServiceException e) {
             log.error("支付异常", e);
             throw new ServiceException(ResultCode.PAY_ERROR);
@@ -381,78 +248,55 @@ public class WechatPlugin implements Payment {
             log.error("支付异常", e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
-
     }
 
     @Override
     public ResultMessage<Object> mpPay(HttpServletRequest request, PayParam payParam) {
-
         try {
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
+                    ConnectQueryDTO.builder()
+                            .userId(UserContext.getCurrentUser().getId())
+                            .unionType(SourceEnum.WECHAT_MP_OPEN_ID.name())
+                            .build()
             );
             if (connect == null) {
                 return null;
             }
 
-            com.wechat.pay.java.service.payments.jsapi.model.Payer payer = new com.wechat.pay.java.service.payments.jsapi.model.Payer();
-            payer.setOpenid(connect.getUnionId());
-
-            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
-
-            //支付金额
-            Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
-            //第三方付款订单
-            String outOrderNo = SnowFlake.getIdStr();
-            //过期时间
-            String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
-
-            //微信小程序，appid 需要单独获取，这里读取了联合登录配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
-            //如果有2开需求，这里需要调整，修改这个appid的获取途径即可
-            String appid = wechatPaymentSetting().getMpAppId();
+            WechatPrepayContext ctx = buildPrepayContext(payParam);
+            String appid = ctx.getSetting().getMpAppId();
             if (StringUtils.isEmpty(appid)) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
-            // 将 Hutool URLEncoder 替换为标准库
-            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
 
-            WechatPaymentSetting setting = wechatPaymentSetting();
+            com.wechat.pay.java.service.payments.jsapi.model.Payer payer = new com.wechat.pay.java.service.payments.jsapi.model.Payer();
+            payer.setOpenid(connect.getUnionId());
 
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 使用官方扩展类生成前端调起支付参数，避免自行签名
-            JsapiServiceExtension service = new JsapiServiceExtension.Builder().config(config).build();
-
+            JsapiServiceExtension service = new JsapiServiceExtension.Builder().config(ctx.getConfig()).build();
             com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest prepayRequest = new com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest();
             com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
-            amount.setTotal(fen);
+            amount.setTotal(ctx.getFen());
             prepayRequest.setAmount(amount);
             prepayRequest.setAppid(appid);
-            prepayRequest.setMchid(setting.getMchId());
-            prepayRequest.setDescription(cashierParam.getDetail());
-            prepayRequest.setNotifyUrl(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            prepayRequest.setAttach(attach);
-            prepayRequest.setTimeExpire(timeExpire);
-            prepayRequest.setOutTradeNo(outOrderNo);
+            prepayRequest.setMchid(ctx.getSetting().getMchId());
+            prepayRequest.setDescription(ctx.getCashierParam().getDetail());
+            prepayRequest.setNotifyUrl(notifyUrl(ctx.getSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
+            prepayRequest.setAttach(ctx.getAttach());
+            prepayRequest.setTimeExpire(ctx.getTimeExpire());
+            prepayRequest.setOutTradeNo(ctx.getOutOrderNo());
             prepayRequest.setPayer(payer);
+
             com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse response =
                     service.prepayWithRequestPayment(prepayRequest);
-            updateOrderPayNo(payParam, outOrderNo);
+            updateOrderPayNo(payParam, ctx.getOutOrderNo());
 
             Map<String, String> map = WechatRequestPaymentParamConverter.fromJsapiResponse(response);
             log.info("唤起支付参数:{}", map);
-
             return ResultUtil.data(map);
-
         } catch (Exception e) {
             log.error("支付异常", e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
-
     }
 
     @Override
@@ -517,208 +361,22 @@ public class WechatPlugin implements Payment {
 
     @Override
     public void transferNotify(HttpServletRequest request) {
-        // 构造 RequestParam
-        RequestParam requestParam = new RequestParam.Builder()
-                .serialNumber(request.getHeader("Wechatpay-Serial"))
-                .nonce(request.getHeader("Wechatpay-Nonce"))
-                .signature(request.getHeader("Wechatpay-Signature"))
-                .timestamp(request.getHeader("Wechatpay-Timestamp"))
-                .body(HttpKit.readData(request))
-                .build();
-
-        WechatPaymentSetting setting = wechatPaymentSetting();
-        NotificationConfig config = null;
-        if ("CERT".equals(setting.getPublicType())) {
-            config = new RSAAutoCertificateConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .apiV3Key(setting.getApiKey3())
-                    .build();
-        } else {
-            config = new RSAPublicKeyConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .apiV3Key(setting.getApiKey3())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .publicKeyId(setting.getPublicId())
-                    .publicKey(setting.getPublicKey())
-                    .build();
-        }
-
-        // 初始化 NotificationParser
-        NotificationParser parser = new NotificationParser(config);
-
-        try {
-            MerchantTransferNotifyResource transferNotifyResource = parser.parse(requestParam, MerchantTransferNotifyResource.class);
-            if (transferNotifyResource == null || StringUtils.isEmpty(transferNotifyResource.getOutBillNo())) {
-                log.warn("微信提现回调解析成功，但未获取到 outBillNo");
-                return;
-            }
-            log.info("微信提现回调，outBillNo={}, state={}, transferBillNo={}",
-                    transferNotifyResource.getOutBillNo(), transferNotifyResource.getState(), transferNotifyResource.getTransferBillNo());
-            if ("SUCCESS".equals(transferNotifyResource.getState())) {
-                memberWithdrawApplyService.transferSuccess(transferNotifyResource.getOutBillNo());
-                return;
-            }
-            log.warn("微信提现回调为非成功终态，outBillNo={}, state={}, failReason={}",
-                    transferNotifyResource.getOutBillNo(), transferNotifyResource.getState(), transferNotifyResource.getFailReason());
-        } catch (ValidationException e) {
-            // 签名验证失败，返回 401 UNAUTHORIZED 状态码
-            log.error("sign verification failed", e);
-
-        } catch (Exception e) {
-            log.error("微信提现回调处理异常", e);
-        }
+        wechatTransferSupport.transferNotify(request);
     }
 
-    /**
-     * 微信提现
-     * 文档地址：https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/initiate-batch-transfer.html
-     *
-     * @param memberWithdrawApply 客户提现申请
-     */
     @Override
     public TransferResultDTO transfer(MemberWithdrawApply memberWithdrawApply) {
-        try {
-            //获取提现设置
-            WithdrawalSetting withdrawalSetting = new Gson().fromJson(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name()).getSettingValue(),
-                    WithdrawalSetting.class);
-            if (withdrawalSetting == null || StringUtils.isEmpty(withdrawalSetting.getWechatAppId())) {
-                return TransferResultDTO.builder().result(false).response("微信提现配置缺失：wechatAppId").build();
-            }
-
-            //获取用户OPENID
-            WechatConnectSetting wechatConnectSetting = new Gson().fromJson(settingService.get(SettingEnum.WECHAT_CONNECT.name()).getSettingValue()
-                    , WechatConnectSetting.class);
-            String source = "";
-            for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
-                if (wechatConnectSettingItem.getAppId().equals(withdrawalSetting.getWechatAppId())) {
-                    switch (wechatConnectSettingItem.getClientType()) {
-                        case "PC":
-                            source = SourceEnum.WECHAT_PC_OPEN_ID.name();
-                            break;
-                        case "H5":
-                            source = SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
-                            break;
-                        case "WECHAT_MP":
-                            source = SourceEnum.WECHAT_MP_OPEN_ID.name();
-                            break;
-                        case "APP":
-                            source = SourceEnum.WECHAT_APP_OPEN_ID.name();
-                            break;
-                    }
-                }
-            }
-
-
-            //获取用户openId
-            Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(memberWithdrawApply.getMemberId())
-                            .unionType(source).build()
-            );
-            if (connect == null || StringUtils.isEmpty(connect.getUnionId())) {
-                return TransferResultDTO.builder().result(false).response("未获取到用户微信OpenId").build();
-            }
-            //获取微信设置
-            WechatPaymentSetting setting = wechatPaymentSetting();
-
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-
-            MerchantTransferWithAuthorizationRequest request = new MerchantTransferWithAuthorizationRequest();
-            request.setAppid(withdrawalSetting.getWechatAppId());
-            request.setOutBillNo(SnowFlake.createStr("T"));
-            request.setTransferSceneId("1000");
-            request.setTransferRemark("用户提现");
-            Long amountFen = CurrencyUtil.getFenLong(memberWithdrawApply.getApplyMoney());
-            if (amountFen == null || amountFen <= 0) {
-                return TransferResultDTO.builder().result(false).response("提现金额异常").build();
-            }
-            request.setTransferAmount(amountFen);
-            request.setOpenid(connect.getUnionId());
-            request.setNotifyUrl(transferNotifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-            request.setTransferSceneReportInfos(buildWithdrawTransferSceneReportInfos());
-
-            UserRecvStyle userRecvStyle=new UserRecvStyle();
-            userRecvStyle.setType("CONFIRM_PAGE");
-            request.setUserRecvStyle(userRecvStyle);
-            MerchantTransferWithAuthorizationResult transferResult = createMerchantTransferWithAuthorization(config, request);
-            MerchantTransferWithAuthorizationResponse response = transferResult.getResponse();
-            log.info("微信提现响应 outBillNo={}, statusCode={}, response={}", request.outBillNo, transferResult.getStatusCode(), response);
-
-            if (transferResult.getStatusCode() == 200
-                    && response != null
-                    && "WAIT_USER_CONFIRM".equals(response.getState())) {
-                return TransferResultDTO.builder()
-                        .result(true)
-                        .response("")
-                        .outBillNo(request.getOutBillNo())
-                        .wechatPackage(response.getPackageInfo())
-                        .build();
-            }
-
-
-            boolean accepted = response != null
-                    && !StringUtils.isEmpty(response.getTransferBillNo())
-                    && !"FAIL".equals(response.getState())
-                    && !"CANCELLED".equals(response.getState());
-            return TransferResultDTO.builder().result(accepted).response(accepted ? null : JSONUtil.toJsonStr(response)).build();
-            //根据自身业务进行接下来的任务处理
-        } catch (Exception e) {
-            log.error("用户微信提现异常", e);
-            return TransferResultDTO.builder().result(false).response(e.getMessage()).build();
-        }
-
-    }
-
-    private List<TransferSceneReportInfo> buildWithdrawTransferSceneReportInfos() {
-        List<TransferSceneReportInfo> reportInfos = new ArrayList<>();
-        TransferSceneReportInfo reportInfo = new TransferSceneReportInfo();
-        reportInfo.setInfoType("活动名称");
-        reportInfo.setInfoContent("新会员有礼");
-        reportInfos.add(reportInfo);
-        TransferSceneReportInfo reportInfo1 = new TransferSceneReportInfo();
-        reportInfo1.setInfoType("奖励说明");
-        reportInfo1.setInfoContent("奖励");
-        reportInfos.add(reportInfo1);
-        return reportInfos;
-    }
-
-    private MerchantTransferWithAuthorizationResult createMerchantTransferWithAuthorization(Config config,
-                                                                                            MerchantTransferWithAuthorizationRequest request) {
-        HttpClient httpClient = new DefaultHttpClientBuilder().config(config).build();
-        PrivacyEncryptor encryptor = config.createEncryptor();
-        HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(Constant.ACCEPT, MediaType.APPLICATION_JSON.getValue());
-        headers.addHeader(Constant.CONTENT_TYPE, MediaType.APPLICATION_JSON.getValue());
-        headers.addHeader(Constant.WECHAT_PAY_SERIAL, encryptor.getWechatpaySerial());
-        HttpRequest httpRequest = new HttpRequest.Builder()
-                .httpMethod(HttpMethod.POST)
-                .url("https://api.mch.weixin.qq.com/v3/fund-app/mch-transfer/transfer-bills")
-                .headers(headers)
-                .body(new JsonRequestBody.Builder().body(new Gson().toJson(request)).build())
-                .build();
-        HttpResponse<MerchantTransferWithAuthorizationResponse> response = httpClient.execute(
-                httpRequest,
-                MerchantTransferWithAuthorizationResponse.class
-        );
-        return new MerchantTransferWithAuthorizationResult(200, response.getServiceResponse());
+        WechatPaymentSetting setting = wechatConfigSupport.getPaymentSetting();
+        return wechatTransferSupport.transfer(memberWithdrawApply, transferNotifyUrl(setting.getCallbackUrl(), PaymentMethodEnum.WECHAT));
     }
 
     /**
      * 验证结果，执行支付回调
      *
-     * @param request
-     * @throws Exception
+     * @param request HTTP 请求
+     * @throws Exception 验签失败或业务异常
      */
     void verifyNotify(HttpServletRequest request) throws Exception {
-
-        // 构造 RequestParam
         RequestParam requestParam = new RequestParam.Builder()
                 .serialNumber(request.getHeader("Wechatpay-Serial"))
                 .nonce(request.getHeader("Wechatpay-Nonce"))
@@ -727,27 +385,8 @@ public class WechatPlugin implements Payment {
                 .body(HttpKit.readData(request))
                 .build();
 
-        WechatPaymentSetting setting = wechatPaymentSetting();
-        NotificationConfig config = null;
-        if ("CERT".equals(setting.getPublicType())) {
-            config = new RSAAutoCertificateConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .apiV3Key(setting.getApiKey3())
-                    .build();
-        } else {
-            config = new RSAPublicKeyConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .apiV3Key(setting.getApiKey3())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .publicKeyId(setting.getPublicId())
-                    .publicKey(setting.getPublicKey())
-                    .build();
-        }
-
-        // 初始化 NotificationParser
+        WechatPaymentSetting setting = wechatConfigSupport.getPaymentSetting();
+        NotificationConfig config = wechatConfigSupport.getNotificationConfig(setting);
         NotificationParser parser = new NotificationParser(config);
 
         // 以支付通知回调为例，验签、解密并转换成 Transaction
@@ -775,11 +414,8 @@ public class WechatPlugin implements Payment {
             return;
         }
 
-        // 将 Hutool URLDecoder 替换为标准库
         String payParamJson = java.net.URLDecoder.decode(transaction.getAttach(), StandardCharsets.UTF_8.name());
-
         PayParam payParam = new Gson().fromJson(payParamJson, PayParam.class);
-
         Double totalAmount = CurrencyUtil.reversalFen(transaction.getAmount().getTotal());
 
         PaymentSuccessParams paymentSuccessParams = new PaymentSuccessParams(
@@ -790,299 +426,62 @@ public class WechatPlugin implements Payment {
         );
 
         paymentService.success(paymentSuccessParams);
-
     }
 
     @Override
     public void refund(RefundLog refundLog) {
-
-        try {
-
-            AmountReq amount = new AmountReq();
-            amount.setRefund(CurrencyUtil.getFenLong(refundLog.getTotalAmount()));
-            amount.setTotal(CurrencyUtil.getFenLong(refundLog.getPayPrice() != null && refundLog.getPayPrice() > 0 ? refundLog.getPayPrice() : orderService.getPaymentTotal(refundLog.getOrderSn())));
-            amount.setCurrency("CNY");
-            //获取微信设置
-            WechatPaymentSetting setting = wechatPaymentSetting();
-
-            Config config = null;
-            if ("CERT".equals(setting.getPublicType())) {
-                config = this.getCertificateConfig(setting);
-            } else {
-                config = this.getPublicKeyConfig(setting);
-            }
-            // 构建service
-            RefundService refundService = new RefundService.Builder().config(config).build();
-
-            CreateRequest request = new CreateRequest();
-            request.setTransactionId(refundLog.getPaymentReceivableNo());
-            request.setAmount(amount);
-            request.setOutRefundNo(refundLog.getOutOrderNo());
-            request.setReason(refundLog.getRefundReason());
-            request.setNotifyUrl(refundNotifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
-
-            Refund refund = refundService.create(request);
-
-            log.info("微信退款响应 {}", refund);
-            if (refund != null) {
-                if (com.wechat.pay.java.service.refund.model.Status.CLOSED.equals(refund.getStatus())
-                        || com.wechat.pay.java.service.refund.model.Status.ABNORMAL.equals(refund.getStatus())) {
-                    refundLog.setErrorMessage("微信退款状态异常: " + refund.getStatus());
-                    refundLogService.save(refundLog);
-                    throw new ServiceException(ResultCode.PAY_ERROR, "微信退款失败: " + refund.getStatus());
-                }
-                refundLog.setReceivableNo(refund.getRefundId());
-                if (com.wechat.pay.java.service.refund.model.Status.SUCCESS.equals(refund.getStatus())) {
-                    refundLog.setIsRefund(true);
-                }
-            }
-            refundLogService.save(refundLog);
-        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
-            log.error("微信退款申请接口异常，orderSn={}, errorCode={}, errorMessage={}",
-                    refundLog.getOrderSn(), e.getErrorCode(), e.getErrorMessage(), e);
-            throw new ServiceException(ResultCode.PAY_ERROR, "微信退款申请失败: " + e.getErrorMessage());
-        } catch (ServiceException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("微信退款申请失败，orderSn={}", refundLog.getOrderSn(), e);
-            throw new ServiceException(ResultCode.PAY_ERROR, "微信退款申请失败: " + (e.getMessage() != null ? e.getMessage() : "渠道异常"));
-        }
-
+        WechatPaymentSetting setting = wechatConfigSupport.getPaymentSetting();
+        wechatRefundSupport.refund(refundLog, refundNotifyUrl(setting.getCallbackUrl(), PaymentMethodEnum.WECHAT));
     }
 
     @Override
     public void refundNotify(HttpServletRequest request) {
-        // 构造 RequestParam
-        RequestParam requestParam = new RequestParam.Builder()
-                .serialNumber(request.getHeader("Wechatpay-Serial"))
-                .nonce(request.getHeader("Wechatpay-Nonce"))
-                .signature(request.getHeader("Wechatpay-Signature"))
-                .timestamp(request.getHeader("Wechatpay-Timestamp"))
-                .body(HttpKit.readData(request))
-                .build();
-
-        WechatPaymentSetting setting = wechatPaymentSetting();
-        NotificationConfig config = null;
-        if ("CERT".equals(setting.getPublicType())) {
-            config = new RSAAutoCertificateConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .apiV3Key(setting.getApiKey3())
-                    .build();
-        } else {
-            config = new RSAPublicKeyConfig.Builder()
-                    .merchantId(setting.getMchId())
-                    .apiV3Key(setting.getApiKey3())
-                    .privateKey(setting.getApiclientKey())
-                    .merchantSerialNumber(setting.getSerialNumber())
-                    .publicKeyId(setting.getPublicId())
-                    .publicKey(setting.getPublicKey())
-                    .build();
-        }
-
-        // 初始化 NotificationParser
-        NotificationParser parser = new NotificationParser(config);
-        try {
-            Refund refund = parser.parse(requestParam, Refund.class);
-            RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo,
-                    refund.getTransactionId()));
-            if (refundLog != null) {
-                if (refund.getStatus() != null && com.wechat.pay.java.service.refund.model.Status.SUCCESS.equals(refund.getStatus())) {
-                    refundLog.setIsRefund(true);
-                    refundLog.setReceivableNo(refund.getRefundId());
-                } else {
-                    refundLog.setIsRefund(false);
-                    refundLog.setErrorMessage("微信退款异步通知非成功状态: " + refund.getStatus());
-                }
-                refundLogService.saveOrUpdate(refundLog);
-            }
-        } catch (Exception e) {
-            log.error("微信退款异步通知处理失败", e);
-        }
+        wechatRefundSupport.refundNotify(request);
     }
 
-    /**
-     * 获取微信支付配置
-     *
-     * @return
-     */
-    private WechatPaymentSetting wechatPaymentSetting() {
-        try {
-            Setting systemSetting = settingService.get(SettingEnum.WECHAT_PAYMENT.name());
-            WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
-            return wechatPaymentSetting;
-        } catch (Exception e) {
-            log.error("微信支付暂不支持", e);
-            throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
-        }
-    }
-
-    /**
-     * 获取微信公钥配置
-     *
-     * @param setting
-     * @return
-     */
-    private RSAPublicKeyConfig getPublicKeyConfig(WechatPaymentSetting setting) {
-        return
-                new RSAPublicKeyConfig.Builder()
-                        .merchantId(setting.getMchId())
-                        .privateKey(setting.getApiclientKey())
-                        .publicKey(setting.getPublicKey())
-                        .publicKeyId(setting.getPublicId())
-                        .merchantSerialNumber(setting.getSerialNumber())
-                        .apiV3Key(setting.getApiKey3())
-                        .build();
-    }
-
-    /**
-     * 获取微信证书配置
-     *
-     * @param setting
-     * @return
-     */
-    private RSAAutoCertificateConfig getCertificateConfig(WechatPaymentSetting setting) {
-        return new RSAAutoCertificateConfig.Builder()
-                .merchantId(setting.getMchId())
-                .privateKey(setting.getApiclientKey())
-                .merchantSerialNumber(setting.getSerialNumber())
-                .apiV3Key(setting.getApiKey3())
-                .build();
-    }
-
-    /**
-     * 修改订单支付单号
-     *
-     * @param payParam   支付参数
-     * @param outOrderNo 订单号
-     */
-    /**
-     * 主动查询微信支付订单状态
-     *
-     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
-     * @return 查单结果
-     */
     @Override
     public PaymentQueryResult query(String outTradeNo) {
-        if (StringUtils.isEmpty(outTradeNo)) {
-            return PaymentQueryResult.builder().exists(false).isPaid(false).isClosed(false).paymentMethod(PaymentMethodEnum.WECHAT.name()).build();
-        }
-        try {
-            WechatPaymentSetting setting = wechatPaymentSetting();
-            Config config = getWechatConfig(setting);
-            NativePayService service = new NativePayService.Builder().config(config).build();
-
-            QueryOrderByOutTradeNoRequest request = new QueryOrderByOutTradeNoRequest();
-            request.setMchid(setting.getMchId());
-            request.setOutTradeNo(outTradeNo);
-
-            Transaction transaction = service.queryOrderByOutTradeNo(request);
-            if (transaction == null) {
-                return PaymentQueryResult.builder()
-                        .exists(false)
-                        .isPaid(false)
-                        .isClosed(false)
-                        .paymentMethod(PaymentMethodEnum.WECHAT.name())
-                        .build();
-            }
-
-            Transaction.TradeStateEnum tradeState = transaction.getTradeState();
-            boolean isPaid = Transaction.TradeStateEnum.SUCCESS.equals(tradeState);
-            boolean isClosed = Transaction.TradeStateEnum.CLOSED.equals(tradeState)
-                    || Transaction.TradeStateEnum.REVOKED.equals(tradeState);
-            Double totalAmount = null;
-            if (transaction.getAmount() != null && transaction.getAmount().getTotal() != null) {
-                totalAmount = CurrencyUtil.reversalFen(transaction.getAmount().getTotal());
-            }
-
-            return PaymentQueryResult.builder()
-                    .exists(true)
-                    .isPaid(isPaid)
-                    .isClosed(isClosed)
-                    .paymentMethod(PaymentMethodEnum.WECHAT.name())
-                    .receivableNo(transaction.getTransactionId())
-                    .totalAmount(totalAmount)
-                    .rawStatus(tradeState != null ? tradeState.name() : null)
-                    .build();
-        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
-            // 404 或 ORDERNOTEXIST 说明渠道无此订单
-            if (e.getHttpStatusCode() == 404 || "ORDERNOTEXIST".equalsIgnoreCase(e.getErrorCode())) {
-                log.info("微信支付查单：渠道订单不存在，outTradeNo={}", outTradeNo);
-                return PaymentQueryResult.builder()
-                        .exists(false)
-                        .isPaid(false)
-                        .isClosed(false)
-                        .paymentMethod(PaymentMethodEnum.WECHAT.name())
-                        .rawStatus(e.getErrorCode())
-                        .errorMessage(e.getErrorMessage())
-                        .build();
-            }
-            log.error("微信支付查单服务异常，outTradeNo={}", outTradeNo, e);
-            throw new ServiceException("微信支付查单服务异常: " + e.getErrorMessage());
-        } catch (ServiceException se) {
-            // 配置缺失等业务异常，返回不存在
-            log.warn("微信支付查单配置异常或未支持，outTradeNo={}", outTradeNo, se);
-            return PaymentQueryResult.builder()
-                    .exists(false)
-                    .isPaid(false)
-                    .isClosed(false)
-                    .paymentMethod(PaymentMethodEnum.WECHAT.name())
-                    .errorMessage(se.getMessage())
-                    .build();
-        } catch (Exception e) {
-            log.error("微信支付查单未知异常，outTradeNo={}", outTradeNo, e);
-            throw new ServiceException("微信支付查单未知异常: " + e.getMessage());
-        }
+        return wechatOrderQuerySupport.query(outTradeNo);
     }
 
-    /**
-     * 关闭微信未支付订单
-     *
-     * @param outTradeNo 外部商户单号（对应 Order.payOrderNo）
-     */
     @Override
     public void close(String outTradeNo) {
-        if (StringUtils.isEmpty(outTradeNo)) {
-            return;
-        }
-        try {
-            WechatPaymentSetting setting = wechatPaymentSetting();
-            Config config = getWechatConfig(setting);
-            NativePayService service = new NativePayService.Builder().config(config).build();
-
-            CloseOrderRequest closeRequest = new CloseOrderRequest();
-            closeRequest.setMchid(setting.getMchId());
-            closeRequest.setOutTradeNo(outTradeNo);
-            service.closeOrder(closeRequest);
-            log.info("微信支付关单成功，outTradeNo={}", outTradeNo);
-        } catch (com.wechat.pay.java.core.exception.ServiceException e) {
-            // 若订单不存在或已关闭，视为正常
-            if (e.getHttpStatusCode() == 404 || "ORDERNOTEXIST".equalsIgnoreCase(e.getErrorCode())
-                    || "ORDER_CLOSED".equalsIgnoreCase(e.getErrorCode())) {
-                log.info("微信支付关单忽略：订单不存在或已关闭，outTradeNo={}, code={}", outTradeNo, e.getErrorCode());
-                return;
-            }
-            log.warn("微信支付关单异常，outTradeNo={}", outTradeNo, e);
-        } catch (Exception e) {
-            log.warn("微信支付关单异常，outTradeNo={}", outTradeNo, e);
-        }
+        wechatOrderQuerySupport.close(outTradeNo);
     }
 
     /**
-     * 获取微信配置对象
+     * 构建微信各终端预下单通用上下文
      *
-     * @param setting 微信支付设置
-     * @return 微信 SDK 配置
+     * @param payParam 支付入参
+     * @return 预下单准备上下文
+     * @throws Exception URL编码或配置解析异常
      */
-    private Config getWechatConfig(WechatPaymentSetting setting) {
-        if ("CERT".equals(setting.getPublicType())) {
-            return this.getCertificateConfig(setting);
-        } else {
-            return this.getPublicKeyConfig(setting);
-        }
+    private WechatPrepayContext buildPrepayContext(PayParam payParam) throws Exception {
+        CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+        Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
+        String outOrderNo = SnowFlake.getIdStr();
+        String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
+        String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
+        WechatPaymentSetting setting = wechatConfigSupport.getPaymentSetting();
+        Config config = wechatConfigSupport.getWechatConfig(setting);
+
+        return WechatPrepayContext.builder()
+                .cashierParam(cashierParam)
+                .fen(fen)
+                .outOrderNo(outOrderNo)
+                .timeExpire(timeExpire)
+                .attach(attach)
+                .setting(setting)
+                .config(config)
+                .build();
     }
 
+    /**
+     * 更新订单渠道支付单号
+     *
+     * @param payParam   支付参数
+     * @param outOrderNo 外部支付商户单号
+     */
     private void updateOrderPayNo(PayParam payParam, String outOrderNo) {
         if ("ORDER".equals(payParam.getOrderType())) {
             orderService.update(new LambdaUpdateWrapper<Order>()
@@ -1097,79 +496,21 @@ public class WechatPlugin implements Payment {
         }
     }
 
-    @lombok.Data
-    private static class MerchantTransferWithAuthorizationRequest {
-        @SerializedName("appid")
-        private String appid;
-        @SerializedName("out_bill_no")
-        private String outBillNo;
-        @SerializedName("transfer_scene_id")
-        private String transferSceneId;
-        @SerializedName("openid")
-        private String openid;
-        @SerializedName("notify_url")
-        private String notifyUrl;
-        @SerializedName("user_name")
-        private String userName;
-        @SerializedName("transfer_amount")
-        private Long transferAmount;
-        @SerializedName("transfer_remark")
-        private String transferRemark;
-        @SerializedName("user_recv_perception")
-        private String userRecvPerception;
-        @SerializedName("transfer_scene_report_infos")
-        private List<TransferSceneReportInfo> transferSceneReportInfos;
-        @SerializedName("user_recv_style")
-        private UserRecvStyle userRecvStyle;
-    }
-    @lombok.Data
-    private static class UserRecvStyle {
-        @SerializedName("type")
-        private String type;
-    }
-
-    @lombok.Data
-    private static class TransferSceneReportInfo {
-        @SerializedName("info_type")
-        private String infoType;
-        @SerializedName("info_content")
-        private String infoContent;
-    }
-
-    @lombok.AllArgsConstructor
-    @lombok.Data
-    private static class MerchantTransferWithAuthorizationResult {
-        private Integer statusCode;
-        private MerchantTransferWithAuthorizationResponse response;
-    }
-
-    @lombok.Data
-    private static class MerchantTransferWithAuthorizationResponse {
-        @SerializedName("out_bill_no")
-        private String outBillNo;
-        @SerializedName("transfer_bill_no")
-        private String transferBillNo;
-        @SerializedName("create_time")
-        private String createTime;
-        @SerializedName("state")
-        private String state;
-        @SerializedName("package_info")
-        private String packageInfo;
-        @SerializedName("user_display_name")
-        private String userDisplayName;
-        @SerializedName("out_authorization_no")
-        private String outAuthorizationNo;
-    }
-
-    @lombok.Data
-    private static class MerchantTransferNotifyResource {
-        @SerializedName("out_bill_no")
-        private String outBillNo;
-        @SerializedName("transfer_bill_no")
-        private String transferBillNo;
-        @SerializedName("state")
-        private String state;
-        @SerializedName("fail_reason")
-        private String failReason;
+    /**
+     * 微信预下单上下文参数封装
+     *
+     * @author Bulbasaur
+     * @since 2026-11-12
+     */
+    @Getter
+    @Builder
+    private static class WechatPrepayContext {
+        private final CashierParam cashierParam;
+        private final Integer fen;
+        private final String outOrderNo;
+        private final String timeExpire;
+        private final String attach;
+        private final WechatPaymentSetting setting;
+        private final Config config;
     }
 }
