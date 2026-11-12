@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS li_paid_member_order (
  pay_time datetime, start_time datetime, end_time datetime, payment_method varchar(32), receivable_no varchar(128),
  UNIQUE KEY uk_paid_sn(sn), UNIQUE KEY uk_paid_request(member_id,request_id),
  KEY idx_paid_active(member_id,status,start_time,end_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='付费会员订单表';
 
 SET @paid_member_ddl = (SELECT IF(COUNT(*)=0, 'ALTER TABLE li_store_flow ADD COLUMN paid_member_subsidy_price decimal(18,2) NOT NULL DEFAULT 0', 'SELECT 1') FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='li_store_flow' AND COLUMN_NAME='paid_member_subsidy_price');
 PREPARE paid_member_stmt FROM @paid_member_ddl; EXECUTE paid_member_stmt; DEALLOCATE PREPARE paid_member_stmt;

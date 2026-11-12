@@ -25,6 +25,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import cn.lili.modules.promotion.entity.vos.CouponPackageVO;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -155,4 +157,23 @@ public class CouponBuyerController {
     }
 
 
+
+    @Operation(summary = "获取优惠券礼包详情")
+    @Parameters({
+            @Parameter(name = "id", description = "券礼包活动ID", required = true)
+    })
+    @GetMapping("/package/{id}")
+    public ResultMessage<CouponPackageVO> getCouponPackageDetail(@NotNull(message = "券礼包ID不能为空") @PathVariable("id") String id) {
+        return ResultUtil.data(couponActivityService.getCouponPackageDetail(id));
+    }
+
+    @PreventDuplicateSubmissions
+    @Operation(summary = "买家一键领取优惠券礼包")
+    @Parameters({
+            @Parameter(name = "id", description = "券礼包活动ID", required = true)
+    })
+    @PostMapping("/package/receive/{id}")
+    public ResultMessage<List<MemberCoupon>> receiveCouponPackage(@NotNull(message = "券礼包ID不能为空") @PathVariable("id") String id) {
+        return ResultUtil.data(couponActivityService.receiveCouponPackage(id));
+    }
 }

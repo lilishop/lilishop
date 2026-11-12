@@ -23,7 +23,11 @@ public enum CouponActivityTypeEnum {
     /**
      * "定向发券"
      */
-    SPECIFY("精确发券");
+    SPECIFY("精确发券"),
+    /**
+     * "优惠券礼包/券包一键领"
+     */
+    COUPON_PACKAGE("优惠券礼包");
 
     private final String description;
 

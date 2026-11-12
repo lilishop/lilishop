@@ -5,6 +5,8 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.CouponActivityTrigger;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
+import cn.lili.modules.promotion.entity.vos.CouponPackageQrCodeVO;
+import cn.lili.modules.promotion.entity.vos.CouponPackageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
@@ -56,5 +58,32 @@ public interface CouponActivityService extends AbstractPromotionsService<CouponA
      * @return 分页结果
      */
     IPage<CouponActivity> getByPage(PageVO pageVO, CouponActivity couponActivity);
+
+    /**
+     * 获取优惠券礼包详情
+     * 用于买家端独立活动页面展示
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @return 优惠券礼包VO
+     */
+    CouponPackageVO getCouponPackageDetail(String couponActivityId);
+
+    /**
+     * 买家一键领取优惠券礼包
+     * 批量为当前登录买家派发礼包内所有有效优惠券
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @return 成功发放的会员优惠券列表
+     */
+    List<MemberCoupon> receiveCouponPackage(String couponActivityId);
+
+    /**
+     * 获取优惠券礼包的H5推广二维码及访问路径
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @param h5BaseUrl H5站点前缀域名（若为空则使用默认配置）
+     * @return 二维码VO
+     */
+    CouponPackageQrCodeVO getCouponPackageQrCode(String couponActivityId, String h5BaseUrl);
 
 }

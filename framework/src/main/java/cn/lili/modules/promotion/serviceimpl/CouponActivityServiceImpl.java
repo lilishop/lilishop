@@ -15,10 +15,21 @@ import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dos.MemberCouponSign;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.dto.CouponActivityTrigger;
 import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponActivityItemVO;
+import cn.lili.modules.promotion.entity.vos.CouponPackageQrCodeVO;
+import cn.lili.modules.promotion.entity.vos.CouponPackageVO;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.BaseSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
+import cn.lili.common.security.context.UserContext;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.extra.qrcode.QrCodeUtil;
+import cn.hutool.extra.qrcode.QrConfig;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.*;
@@ -66,6 +77,8 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
 
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private SettingService settingService;
 
 
     @Autowired
@@ -220,6 +233,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
             case INVITE_NEW:
             case AUTO_COUPON:
             case REGISTERED:
+            case COUPON_PACKAGE:
                 this.resetCache(couponActivity.getCouponActivityType());
                 break;
         }
@@ -450,5 +464,160 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 }
             }
         }
+    }
+
+    /**
+     * 获取优惠券礼包详情
+     * 查询券礼包基础数据、包含的优惠券子项及宣传总面额，并结合当前登录买家身份判断是否已领过
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @return 优惠券礼包详情展示VO
+     */
+    @Override
+    public CouponPackageVO getCouponPackageDetail(String couponActivityId) {
+        CouponActivity couponActivity = this.getById(couponActivityId);
+        if (couponActivity == null) {
+            throw new ServiceException(ResultCode.PROMOTION_ACTIVITY_ERROR);
+        }
+
+        CouponPackageVO couponPackageVO = new CouponPackageVO();
+        couponPackageVO.setId(couponActivity.getId());
+        couponPackageVO.setActivityName(couponActivity.getPromotionName());
+        couponPackageVO.setStartTime(couponActivity.getStartTime());
+        couponPackageVO.setEndTime(couponActivity.getEndTime());
+        couponPackageVO.setPromotionStatus(couponActivity.getPromotionStatus());
+
+        List<CouponActivityItemVO> itemList = couponActivityItemService.getCouponActivityItemListVO(couponActivityId);
+        couponPackageVO.setCouponItems(itemList);
+
+        // 汇总礼包宣传总面额：遍历子券面额与发放张数乘积
+        double totalAmount = 0.0;
+        if (itemList != null && !itemList.isEmpty()) {
+            for (CouponActivityItemVO item : itemList) {
+                if (item.getPrice() != null && item.getNum() != null) {
+                    totalAmount += item.getPrice() * item.getNum();
+                }
+            }
+        }
+        couponPackageVO.setTotalAmount(totalAmount);
+
+        // 校验当前用户是否已领取过该券礼包
+        boolean hasReceived = false;
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            LambdaQueryWrapper<MemberCouponSign> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberCouponSign::getCouponActivityId, couponActivityId)
+                    .eq(MemberCouponSign::getMemberId, currentUser.getId())
+                    .gt(MemberCouponSign::getInvalidTime, new Date());
+            hasReceived = memberCouponSignService.count(queryWrapper) > 0;
+        }
+        couponPackageVO.setHasReceived(hasReceived);
+
+        return couponPackageVO;
+    }
+
+    /**
+     * 买家一键领取优惠券礼包
+     * 校验活动生命周期、活动状态、防重复领取，扣减子券发行量并批量生成买家优惠券实例
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @return 成功发放的会员优惠券列表
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<MemberCoupon> receiveCouponPackage(String couponActivityId) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+
+        CouponActivity couponActivity = this.getById(couponActivityId);
+        if (couponActivity == null) {
+            throw new ServiceException(ResultCode.PROMOTION_ACTIVITY_ERROR);
+        }
+
+        // 校验活动状态与活动时间
+        if (!PromotionsStatusEnum.START.name().equals(couponActivity.getPromotionStatus())) {
+            throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+        }
+        Date now = new Date();
+        if (couponActivity.getStartTime() != null && couponActivity.getStartTime().after(now)) {
+            throw new ServiceException(ResultCode.PROMOTION_START_TIME_ERROR);
+        }
+        if (couponActivity.getEndTime() != null && couponActivity.getEndTime().before(now)) {
+            throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+        }
+
+        // 幂等与防重复领取判定
+        LambdaQueryWrapper<MemberCouponSign> signWrapper = new LambdaQueryWrapper<>();
+        signWrapper.eq(MemberCouponSign::getCouponActivityId, couponActivityId)
+                .eq(MemberCouponSign::getMemberId, currentUser.getId())
+                .gt(MemberCouponSign::getInvalidTime, now);
+        if (memberCouponSignService.count(signWrapper) > 0) {
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_ERROR);
+        }
+
+        // 获取子券列表
+        List<CouponActivityItem> items = couponActivityItemService.getCouponActivityList(couponActivityId);
+        if (items == null || items.isEmpty()) {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
+        }
+
+        // 批量发券
+        List<MemberCoupon> memberCoupons = this.sendCoupon(currentUser, items);
+
+        // 记录领取标记，失效时间设置为活动结束时间，确保活动期间每人只能领一次
+        MemberCouponSign sign = new MemberCouponSign();
+        sign.setMemberId(currentUser.getId());
+        sign.setCouponActivityId(couponActivityId);
+        sign.setInvalidTime(couponActivity.getEndTime() != null ? couponActivity.getEndTime() : new Date(now.getTime() + 86400000L * 30));
+        memberCouponSignService.save(sign);
+
+        return memberCoupons;
+    }
+
+    /**
+     * 获取优惠券礼包的H5推广二维码及访问路径
+     * 根据H5前缀及券包ID生成标准QR Code，无需等待微信小程序审核即可快速在H5环境真机实测
+     *
+     * @param couponActivityId 优惠券活动ID
+     * @param h5BaseUrl        H5基础域名链接
+     * @return 二维码Base64及落地页链接VO
+     */
+    @Override
+    public CouponPackageQrCodeVO getCouponPackageQrCode(String couponActivityId, String h5BaseUrl) {
+        CouponActivity couponActivity = this.getById(couponActivityId);
+        if (couponActivity == null) {
+            throw new ServiceException(ResultCode.PROMOTION_ACTIVITY_ERROR);
+        }
+
+        if (CharSequenceUtil.isEmpty(h5BaseUrl)) {
+            try {
+                Setting setting = settingService.get(SettingEnum.BASE_SETTING.name());
+                if (setting != null && CharSequenceUtil.isNotEmpty(setting.getSettingValue())) {
+                    BaseSetting baseSetting = JSONUtil.toBean(setting.getSettingValue(), BaseSetting.class);
+                    if (baseSetting != null && CharSequenceUtil.isNotEmpty(baseSetting.getStaticPageWapAddress())) {
+                        h5BaseUrl = baseSetting.getStaticPageWapAddress();
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("获取基础设置H5域名失败，使用默认值", e);
+            }
+        }
+        if (CharSequenceUtil.isEmpty(h5BaseUrl)) {
+            h5BaseUrl = "http://localhost:8080";
+        }
+        if (h5BaseUrl.endsWith("/")) {
+            h5BaseUrl = h5BaseUrl.substring(0, h5BaseUrl.length() - 1);
+        }
+
+        String h5Url = h5BaseUrl + "/pages/promotion/coupon-pack?id=" + couponActivityId;
+        String qrCodeBase64 = QrCodeUtil.generateAsBase64(h5Url, new QrConfig(300, 300), "png");
+
+        return CouponPackageQrCodeVO.builder()
+                .activityId(couponActivityId)
+                .h5Url(h5Url)
+                .qrCodeBase64("data:image/png;base64," + qrCodeBase64)
+                .build();
     }
 }

@@ -9,6 +9,7 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
+import cn.lili.modules.promotion.entity.vos.CouponPackageQrCodeVO;
 import cn.lili.modules.promotion.service.CouponActivityService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,4 +75,14 @@ public class CouponActivityManagerController {
     }
 
 
+
+    @Operation(description = "获取优惠券礼包H5推广二维码及访问路径")
+    @Parameter(name = "id", description = "优惠券活动ID", required = true)
+    @Parameter(name = "h5BaseUrl", description = "H5基础站点域名(可选)")
+    @GetMapping("/package/qrcode/{id}")
+    public ResultMessage<CouponPackageQrCodeVO> getCouponPackageQrCode(
+            @PathVariable String id,
+            @RequestParam(required = false) String h5BaseUrl) {
+        return ResultUtil.data(couponActivityService.getCouponPackageQrCode(id, h5BaseUrl));
+    }
 }
