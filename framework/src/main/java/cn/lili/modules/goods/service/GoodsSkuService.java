@@ -8,6 +8,7 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
+import cn.lili.modules.stock.entity.dto.StockFlowContext;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -146,7 +147,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 根据goodsSku组装goodsSkuVO
      *
-     * @param list 商品id
+     * @param list 商品SKU实体列表
      * @return goodsSku列表
      */
     List<GoodsSkuVO> getGoodsSkuVOList(List<GoodsSku> list);
@@ -230,12 +231,34 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateGoodsSkuStatusByGoodsIds(List<String> goodsIds, String marketEnable);
 
     /**
-     * 更新SKU库存
+     * 批量直接覆盖更新 SKU 目标库存（默认不记录业务流水）
      *
-     * @param goodsSkuStockDTOS sku库存修改实体
+     * @param goodsSkuStockDTOS SKU 库存修改列表（包含 skuId 与目标绝对库存 quantity）
      */
     void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
+
+    /**
+     * 批量直接覆盖更新 SKU 目标库存并记录库存台账流水
+     *
+     * @param goodsSkuStockDTOS SKU 库存修改列表（包含 skuId 与目标绝对库存 quantity）
+     * @param flowContext       库存流水业务上下文（包含业务单号、操作人、流水类型及备注说明，为空时不记录流水）
+     */
+    void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS, StockFlowContext flowContext);
+
+    /**
+     * 批量按增减方向原子更新 SKU 库存（默认不记录业务流水）
+     *
+     * @param goodsSkuStockDTOS SKU 库存修改列表（包含 skuId、增减方向 type[ADD/SUB] 及变动数量 quantity）
+     */
     void updateStocksByType(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
+
+    /**
+     * 批量按增减方向原子更新 SKU 库存并记录库存台账流水
+     *
+     * @param goodsSkuStockDTOS SKU 库存修改列表（包含 skuId、增减方向 type[ADD/SUB] 及变动数量 quantity）
+     * @param flowContext       库存流水业务上下文（包含业务单号、操作人、流水类型及备注说明，为空时不记录流水）
+     */
+    void updateStocksByType(List<GoodsSkuStockDTO> goodsSkuStockDTOS, StockFlowContext flowContext);
 
     /**
      * 更新SKU预警库存
@@ -250,16 +273,46 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO);
 
     /**
-     * 更新SKU库存
+     * 单个直接覆盖更新 SKU 目标库存（默认不记录业务流水）
      *
-     * @param skuId    SKUId
-     * @param quantity 设置的库存数量
+     * @param skuId    商品 SKU ID
+     * @param quantity 目标库存数量（须大于等于0）
      */
     void updateStock(String skuId, Integer quantity);
-    void updateStock(String skuId, Integer quantity,String type);
 
     /**
-     * 卡密池同步专用：更新 E_COUPON SKU 的 quantity（绕过普通库存手工修改限制）。
+     * 单个直接覆盖更新 SKU 目标库存并记录库存台账流水
+     *
+     * @param skuId       商品 SKU ID
+     * @param quantity    目标库存数量（须大于等于0）
+     * @param flowContext 库存流水业务上下文（包含业务单号、操作人、流水类型及备注说明，为空时不记录流水）
+     */
+    void updateStock(String skuId, Integer quantity, StockFlowContext flowContext);
+
+    /**
+     * 单个按增减方向原子更新 SKU 库存（默认不记录业务流水）
+     *
+     * @param skuId    商品 SKU ID
+     * @param quantity 变动库存数量（须大于0）
+     * @param type     变动方向类型：ADD增加 / SUB减少（扣减时带库存下限保护，防止超卖并发透支）
+     */
+    void updateStock(String skuId, Integer quantity, String type);
+
+    /**
+     * 单个按增减方向原子更新 SKU 库存并记录库存台账流水
+     *
+     * @param skuId       商品 SKU ID
+     * @param quantity    变动库存数量（须大于0）
+     * @param type        变动方向类型：ADD增加 / SUB减少（扣减时带库存下限保护，防止超卖并发透支）
+     * @param flowContext 库存流水业务上下文（包含业务单号、操作人、流水类型及备注说明，为空时不记录流水）
+     */
+    void updateStock(String skuId, Integer quantity, String type, StockFlowContext flowContext);
+
+    /**
+     * 卡密池同步专用：更新 E_COUPON SKU 的 quantity（绕过普通库存手工修改限制）
+     *
+     * @param skuId    商品 SKU ID
+     * @param quantity 卡密池有效卡密总数
      */
     void updateStockFromCardKeySync(String skuId, Integer quantity);
 
@@ -272,9 +325,9 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     Integer getStock(String skuId);
 
     /**
-     * 修改商品库存字段
+     * 批量静默同步修改商品 SKU 库存字段（仅更新数据库与缓存，不触发异步事件与台账流水）
      *
-     * @param goodsSkus
+     * @param goodsSkus 商品 SKU 实体列表
      */
     void updateGoodsStock(List<GoodsSku> goodsSkus);
 
@@ -290,7 +343,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * 删除并且新增sku，即覆盖之前信息
      *
      * @param goodsSkus 商品sku集合
-     * @return
+     * @return 操作结果
      */
     boolean deleteAndInsertGoodsSkus(List<GoodsSku> goodsSkus);
 

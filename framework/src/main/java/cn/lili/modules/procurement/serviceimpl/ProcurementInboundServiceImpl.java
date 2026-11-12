@@ -11,6 +11,8 @@ import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.stock.entity.dto.StockFlowContext;
+import cn.lili.modules.stock.entity.enums.StockFlowTypeEnum;
 import cn.lili.modules.procurement.entity.dos.ProcurementInbound;
 import cn.lili.modules.procurement.entity.dos.ProcurementInboundItem;
 import cn.lili.modules.procurement.entity.dos.ProcurementOrder;
@@ -146,7 +148,13 @@ public class ProcurementInboundServiceImpl extends ServiceImpl<ProcurementInboun
         inbound.setTotalRetailAmount(totalRetail);
         this.updateById(inbound);
 
-        goodsSkuService.updateStocksByType(stockDTOS);
+        String operator = user != null ? user.getUsername() : "system";
+        goodsSkuService.updateStocksByType(stockDTOS, StockFlowContext.of(
+                StockFlowTypeEnum.PROCUREMENT_INBOUND,
+                inbound.getInboundSn(),
+                operator,
+                "采购入库"
+        ));
 
         boolean allReceived = orderItems.stream().allMatch(x -> (x.getReceivedQuantity() != null && x.getReceivedQuantity() >= x.getQuantity()));
         order.setStatus(allReceived ? ProcurementStatusEnum.COMPLETED.name() : ProcurementStatusEnum.PARTIAL_INBOUND.name());

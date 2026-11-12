@@ -8,6 +8,8 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.stock.entity.dto.StockFlowContext;
+import cn.lili.modules.stock.entity.enums.StockFlowTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +23,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -74,14 +78,16 @@ class GoodsStoreControllerUpdateStocksTest {
             controller.updateStocks(List.of(dto));
 
             ArgumentCaptor<List<GoodsSkuStockDTO>> captor = ArgumentCaptor.forClass(List.class);
-            verify(goodsSkuService).updateStocksByType(captor.capture());
-            verify(goodsSkuService, never()).updateStocks(anyList());
+            ArgumentCaptor<StockFlowContext> contextCaptor = ArgumentCaptor.forClass(StockFlowContext.class);
+            verify(goodsSkuService).updateStocksByType(captor.capture(), contextCaptor.capture());
+            verify(goodsSkuService, never()).updateStocks(anyList(), any());
 
             List<GoodsSkuStockDTO> captured = captor.getValue();
             assertThat(captured).hasSize(1);
             assertThat(captured.get(0).getGoodsId()).isEqualTo("server-goods-1");
             assertThat(captured.get(0).getType()).isEqualTo("SUB");
             assertThat(captured.get(0).getQuantity()).isEqualTo(5);
+            assertThat(contextCaptor.getValue().getFlowType()).isEqualTo(StockFlowTypeEnum.MANUAL_ADJUST);
         }
     }
 
@@ -108,8 +114,8 @@ class GoodsStoreControllerUpdateStocksTest {
                     () -> controller.updateStocks(List.of(dto)));
 
             assertThat(ex.getResultCode()).isEqualTo(ResultCode.GOODS_NOT_EXIST);
-            verify(goodsSkuService, never()).updateStocksByType(anyList());
-            verify(goodsSkuService, never()).updateStocks(anyList());
+            verify(goodsSkuService, never()).updateStocksByType(anyList(), any());
+            verify(goodsSkuService, never()).updateStocks(anyList(), any());
         }
     }
 
@@ -149,7 +155,8 @@ class GoodsStoreControllerUpdateStocksTest {
                     () -> controller.updateStocks(List.of(invalidTypeDto)));
             assertThat(typeEx.getResultCode()).isEqualTo(ResultCode.PARAMS_ERROR);
 
-            verify(goodsSkuService, never()).updateStocksByType(anyList());
+            verify(goodsSkuService, never()).updateStocksByType(anyList(), any());
+            verify(goodsSkuService, never()).updateStocks(anyList(), any());
         }
     }
 
@@ -177,8 +184,10 @@ class GoodsStoreControllerUpdateStocksTest {
 
             controller.updateStocks(List.of(dto));
 
-            verify(goodsSkuService).updateStocks(List.of(dto));
-            verify(goodsSkuService, never()).updateStocksByType(anyList());
+            ArgumentCaptor<StockFlowContext> contextCaptor = ArgumentCaptor.forClass(StockFlowContext.class);
+            verify(goodsSkuService).updateStocks(eq(List.of(dto)), contextCaptor.capture());
+            verify(goodsSkuService, never()).updateStocksByType(anyList(), any());
+            assertThat(contextCaptor.getValue().getFlowType()).isEqualTo(StockFlowTypeEnum.MANUAL_ADJUST);
         }
     }
 }

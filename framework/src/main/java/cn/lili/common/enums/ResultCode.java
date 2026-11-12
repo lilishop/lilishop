@@ -115,6 +115,8 @@ public enum ResultCode {
     CARD_KEY_ZERO_PRICE(11051, "电子卡券订单金额异常"),
     CARD_KEY_STOCK_MANUAL_FORBIDDEN(11052, "电子卡券库存由卡池同步，不可手动调整"),
     GOODS_STOCK_INSUFFICIENT(11053, "商品库存不足"),
+    STOCK_OUTBOUND_STATUS_ERROR(11054, "出库单当前状态不允许此操作"),
+    STOCK_OUTBOUND_NOT_EXIST(11055, "出库单不存在"),
 
     /**
      * 预约服务商品业务错误码，11061 起。

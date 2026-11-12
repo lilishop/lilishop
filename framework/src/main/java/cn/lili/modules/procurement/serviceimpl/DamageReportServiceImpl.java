@@ -14,6 +14,8 @@ import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.stock.entity.dto.StockFlowContext;
+import cn.lili.modules.stock.entity.enums.StockFlowTypeEnum;
 import cn.lili.modules.procurement.entity.dos.DamageReport;
 import cn.lili.modules.procurement.entity.dos.DamageReportItem;
 import cn.lili.modules.procurement.entity.dto.DamageReportCreateDTO;
@@ -187,7 +189,15 @@ public class DamageReportServiceImpl extends ServiceImpl<DamageReportMapper, Dam
             dto.setType(GoodsStockTypeEnum.SUB.name());
             stockDTOS.add(dto);
         }
-        goodsSkuService.updateStocksByType(stockDTOS);
+        DamageReport report = this.getById(reportId);
+        String sn = report != null ? report.getSn() : reportId;
+        String operator = report != null && CharSequenceUtil.isNotEmpty(report.getAuditorName()) ? report.getAuditorName() : "system";
+        goodsSkuService.updateStocksByType(stockDTOS, StockFlowContext.of(
+                StockFlowTypeEnum.DAMAGE,
+                sn,
+                operator,
+                "商品报损出库"
+        ));
     }
 
     @Override

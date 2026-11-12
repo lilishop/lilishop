@@ -7,6 +7,7 @@ import cn.lili.listener.MemberMessageListener;
 import cn.lili.listener.NoticeMessageListener;
 import cn.lili.listener.NoticeSendMessageListener;
 import cn.lili.listener.OrderMessageListener;
+import cn.lili.listener.StockFlowMessageListener;
 import cn.lili.listener.StoreMessageListener;
 import cn.lili.listener.WxChannelsGoodsSyncListener;
 import cn.lili.trigger.TimeTriggerConsumer;
@@ -34,6 +35,7 @@ public class MessageDispatcher {
     private final NoticeSendMessageListener noticeSendMessageListener;
     private final WxChannelsGoodsSyncListener wxChannelsGoodsSyncListener;
     private final TimeTriggerConsumer timeTriggerConsumer;
+    private final StockFlowMessageListener stockFlowMessageListener;
 
     public MessageDispatcher(RocketmqCustomProperties properties,
                              GoodsMessageListener goodsMessageListener,
@@ -44,7 +46,8 @@ public class MessageDispatcher {
                              NoticeMessageListener noticeMessageListener,
                              NoticeSendMessageListener noticeSendMessageListener,
                              WxChannelsGoodsSyncListener wxChannelsGoodsSyncListener,
-                             TimeTriggerConsumer timeTriggerConsumer) {
+                             TimeTriggerConsumer timeTriggerConsumer,
+                             StockFlowMessageListener stockFlowMessageListener) {
         this.properties = properties;
         this.goodsMessageListener = goodsMessageListener;
         this.orderMessageListener = orderMessageListener;
@@ -55,6 +58,7 @@ public class MessageDispatcher {
         this.noticeSendMessageListener = noticeSendMessageListener;
         this.wxChannelsGoodsSyncListener = wxChannelsGoodsSyncListener;
         this.timeTriggerConsumer = timeTriggerConsumer;
+        this.stockFlowMessageListener = stockFlowMessageListener;
     }
 
     public void dispatch(QueueMessage message) {
@@ -95,6 +99,11 @@ public class MessageDispatcher {
                 timeTriggerConsumer.onMessage(
                         JSON.parseObject(new String(message.getBody(), StandardCharsets.UTF_8), TimeTriggerMsg.class)
                 );
+                return;
+            }
+            if (topicEquals(message, properties.getStockFlowTopic())) {
+                stockFlowMessageListener.onMessage(message);
+                return;
             }
         } catch (Exception e) {
             log.error("dispatch message failed, topic={}, tag={}", message.getTopic(), message.getTag(), e);

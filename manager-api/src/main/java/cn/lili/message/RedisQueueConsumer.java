@@ -97,6 +97,7 @@ public class RedisQueueConsumer {
         addQueueKey(keys, properties.getNoticeTopic());
         addQueueKey(keys, properties.getNoticeSendTopic());
         addQueueKey(keys, properties.getPromotionTopic());
+        addQueueKey(keys, properties.getStockFlowTopic());
         return keys;
     }
 

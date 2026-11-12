@@ -17,6 +17,13 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.stock.entity.dto.StockFlowMessage;
+import cn.lili.modules.stock.entity.enums.StockFlowDirectionEnum;
+import cn.lili.modules.stock.entity.enums.StockFlowTypeEnum;
+import cn.lili.modules.stock.event.StockFlowEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
@@ -106,6 +113,8 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     @Autowired
     private CardKeyService cardKeyService;
     @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
     @org.springframework.context.annotation.Lazy
     private cn.lili.modules.promotion.service.PickupCardService pickupCardService;
 
@@ -167,6 +176,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                         log.error("库存回退异常，keys：{},回复库存值为: {}", keys, values);
                     }
                     rollbackOrderStock(order);
+                    publishOrderStockFlow(order, StockFlowTypeEnum.ORDER_CANCEL, StockFlowDirectionEnum.IN);
                 }
                 break;
             }
@@ -234,6 +244,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             log.info("库存扣减成功,参数为{};{}", keys, values);
             orderService.afterOrderConfirm(orderMessage.getOrderSn());
             synchroDB(order);
+            publishOrderStockFlow(order, StockFlowTypeEnum.ORDER_PAID, StockFlowDirectionEnum.OUT);
         } else {
             log.info("库存扣件失败，变更缓存key{} 变更缓存value{}", keys, values);
             //失败之后取消订单
@@ -677,5 +688,59 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //批量修改商品库存
         goodsSkuService.updateGoodsStock(goodsSkus);
 
+    }
+
+    /**
+     * 发布订单交易库存流水事件（支付扣减或取消还原）
+     *
+     * @param order     订单详情
+     * @param flowType  流水变动类型（ORDER_PAID 或 ORDER_CANCEL）
+     * @param direction 流水变动方向（OUT 或 IN）
+     */
+    private void publishOrderStockFlow(OrderDetailVO order, StockFlowTypeEnum flowType, StockFlowDirectionEnum direction) {
+        if (order == null || order.getOrder() == null || order.getOrderItems() == null || order.getOrderItems().isEmpty()) {
+            return;
+        }
+        Order orderHeader = order.getOrder();
+        String operator = CharSequenceUtil.isNotEmpty(orderHeader.getMemberName()) ? orderHeader.getMemberName() : "buyer";
+        List<StockFlowMessage> messages = new ArrayList<>();
+        boolean isOut = StockFlowDirectionEnum.OUT.equals(direction);
+
+        for (OrderItem item : order.getOrderItems()) {
+            if (item.getNum() == null || item.getNum() <= 0) {
+                continue;
+            }
+            GoodsSku goodsSku = goodsSkuService.getById(item.getSkuId());
+            if (goodsSku == null) {
+                continue;
+            }
+            if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
+                continue;
+            }
+            int afterStock = goodsSku.getQuantity() != null ? goodsSku.getQuantity() : 0;
+            int qty = item.getNum();
+            int beforeStock = isOut ? afterStock + qty : afterStock - qty;
+
+            StockFlowMessage message = StockFlowMessage.builder()
+                    .storeId(orderHeader.getStoreId())
+                    .goodsId(item.getGoodsId())
+                    .skuId(item.getSkuId())
+                    .goodsName(item.getGoodsName())
+                    .specs(item.getSpecs())
+                    .flowType(flowType.name())
+                    .direction(direction.name())
+                    .quantity(qty)
+                    .beforeStock(beforeStock)
+                    .afterStock(afterStock)
+                    .bizSn(orderHeader.getSn())
+                    .operator(operator)
+                    .remark(isOut ? "订单支付成功出库" : "订单取消库存回退")
+                    .build();
+            messages.add(message);
+        }
+
+        if (!messages.isEmpty()) {
+            applicationEventPublisher.publishEvent(new StockFlowEvent(this, messages));
+        }
     }
 }

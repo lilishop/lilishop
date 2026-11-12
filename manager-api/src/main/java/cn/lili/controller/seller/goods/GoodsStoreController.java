@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -21,6 +22,8 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.stock.entity.dto.StockFlowContext;
+import cn.lili.modules.stock.entity.enums.StockFlowTypeEnum;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -260,11 +263,19 @@ public class GoodsStoreController {
                 directList.add(item);
             }
         }
+        String batchSn = SnowFlake.createStr("SA");
+        String operator = Objects.requireNonNull(UserContext.getCurrentUser()).getUsername();
+        StockFlowContext flowContext = StockFlowContext.of(
+                StockFlowTypeEnum.MANUAL_ADJUST,
+                batchSn,
+                operator,
+                "商家修改商品库存"
+        );
         if (!typedList.isEmpty()) {
-            goodsSkuService.updateStocksByType(typedList);
+            goodsSkuService.updateStocksByType(typedList, flowContext);
         }
         if (!directList.isEmpty()) {
-            goodsSkuService.updateStocks(directList);
+            goodsSkuService.updateStocks(directList, flowContext);
         }
         return ResultUtil.success();
     }
