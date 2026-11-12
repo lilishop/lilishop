@@ -41,7 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * 售后申请数量下限与累计退款金额上限校验测试
+ * 售后申请数量下限、累计退款金额上限与平台退款状态校验测试
  *
  * @author Bulbasaur
  * @since 2026-11-11
@@ -54,6 +54,9 @@ class AfterSaleServiceImplRefundValidationTest {
     private AfterSaleMapper afterSaleMapper;
     private RefundSupport refundSupport;
 
+    /**
+     * 初始化 MyBatis-Plus 实体表元数据与雪花算法生成器
+     */
     @BeforeAll
     static void initMybatisPlus() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -63,6 +66,9 @@ class AfterSaleServiceImplRefundValidationTest {
         cn.lili.common.utils.SnowFlake.initialize(1, 1);
     }
 
+    /**
+     * 初始化测试上下文及各依赖 mock 对象
+     */
     @BeforeEach
     void setUp() {
         afterSaleService = spy(new AfterSaleServiceImpl());
@@ -84,6 +90,9 @@ class AfterSaleServiceImplRefundValidationTest {
         doNothing().when(afterSaleService).sendAfterSaleMessage(any());
     }
 
+    /**
+     * 验证买家申请售后数量必须大于0，小于等于0时拒绝申请
+     */
     @Test
     void saveAfterSaleRejectsZeroOrNegativeQuantity() {
         stubOrderContext("OI001", "O001", 3, 0, 300.0);
@@ -97,6 +106,9 @@ class AfterSaleServiceImplRefundValidationTest {
         assertThat(exNeg.getResultCode()).isEqualTo(ResultCode.AFTER_GOODS_NUMBER_ERROR);
     }
 
+    /**
+     * 验证申请售后数量超出订单商品剩余可退数量时拦截拒绝
+     */
     @Test
     void saveAfterSaleRejectsQuantityExceedingRemaining() {
         stubOrderContext("OI001", "O001", 3, 2, 300.0);
@@ -106,6 +118,9 @@ class AfterSaleServiceImplRefundValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.AFTER_GOODS_NUMBER_ERROR);
     }
 
+    /**
+     * 验证同一商品项历史已完成售后退款已达上限时，不可再次申请售后
+     */
     @Test
     void saveAfterSaleRejectsWhenNoRemainingRefundablePrice() {
         stubOrderContext("OI001", "O001", 3, 0, 300.0);
@@ -122,6 +137,9 @@ class AfterSaleServiceImplRefundValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.AFTER_SALES_PRICE_ERROR);
     }
 
+    /**
+     * 验证退最后一件商品时自动倒扣历史已退金额，消除分摊舍入误差
+     */
     @Test
     void saveAfterSaleCalculatesRemainingPriceForLastGoods() {
         stubOrderContext("OI001", "O001", 2, 1, 100.0);
@@ -150,6 +168,9 @@ class AfterSaleServiceImplRefundValidationTest {
         }
     }
 
+    /**
+     * 验证商家审核售后时实际退款金额不能为负数
+     */
     @Test
     void reviewRejectsNegativeActualRefundPrice() {
         AfterSale current = new AfterSale();
@@ -169,6 +190,9 @@ class AfterSaleServiceImplRefundValidationTest {
         }
     }
 
+    /**
+     * 验证商家审核售后时累计退款金额不可超过该商品实付总额
+     */
     @Test
     void reviewRejectsCumulativeRefundExceedingItemLimit() {
         AfterSale current = new AfterSale();
@@ -214,6 +238,72 @@ class AfterSaleServiceImplRefundValidationTest {
         }
     }
 
+    /**
+     * 验证平台端退款操作校验当前状态：仅允许 WAIT_REFUND 状态，其它状态（如已完成 COMPLETE、待审核 APPLY）均拒绝退款以防重复退款
+     */
+    @Test
+    void platformRefundRejectsNonWaitRefundStatus() {
+        AfterSale completedAfterSale = new AfterSale();
+        completedAfterSale.setSn("AS_COMPLETE");
+        completedAfterSale.setServiceStatus(AfterSaleStatusEnum.COMPLETE.name());
+
+        doReturn(completedAfterSale).when(afterSaleService).getOne(any());
+
+        try (MockedStatic<OperationalJudgment> judgment = mockStatic(OperationalJudgment.class)) {
+            judgment.when(() -> OperationalJudgment.judgment(completedAfterSale)).thenReturn(completedAfterSale);
+
+            ServiceException ex = assertThrows(ServiceException.class,
+                    () -> afterSaleService.refund("AS_COMPLETE", "平台重复退款测试"));
+            assertThat(ex.getResultCode()).isEqualTo(ResultCode.AFTER_STATUS_ERROR);
+            verify(refundSupport, never()).refund(any());
+        }
+
+        AfterSale applyAfterSale = new AfterSale();
+        applyAfterSale.setSn("AS_APPLY");
+        applyAfterSale.setServiceStatus(AfterSaleStatusEnum.APPLY.name());
+
+        doReturn(applyAfterSale).when(afterSaleService).getOne(any());
+
+        try (MockedStatic<OperationalJudgment> judgment = mockStatic(OperationalJudgment.class)) {
+            judgment.when(() -> OperationalJudgment.judgment(applyAfterSale)).thenReturn(applyAfterSale);
+
+            ServiceException ex = assertThrows(ServiceException.class,
+                    () -> afterSaleService.refund("AS_APPLY", "未审核单退款测试"));
+            assertThat(ex.getResultCode()).isEqualTo(ResultCode.AFTER_STATUS_ERROR);
+            verify(refundSupport, never()).refund(any());
+        }
+    }
+
+    /**
+     * 验证处于 WAIT_REFUND 状态的售后单平台端正常触发渠道退款并流转至 COMPLETE 状态
+     */
+    @Test
+    void platformRefundSucceedsWhenStatusIsWaitRefund() {
+        AfterSale waitRefundAfterSale = new AfterSale();
+        waitRefundAfterSale.setSn("AS_WAIT");
+        waitRefundAfterSale.setServiceStatus(AfterSaleStatusEnum.WAIT_REFUND.name());
+
+        doReturn(waitRefundAfterSale).when(afterSaleService).getOne(any());
+        doNothing().when(refundSupport).refund(waitRefundAfterSale);
+
+        try (MockedStatic<OperationalJudgment> judgment = mockStatic(OperationalJudgment.class)) {
+            judgment.when(() -> OperationalJudgment.judgment(waitRefundAfterSale)).thenReturn(waitRefundAfterSale);
+
+            AfterSale result = afterSaleService.refund("AS_WAIT", "平台退款正常处理");
+            assertThat(result.getServiceStatus()).isEqualTo(AfterSaleStatusEnum.COMPLETE.name());
+            verify(refundSupport).refund(waitRefundAfterSale);
+        }
+    }
+
+    /**
+     * 模拟构造订单明细与订单基础信息桩数据
+     *
+     * @param orderItemSn        订单项编号
+     * @param orderSn            订单编号
+     * @param num                购买数量
+     * @param returnGoodsNumber 已退商品数量
+     * @param flowPrice          支付实付流水金额
+     */
     private void stubOrderContext(String orderItemSn, String orderSn, int num, int returnGoodsNumber, double flowPrice) {
         OrderItem orderItem = new OrderItem();
         orderItem.setSn(orderItemSn);
@@ -238,6 +328,13 @@ class AfterSaleServiceImplRefundValidationTest {
         when(orderService.getBySn(orderSn)).thenReturn(order);
     }
 
+    /**
+     * 构造售后申请 DTO 辅助对象
+     *
+     * @param orderItemSn 订单项编号
+     * @param num         申请数量
+     * @return 售后申请 DTO
+     */
     private AfterSaleDTO afterSaleDto(String orderItemSn, Integer num) {
         AfterSaleDTO dto = new AfterSaleDTO();
         dto.setOrderItemSn(orderItemSn);

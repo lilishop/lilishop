@@ -426,8 +426,13 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @SystemLogPoint(description = "售后-平台退款", customerLog = "'售后-平台退款:单号['+#afterSaleSn+']，备注为['+#remark+']'")
     @Transactional(rollbackFor = Exception.class)
     public AfterSale refund(String afterSaleSn, String remark) {
-        //根据售后单号获取售后单
-        AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
+        //根据售后单号获取售后单（加行锁防止并发重复退款）
+        AfterSale afterSale = OperationalJudgment.judgment(this.getOne(new LambdaQueryWrapper<AfterSale>()
+                .eq(AfterSale::getSn, afterSaleSn).last("FOR UPDATE")));
+        // 校验当前售后状态：仅允许待退款状态的售后单进行退款，防止重复发起或在已完成/非退款状态下操作引发资损
+        if (!AfterSaleStatusEnum.WAIT_REFUND.name().equals(afterSale.getServiceStatus())) {
+            throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
+        }
         //退款（若渠道退款失败将抛出业务异常阻断并回滚）
         refundSupport.refund(afterSale);
         afterSale.setServiceStatus(AfterSaleStatusEnum.COMPLETE.name());
