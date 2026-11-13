@@ -11,8 +11,8 @@ import cn.lili.modules.member.entity.dos.MemberGrade;
 import cn.lili.modules.member.entity.vo.MemberGradeDetailVO;
 import cn.lili.modules.member.mapper.MemberBenefitMapper;
 import cn.lili.modules.member.mapper.MemberGradeMapper;
+import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberGradeService;
-import cn.lili.modules.member.service.MemberService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -37,7 +37,7 @@ public class MemberGradeServiceImpl extends ServiceImpl<MemberGradeMapper, Membe
     private static final Pattern HEX_COLOR = Pattern.compile("^#([A-Fa-f0-9]{6})$");
 
     @Autowired
-    private MemberService memberService;
+    private MemberMapper memberMapper;
     @Autowired
     private MemberBenefitMapper memberBenefitMapper;
 
@@ -189,7 +189,7 @@ public class MemberGradeServiceImpl extends ServiceImpl<MemberGradeMapper, Membe
         }
         LambdaQueryWrapper<Member> memberWrapper = new LambdaQueryWrapper<Member>()
                 .eq(Member::getGradeId, id);
-        long count = memberService.count(memberWrapper);
+        long count = memberMapper.selectCount(memberWrapper);
         if (count > 0) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "当前等级下存在会员，无法删除");
         }

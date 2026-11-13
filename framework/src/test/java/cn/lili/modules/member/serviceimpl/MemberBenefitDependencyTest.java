@@ -61,6 +61,7 @@ class MemberBenefitDependencyTest {
             when(transactions.getTransaction(any())).thenAnswer(call -> new SimpleTransactionStatus());
             context.registerBean(PlatformTransactionManager.class, () -> transactions);
             context.registerBean(cn.lili.modules.member.mapper.MemberPointsHistoryMapper.class, () -> mock(cn.lili.modules.member.mapper.MemberPointsHistoryMapper.class));
+            context.registerBean(cn.lili.modules.promotion.service.PickupCardOrderService.class, () -> mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
             context.registerBean(OrderMapper.class, () -> mock(OrderMapper.class));
             context.registerBean(OrderItemMapper.class, () -> mock(OrderItemMapper.class));
             context.registerBean(AfterSaleMapper.class, () -> mock(AfterSaleMapper.class));
