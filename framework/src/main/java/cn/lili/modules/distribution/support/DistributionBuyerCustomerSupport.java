@@ -1,5 +1,6 @@
-package cn.lili.modules.distribution.serviceimpl;
+package cn.lili.modules.distribution.support;
 
+import cn.lili.modules.distribution.serviceimpl.DistributionCustomerRelationServiceImpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
@@ -11,7 +12,6 @@ import cn.lili.modules.distribution.entity.vos.DistributionBuyerCustomerPageVO;
 import cn.lili.modules.distribution.entity.vos.DistributionBuyerCustomerTradeStatsVO;
 import cn.lili.modules.distribution.entity.vos.DistributionBuyerCustomerVO;
 import cn.lili.modules.distribution.mapper.DistributionCustomerRelationMapper;
-import cn.lili.modules.distribution.support.DistributionInviteRangeSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 

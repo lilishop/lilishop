@@ -1,5 +1,6 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.lili.modules.distribution.support.DistributionBuyerCustomerSupport;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
@@ -22,6 +23,8 @@ import cn.lili.modules.distribution.mapper.DistributionCustomerRelationLogMapper
 import cn.lili.modules.distribution.mapper.DistributionCustomerRelationMapper;
 import cn.lili.modules.distribution.mapper.DistributionMapper;
 import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
+import cn.lili.modules.distribution.support.DistributionCustomerRelationBindSupport;
+import cn.lili.modules.distribution.support.DistributionCustomerRelationLogSupport;
 import cn.lili.modules.distribution.support.DistributionMemberSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;

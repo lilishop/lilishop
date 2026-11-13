@@ -1,4 +1,4 @@
-package cn.lili.modules.goods.serviceimpl;
+package cn.lili.modules.goods.support;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;

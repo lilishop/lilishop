@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.modules.goods.support.GoodsImportV2TemplateSupport;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;

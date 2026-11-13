@@ -1,4 +1,4 @@
-package cn.lili.modules.distribution.serviceimpl;
+package cn.lili.modules.distribution.support;
 
 import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.distribution.entity.dos.Distribution;
@@ -8,7 +8,6 @@ import cn.lili.modules.distribution.entity.enums.DistributionCustomerRelationCha
 import cn.lili.modules.distribution.entity.enums.DistributionRelationStatusEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionCustomerRelationLogVO;
 import cn.lili.modules.distribution.mapper.DistributionCustomerRelationLogMapper;
-import cn.lili.modules.distribution.support.DistributionMemberSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

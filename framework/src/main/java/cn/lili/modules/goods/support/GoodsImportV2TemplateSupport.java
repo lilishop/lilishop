@@ -1,4 +1,4 @@
-package cn.lili.modules.goods.serviceimpl;
+package cn.lili.modules.goods.support;
 
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Brand;

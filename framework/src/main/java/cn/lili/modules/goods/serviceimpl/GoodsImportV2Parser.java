@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.modules.goods.support.GoodsImportV2TemplateSupport;
 import cn.lili.modules.goods.entity.vo.GoodsImportResultVO;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;

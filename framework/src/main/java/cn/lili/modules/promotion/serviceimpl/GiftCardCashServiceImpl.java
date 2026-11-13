@@ -1,5 +1,8 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.modules.promotion.support.GiftCardCashBatchSupport;
+import cn.lili.modules.promotion.support.GiftCardCashCredentialSupport;
+import cn.lili.modules.promotion.support.GiftCardCashTradeSupport;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;

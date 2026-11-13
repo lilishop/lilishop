@@ -1,5 +1,7 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.modules.goods.support.CardKeyImportSupport;
+import cn.lili.modules.goods.support.CardKeyTradeSupport;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;

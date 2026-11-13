@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.serviceimpl;
+package cn.lili.modules.promotion.support;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;

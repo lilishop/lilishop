@@ -1,4 +1,4 @@
-package cn.lili.modules.distribution.serviceimpl;
+package cn.lili.modules.distribution.support;
 
 import cn.hutool.core.date.DateUtil;
 import cn.lili.cache.Cache;
@@ -15,7 +15,7 @@ import cn.lili.modules.distribution.entity.enums.DistributionRelationStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.mapper.DistributionCustomerRelationLogMapper;
 import cn.lili.modules.distribution.mapper.DistributionMapper;
-import cn.lili.modules.distribution.support.DistributionMemberSupport;
+import cn.lili.modules.distribution.serviceimpl.DistributionCustomerRelationServiceImpl;
 import cn.lili.modules.system.entity.dto.DistributionCustomerSetting;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
