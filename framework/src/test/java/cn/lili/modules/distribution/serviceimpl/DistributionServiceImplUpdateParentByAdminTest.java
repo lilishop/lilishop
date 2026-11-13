@@ -66,6 +66,11 @@ class DistributionServiceImplUpdateParentByAdminTest {
         ReflectionTestUtils.setField(service, "memberService", memberService);
         ReflectionTestUtils.setField(service, "customerRelationService", customerRelationService);
         ReflectionTestUtils.setField(service, "gradeService", gradeService);
+        ReflectionTestUtils.setField(service, "distributionMemberAdminSupport",
+                new cn.lili.modules.distribution.support.DistributionMemberAdminSupport(memberService, gradeService,
+                        mock(cn.lili.modules.distribution.service.DistributionRecruitService.class), customerRelationService,
+                        mock(cn.lili.modules.distribution.mapper.DistributionCustomerRelationMapper.class),
+                        mock(cn.lili.modules.distribution.support.DistributionMemberSupport.class)));
         doNothing().when(parentBindSupport).syncInviteCountAndGrade(anyString());
     }
 

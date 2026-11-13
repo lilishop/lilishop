@@ -15,7 +15,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.mapper.PintuanMapper;
-import cn.lili.modules.promotion.service.PintuanService;
 import org.springframework.beans.factory.ObjectProvider;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.interfaces.TimeTrigger;
@@ -45,40 +44,24 @@ public class OrderPintuanSupport {
 
     @Autowired
     private PintuanMapper pintuanMapper;
-
-    @Autowired
-    private ObjectProvider<PintuanService> pintuanServiceProvider;
-
-    private PintuanService pintuanService;
-
     @Autowired
     private TimeTrigger timeTrigger;
-
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-
     @Autowired
     private ObjectProvider<CardKeyService> cardKeyServiceProvider;
-
     private CardKeyService cardKeyService;
-
     @Autowired
     private OrderStatusSupport orderStatusSupport;
 
+    /**
+     * 按主键查询拼团配置，统一通过必需的Mapper读取，避免Service与Mapper备用路径。
+     *
+     * @param pintuanId 拼团活动ID
+     * @return 拼团配置，不存在时为null
+     */
     private Pintuan getPintuanById(String pintuanId) {
-        if (this.pintuanService != null) {
-            return this.pintuanService.getById(pintuanId);
-        }
-        if (this.pintuanMapper != null) {
-            return this.pintuanMapper.selectById(pintuanId);
-        }
-        if (this.pintuanServiceProvider != null) {
-            PintuanService service = this.pintuanServiceProvider.getIfAvailable();
-            if (service != null) {
-                return service.getById(pintuanId);
-            }
-        }
-        return SpringContextUtil.getBean(PintuanMapper.class).selectById(pintuanId);
+        return pintuanMapper.selectById(pintuanId);
     }
 
     private CardKeyService getCardKeyService() {
@@ -91,29 +74,28 @@ public class OrderPintuanSupport {
         return SpringContextUtil.getBean(CardKeyService.class);
     }
 
+    /** Spring按必需字段注入拼团存储及订单协作依赖。 */
     public OrderPintuanSupport() {
     }
 
-    public OrderPintuanSupport(PintuanService pintuanService,
-                               TimeTrigger timeTrigger,
-                               RocketmqCustomProperties rocketmqCustomProperties,
-                               CardKeyService cardKeyService) {
-        this.pintuanService = pintuanService;
-        this.timeTrigger = timeTrigger;
-        this.rocketmqCustomProperties = rocketmqCustomProperties;
-        this.cardKeyService = cardKeyService;
-    }
-
-    public OrderPintuanSupport(PintuanService pintuanService,
+    /**
+     * 显式装配拼团存储和订单协作能力，供独立测试使用，不查询全局Spring上下文。
+     *
+     * @param pintuanMapper 拼团配置Mapper
+     * @param timeTrigger 延时任务调度器
+     * @param rocketmqCustomProperties 消息主题配置
+     * @param cardKeyService 电子卡券履约服务
+     * @param orderStatusSupport 订单状态流转支持类
+     */
+    public OrderPintuanSupport(PintuanMapper pintuanMapper,
                                TimeTrigger timeTrigger,
                                RocketmqCustomProperties rocketmqCustomProperties,
                                CardKeyService cardKeyService,
                                OrderStatusSupport orderStatusSupport) {
-        this(pintuanService, timeTrigger, rocketmqCustomProperties, cardKeyService);
-        this.orderStatusSupport = orderStatusSupport;
-    }
-
-    public void setOrderStatusSupport(OrderStatusSupport orderStatusSupport) {
+        this.pintuanMapper = pintuanMapper;
+        this.timeTrigger = timeTrigger;
+        this.rocketmqCustomProperties = rocketmqCustomProperties;
+        this.cardKeyService = cardKeyService;
         this.orderStatusSupport = orderStatusSupport;
     }
 

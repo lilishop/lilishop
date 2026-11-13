@@ -24,7 +24,6 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.order.order.mapper.TradeMapper;
 import cn.lili.modules.promotion.service.GiftCardCashService;
 import cn.lili.modules.promotion.service.PickupCardOrderService;
-import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.vo.Traces;
@@ -73,87 +72,55 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private PickupCardOrderService pickupCardOrderService;
-
     @Autowired
     private TimeTrigger timeTrigger;
-
     @Autowired
     private ReceiptService receiptService;
-
     @Autowired
     private OrderItemService orderItemService;
-
     @Autowired
     private ObjectProvider<LogisticsService> logisticsServiceProvider;
-
     private LogisticsService logisticsService;
-
     @Autowired
     private OrderLogService orderLogService;
-
     @Autowired
     private LiliMessageTemplate liliMessageTemplate;
-
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-
-    @Autowired
-    private ObjectProvider<PintuanService> pintuanServiceProvider;
-
-    private PintuanService pintuanService;
-
     @Autowired
     private TradeMapper tradeMapper;
-
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
     private StoreDetailService storeDetailService;
-
     @Autowired
     private OrderPackageService orderPackageService;
-
     @Autowired
     private OrderPackageItemService orderPackageItemService;
-
     @Autowired
     private SettingService settingService;
-
     @Autowired
     private GiftCardCashService giftCardCashService;
-
     @Autowired
     private ObjectProvider<CardKeyService> cardKeyServiceProvider;
-
     private CardKeyService cardKeyService;
-
     @Autowired
     private ObjectProvider<AppointmentService> appointmentServiceProvider;
-
     private AppointmentService appointmentService;
-
     @Autowired
     private GoodsSkuService goodsSkuService;
-
     @Autowired
     private OrderCreateSupport orderCreateSupport;
-
     @Autowired
     private OrderQuerySupport orderQuerySupport;
-
     @Autowired
     private OrderDeliverySupport orderDeliverySupport;
-
     @Autowired
     private OrderVerificationSupport orderVerificationSupport;
-
     @Autowired
     private OrderPintuanSupport orderPintuanSupport;
-
     @Autowired
     private OrderStatusSupport orderStatusSupport;
-
     @Autowired
     private OrderPaymentSupport orderPaymentSupport;
 
@@ -165,16 +132,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return this.logisticsServiceProvider.getIfAvailable();
         }
         return SpringContextUtil.getBean(LogisticsService.class);
-    }
-
-    private PintuanService getPintuanService() {
-        if (this.pintuanService != null) {
-            return this.pintuanService;
-        }
-        if (this.pintuanServiceProvider != null) {
-            return this.pintuanServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(PintuanService.class);
     }
 
     private CardKeyService getCardKeyService() {
@@ -236,14 +193,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return orderVerificationSupport;
     }
 
+    /**
+     * 返回必需的Spring拼团支持组件，不在业务入口手动创建实例。
+     *
+     * @return 拼团订单支持组件
+     */
     public OrderPintuanSupport getOrderPintuanSupport() {
-        if (orderPintuanSupport == null) {
-            orderPintuanSupport = new OrderPintuanSupport(getPintuanService(), timeTrigger,
-                    rocketmqCustomProperties, getCardKeyService());
-            if (orderStatusSupport != null) {
-                orderPintuanSupport.setOrderStatusSupport(orderStatusSupport);
-            }
-        }
         return orderPintuanSupport;
     }
 

@@ -39,7 +39,6 @@ import cn.lili.modules.payment.kit.Payment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +48,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 交易业务层实现
+ * 交易业务层实现，单向调用订单服务完成落库与支付入账，不依赖延迟注入。
+ * 创建交易及支付入账沿用当前服务事务，订单处理失败时继续向上传播异常以触发回滚。
  *
  * @author Chopper
  * @since 2020/11/17 7:39 下午
@@ -60,56 +60,24 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
 
     @Autowired
     private OrderLogService orderLogService;
-
-    /**
-     * 缓存
-     */
     @Autowired
     private Cache<Object> cache;
-
-    /**
-     * 订单
-     */
     @Autowired
-    @Lazy
     private OrderService orderService;
-
-    /**
-     * 客户
-     */
     @Autowired
     private MemberService memberService;
-
-    /**
-     * 优惠券
-     */
     @Autowired
     private CouponService couponService;
-
-    /**
-     * 客户优惠券
-     */
     @Autowired
     private MemberCouponService memberCouponService;
-
-    /**
-     * 砍价
-     */
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
-
     @Autowired
     private CardKeyService cardKeyService;
-
     @Autowired
     private AppointmentService appointmentService;
-
-    /**
-     * RocketMQ 配置
-     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 

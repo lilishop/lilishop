@@ -11,7 +11,6 @@ import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.stock.entity.dto.StockFlowContext;
@@ -24,7 +23,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 商品 SKU 库存与预警管理器
+ * 商品 SKU 库存与预警管理器，SKU持久化统一使用Mapper，不反向调用SKU服务
  * <p>
  * 封装 SKU 的库存原子增减、全量覆盖、卡密同步、预警线批量调整及库存台账事件发布，
  * 统一维护商品/SKU 多级缓存与促销库存联动。
@@ -52,15 +50,9 @@ public class GoodsSkuStockManager {
     private GoodsSkuMapper goodsSkuMapper;
 
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
+    private GoodsStockAggregateSupport stockAggregates;
 
     @Autowired
-    @Lazy
-    private GoodsService goodsService;
-
-    @Autowired
-    @Lazy
     private PromotionGoodsService promotionGoodsService;
 
     @Autowired
@@ -73,21 +65,18 @@ public class GoodsSkuStockManager {
      * 全参构造函数，用于非 Spring 托管环境及单元测试装配
      *
      * @param goodsSkuMapper            SKU 数据映射器
-     * @param goodsSkuService           SKU 业务服务
-     * @param goodsService              SPU 业务服务
+     * @param stockAggregates              商品库存汇总组件
      * @param promotionGoodsService     促销商品服务
      * @param cache                     缓存客户端
      * @param applicationEventPublisher 领域事件发布器
      */
     public GoodsSkuStockManager(GoodsSkuMapper goodsSkuMapper,
-                                GoodsSkuService goodsSkuService,
-                                GoodsService goodsService,
+                                GoodsStockAggregateSupport stockAggregates,
                                 PromotionGoodsService promotionGoodsService,
                                 Cache cache,
                                 ApplicationEventPublisher applicationEventPublisher) {
         this.goodsSkuMapper = goodsSkuMapper;
-        this.goodsSkuService = goodsSkuService;
-        this.goodsService = goodsService;
+        this.stockAggregates = stockAggregates;
         this.promotionGoodsService = promotionGoodsService;
         this.cache = cache;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -127,8 +116,8 @@ public class GoodsSkuStockManager {
 
                 this.updateStock(goodsSku.getSkuId(), goodsSku.getQuantity(), flowContext);
             }
-            if (this.goodsService != null) {
-                this.goodsService.updateStock(entry.getKey());
+            if (this.stockAggregates != null) {
+                this.stockAggregates.updateStock(entry.getKey());
             }
         }
     }
@@ -164,9 +153,9 @@ public class GoodsSkuStockManager {
         for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
             this.updateStock(goodsSkuStockDTO.getSkuId(), goodsSkuStockDTO.getQuantity(), goodsSkuStockDTO.getType(), flowContext);
         }
-        if (this.goodsService != null) {
+        if (this.stockAggregates != null) {
             for (String goodsId : goodsIds) {
-                this.goodsService.updateStock(goodsId);
+                this.stockAggregates.updateStock(goodsId);
             }
         }
     }
@@ -176,6 +165,7 @@ public class GoodsSkuStockManager {
      *
      * @param goodsSkuStockDTO SKU 预警设置对象
      */
+    @Transactional(rollbackFor = Exception.class)
     public void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO) {
         GoodsSku goodsSku = this.goodsSkuMapper.selectById(goodsSkuStockDTO.getSkuId());
         if (goodsSku == null) {
@@ -185,18 +175,20 @@ public class GoodsSkuStockManager {
         if (cache != null) {
             cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
         }
-        if (goodsSkuService != null) {
-            goodsSkuService.update(goodsSku);
-        } else {
-            this.goodsSkuMapper.updateById(goodsSku);
+        this.goodsSkuMapper.updateById(goodsSku);
+        // 保留原SKU服务更新时的缓存替换，避免预警值更新后读到旧SKU。
+        if (cache != null) {
+            cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));
+            cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
         }
     }
 
     /**
-     * 批量更新 SKU 预警库存数值并批量清理商品缓存
+     * 批量更新SKU预警库存数值并清理商品缓存，Mapper批量写入在同一事务中完成。
      *
      * @param goodsSkuStockDTOS SKU 预警设置列表
      */
+    @Transactional(rollbackFor = Exception.class)
     public void batchUpdateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
         if (goodsSkuStockDTOS == null || goodsSkuStockDTOS.isEmpty()) {
             return;
@@ -220,12 +212,8 @@ public class GoodsSkuStockManager {
                 goodsSkuList.add(goodsSku);
             }
         }
-        if (goodsSkuService != null) {
-            goodsSkuService.updateBatchById(goodsSkuList);
-        } else {
-            for (GoodsSku sku : goodsSkuList) {
-                this.goodsSkuMapper.updateById(sku);
-            }
+        if (!goodsSkuList.isEmpty()) {
+            this.goodsSkuMapper.updateById(goodsSkuList);
         }
     }
 
@@ -276,7 +264,7 @@ public class GoodsSkuStockManager {
                         .operator(flowContext.getOperator())
                         .remark(flowContext.getRemark())
                         .build();
-                applicationEventPublisher.publishEvent(new StockFlowEvent(goodsSkuService != null ? goodsSkuService : this, message));
+                applicationEventPublisher.publishEvent(new StockFlowEvent(this, message));
             }
         }
     }
@@ -362,7 +350,7 @@ public class GoodsSkuStockManager {
                     .operator(flowContext.getOperator())
                     .remark(flowContext.getRemark())
                     .build();
-            applicationEventPublisher.publishEvent(new StockFlowEvent(goodsSkuService != null ? goodsSkuService : this, message));
+            applicationEventPublisher.publishEvent(new StockFlowEvent(this, message));
         }
     }
 
@@ -403,21 +391,13 @@ public class GoodsSkuStockManager {
             for (GoodsSku goodsSku : entry.getValue()) {
                 int quantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
                 if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
-                    if (this.goodsSkuService != null) {
-                        this.goodsSkuService.updateStockFromCardKeySync(goodsSku.getId(), quantity);
-                    } else {
-                        this.updateStockFromCardKeySync(goodsSku.getId(), quantity);
-                    }
+                    this.updateStockFromCardKeySync(goodsSku.getId(), quantity);
                 } else {
-                    if (this.goodsSkuService != null) {
-                        this.goodsSkuService.updateStock(goodsSku.getId(), quantity);
-                    } else {
-                        this.updateStock(goodsSku.getId(), quantity);
-                    }
+                    this.updateStock(goodsSku.getId(), quantity);
                 }
             }
-            if (this.goodsService != null) {
-                this.goodsService.updateStock(entry.getKey());
+            if (this.stockAggregates != null) {
+                this.stockAggregates.updateStock(entry.getKey());
             }
         }
     }
@@ -429,17 +409,7 @@ public class GoodsSkuStockManager {
      * @return 该商品下的总库存量
      */
     public Integer getGoodsStock(String goodsId) {
-        List<GoodsSku> goodsSkus = this.goodsSkuMapper.selectList(new LambdaQueryWrapper<GoodsSku>()
-                .eq(GoodsSku::getGoodsId, goodsId));
-        int totalStock = 0;
-        if (goodsSkus != null && !goodsSkus.isEmpty()) {
-            for (GoodsSku goodsSku : goodsSkus) {
-                if (goodsSku.getQuantity() != null) {
-                    totalStock += goodsSku.getQuantity();
-                }
-            }
-        }
-        return totalStock;
+        return stockAggregates.getGoodsStock(goodsId);
     }
 
     /**
@@ -459,18 +429,18 @@ public class GoodsSkuStockManager {
     }
 
     /**
-     * 加载用于库存更新的 SKU 实体
+     * 加载用于库存更新的SKU，沿用先查缓存、未命中再查Mapper并回填缓存的规则
      *
      * @param skuId 商品 SKU ID
      * @return SKU 实体
      */
     private GoodsSku loadGoodsSkuForStockUpdate(String skuId) {
-        GoodsSku goodsSku = null;
-        if (this.goodsSkuService != null) {
-            goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
-        }
+        GoodsSku goodsSku = cache == null ? null : (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(skuId));
         if (goodsSku == null) {
             goodsSku = this.goodsSkuMapper.selectById(skuId);
+            if (goodsSku != null && cache != null) {
+                cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
+            }
         }
         if (goodsSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);

@@ -5,7 +5,15 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
-import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.support.GoodsStockAggregateSupport;
+import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.mapper.GoodsSkuMapper;
+import cn.lili.modules.goods.support.GoodsSkuStockManager;
+import cn.lili.cache.Cache;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
+import org.springframework.context.ApplicationEventPublisher;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +49,12 @@ class GoodsSkuServiceImplECouponStockTest {
     private GoodsSkuServiceImpl goodsSkuService;
 
     @Mock
-    private GoodsService goodsService;
+    private GoodsStockAggregateSupport goodsService;
+
+    @Mock
+    private GoodsSkuMapper mapper;
+    @Mock
+    private Cache cache;
 
     private GoodsSkuServiceImpl serviceSpy;
 
@@ -51,7 +64,9 @@ class GoodsSkuServiceImplECouponStockTest {
     @BeforeEach
     void setUp() {
         serviceSpy = spy(goodsSkuService);
-        ReflectionTestUtils.setField(serviceSpy, "goodsService", goodsService);
+        ReflectionTestUtils.setField(serviceSpy, "goodsSkuStockManager",
+                new GoodsSkuStockManager(mapper, goodsService, mock(PromotionGoodsService.class), cache,
+                        mock(ApplicationEventPublisher.class)));
     }
 
     /**
@@ -78,7 +93,7 @@ class GoodsSkuServiceImplECouponStockTest {
     @Test
     void updateStockRejectsECouponManualUpdate() {
         GoodsSku sku = buildECouponSku("sku-1", 10);
-        doReturn(sku).when(serviceSpy).getGoodsSkuByIdFromCache("sku-1");
+        when(cache.get(GoodsSkuService.getCacheKeys("sku-1"))).thenReturn(sku);
 
         ServiceException ex = assertThrows(ServiceException.class,
                 () -> serviceSpy.updateStock("sku-1", 99));
@@ -91,7 +106,7 @@ class GoodsSkuServiceImplECouponStockTest {
     @Test
     void updateStockByTypeRejectsECouponManualUpdate() {
         GoodsSku sku = buildECouponSku("sku-1", 10);
-        doReturn(sku).when(serviceSpy).getGoodsSkuByIdFromCache("sku-1");
+        when(cache.get(GoodsSkuService.getCacheKeys("sku-1"))).thenReturn(sku);
 
         ServiceException ex = assertThrows(ServiceException.class,
                 () -> serviceSpy.updateStock("sku-1", 1, "ADD"));
@@ -104,12 +119,15 @@ class GoodsSkuServiceImplECouponStockTest {
     @Test
     void updateGoodsStockUsesCardKeySyncForECoupon() {
         GoodsSku sku = buildECouponSku("sku-1", 5);
-        doNothing().when(serviceSpy).updateStockFromCardKeySync("sku-1", 5);
+        GoodsSkuStockManager manager = spy(new GoodsSkuStockManager(mapper, goodsService,
+                mock(PromotionGoodsService.class), cache, mock(ApplicationEventPublisher.class)));
+        doNothing().when(manager).updateStockFromCardKeySync("sku-1", 5);
+        ReflectionTestUtils.setField(serviceSpy, "goodsSkuStockManager", manager);
 
         assertDoesNotThrow(() -> serviceSpy.updateGoodsStock(List.of(sku)));
 
-        verify(serviceSpy).updateStockFromCardKeySync("sku-1", 5);
-        verify(serviceSpy, never()).updateStock(eq("sku-1"), anyInt());
+        verify(manager).updateStockFromCardKeySync("sku-1", 5);
+        verify(manager, never()).updateStock(eq("sku-1"), anyInt());
         verify(goodsService).updateStock("goods-1");
     }
 

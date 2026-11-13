@@ -5,8 +5,7 @@ import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.promotion.support.SkuPromotionQuerySupport;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
@@ -54,15 +53,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Autowired
     @Lazy
     private SeckillApplyService seckillApplyService;
-    /**
-     * 规格商品
-     */
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
-
-    @Autowired
-    private GoodsService goodsService;
+    private SkuPromotionQuerySupport skuPromotionQueries;
 
     @Autowired
     private GoodsIndexService goodsIndexService;
@@ -72,20 +64,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
     @Override
     public List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds) {
-
-        GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
-        if (sku == null) {
-            return new ArrayList<>();
-        }
-        QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
-
-        queryWrapper.and(i -> i.or(j -> j.eq(SKU_ID_COLUMN, skuId))
-                .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
-                .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
-                        .and(l -> l.like("scope_id", sku.getCategoryPath())))));
-        queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
-        queryWrapper.in("store_id", Arrays.asList(storeIds.split(",")));
-        return this.list(queryWrapper);
+        return skuPromotionQueries.findSkuValidPromotion(skuId, storeIds);
     }
 
     @Override
@@ -151,11 +130,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
      */
     @Override
     public Double getValidPromotionsGoodsPrice(String skuId, List<String> promotionTypes) {
-        QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(SKU_ID_COLUMN, skuId);
-        queryWrapper.in("promotion_type", promotionTypes);
-        queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START));
-        return this.baseMapper.selectPromotionsGoodsPrice(queryWrapper);
+        return skuPromotionQueries.getValidPromotionsGoodsPrice(skuId, promotionTypes);
     }
 
     @Override

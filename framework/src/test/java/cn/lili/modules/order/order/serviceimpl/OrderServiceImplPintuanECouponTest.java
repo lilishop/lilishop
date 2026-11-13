@@ -5,7 +5,8 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
-import cn.lili.modules.promotion.service.PintuanService;
+import cn.lili.modules.promotion.mapper.PintuanMapper;
+import cn.lili.modules.order.order.support.OrderPintuanSupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class OrderServiceImplPintuanECouponTest {
 
     private OrderServiceImpl orderService;
     private CardKeyService cardKeyService;
-    private PintuanService pintuanService;
+    private PintuanMapper pintuanMapper;
 
     /**
      * 初始化当前用例的模拟依赖及测试数据。
@@ -41,9 +42,10 @@ class OrderServiceImplPintuanECouponTest {
         orderService = spy(new OrderServiceImpl());
         ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         cardKeyService = mock(CardKeyService.class);
-        pintuanService = mock(PintuanService.class);
+        pintuanMapper = mock(PintuanMapper.class);
         ReflectionTestUtils.setField(orderService, "cardKeyService", cardKeyService);
-        ReflectionTestUtils.setField(orderService, "pintuanService", pintuanService);
+        ReflectionTestUtils.setField(orderService, "orderPintuanSupport",
+                new OrderPintuanSupport(pintuanMapper, null, null, cardKeyService, null));
     }
 
     /**
@@ -68,7 +70,7 @@ class OrderServiceImplPintuanECouponTest {
         Pintuan pintuan = new Pintuan();
         pintuan.setFictitious(false);
         pintuan.setRequiredNum(2);
-        when(pintuanService.getById("p1")).thenReturn(pintuan);
+        when(pintuanMapper.selectById("p1")).thenReturn(pintuan);
 
         Order order = pintuanECouponOrder("PT-F001", "PT-PARENT");
         doReturn(List.of(order)).when(orderService).list(any(LambdaQueryWrapper.class));

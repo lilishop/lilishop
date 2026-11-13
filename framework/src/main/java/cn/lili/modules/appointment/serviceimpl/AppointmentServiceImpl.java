@@ -14,6 +14,7 @@ import cn.lili.modules.appointment.entity.dto.search.AppointmentWorkOrderSearchP
 import cn.lili.modules.appointment.entity.vo.*;
 import cn.lili.modules.appointment.mapper.*;
 import cn.lili.modules.appointment.service.AppointmentService;
+import cn.lili.modules.appointment.support.AppointmentGoodsMetadataSupport;
 import cn.lili.modules.appointment.support.*;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -76,6 +77,9 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentGoodsExtMappe
 
     @Autowired
     private AppointmentStaffSupport appointmentStaffSupport;
+
+    @Autowired
+    private AppointmentGoodsMetadataSupport appointmentGoodsMetadataSupport;
 
     @Autowired
     private AppointmentConfigSupport appointmentConfigSupport;
@@ -230,61 +234,18 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentGoodsExtMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveGoodsExt(AppointmentGoodsExtSaveDTO dto) {
-        AuthUser user = UserContext.getCurrentUser();
-        if (user == null || CharSequenceUtil.isBlank(user.getStoreId())) {
-            throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
-        }
-        Goods goods = goodsService.getById(dto.getGoodsId());
-        if (goods == null || !GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
-            throw new ServiceException(ResultCode.APPOINTMENT_GOODS_TYPE_REQUIRED);
-        }
-        if (!user.getStoreId().equals(goods.getStoreId())) {
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST_STORE);
-        }
-        persistGoodsExt(goods, dto);
+        appointmentGoodsMetadataSupport.saveGoodsExt(dto);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncGoodsExtFromPublish(String goodsId, GoodsOperationDTO goodsOperationDTO) {
-        if (goodsOperationDTO == null
-                || !GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goodsOperationDTO.getGoodsType())) {
-            return;
-        }
-        if (goodsOperationDTO.getAppointmentSettings() == null
-                && goodsOperationDTO.getAppointmentSlotTemplate() == null) {
-            return;
-        }
-        Goods goods = goodsService.getById(goodsId);
-        if (goods == null) {
-            return;
-        }
-        List<GoodsSku> skus = goodsSkuService.listByGoodsIdAndStoreId(goodsId, goods.getStoreId());
-        AppointmentGoodsExtSaveDTO saveDTO = AppointmentGoodsPublishSupport.toSaveDto(
-                goodsId,
-                goodsOperationDTO.getAppointmentSettings(),
-                goodsOperationDTO.getAppointmentSlotTemplate(),
-                goodsOperationDTO.getSkuList(),
-                skus);
-        persistGoodsExt(goods, saveDTO);
+        appointmentGoodsMetadataSupport.syncGoodsExtFromPublish(goodsId, goodsOperationDTO);
     }
 
     @Override
     public void enrichGoodsVoForSeller(GoodsVO goodsVO) {
-        if (goodsVO == null || !GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goodsVO.getGoodsType())) {
-            return;
-        }
-        AppointmentGoodsExt ext = this.getOne(new LambdaQueryWrapper<AppointmentGoodsExt>()
-                .eq(AppointmentGoodsExt::getGoodsId, goodsVO.getId())
-                .eq(AppointmentGoodsExt::getDeleteFlag, false));
-        List<AppointmentSlotTemplate> templates = slotTemplateMapper.selectList(
-                new LambdaQueryWrapper<AppointmentSlotTemplate>()
-                        .eq(AppointmentSlotTemplate::getGoodsId, goodsVO.getId())
-                        .eq(AppointmentSlotTemplate::getDeleteFlag, false)
-                        .orderByAsc(AppointmentSlotTemplate::getSortOrder));
-        goodsVO.setAppointmentSettings(AppointmentGoodsPublishSupport.toSettingsMap(ext));
-        goodsVO.setAppointmentSlotTemplate(AppointmentGoodsPublishSupport.toSlotTemplateMap(ext, templates));
-        AppointmentGoodsPublishSupport.attachSkuSlotCapacities(goodsVO, templates);
+        appointmentGoodsMetadataSupport.enrichGoodsVoForSeller(goodsVO);
     }
 
     @Override
@@ -602,56 +563,5 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentGoodsExtMappe
         appointmentAfterSaleSupport.notifyBookingSuccess(orderSn);
     }
 
-    private void persistGoodsExt(Goods goods, AppointmentGoodsExtSaveDTO dto) {
-        AppointmentGoodsExt ext = this.getOne(new LambdaQueryWrapper<AppointmentGoodsExt>()
-                .eq(AppointmentGoodsExt::getGoodsId, dto.getGoodsId())
-                .eq(AppointmentGoodsExt::getDeleteFlag, false));
-        if (ext == null) {
-            ext = BeanUtil.copyProperties(dto, AppointmentGoodsExt.class);
-            ext.setId(SnowFlake.getIdStr());
-            ext.setStoreId(goods.getStoreId());
-            ext.setDeleteFlag(false);
-            fillSystemFormSnapshot(ext, goods.getStoreId());
-            this.save(ext);
-        } else {
-            BeanUtil.copyProperties(dto, ext, "id", "goodsId", "storeId");
-            fillSystemFormSnapshot(ext, goods.getStoreId());
-            this.updateById(ext);
-        }
-        if (CollUtil.isNotEmpty(dto.getSlotTemplates())) {
-            slotTemplateMapper.delete(new LambdaQueryWrapper<AppointmentSlotTemplate>()
-                    .eq(AppointmentSlotTemplate::getGoodsId, dto.getGoodsId()));
-            for (AppointmentSlotTemplateDTO templateDTO : dto.getSlotTemplates()) {
-                AppointmentSlotTemplate template = BeanUtil.copyProperties(templateDTO, AppointmentSlotTemplate.class);
-                template.setId(SnowFlake.getIdStr());
-                template.setGoodsId(dto.getGoodsId());
-                template.setStoreId(goods.getStoreId());
-                template.setDeleteFlag(false);
-                if (template.getEnabled() == null) {
-                    template.setEnabled(true);
-                }
-                if (template.getCapacity() == null) {
-                    template.setCapacity(0);
-                }
-                slotTemplateMapper.insert(template);
-            }
-        }
-    }
 
-    private void fillSystemFormSnapshot(AppointmentGoodsExt ext, String storeId) {
-        if (ext == null) {
-            return;
-        }
-        if (CharSequenceUtil.isBlank(ext.getSystemFormId())) {
-            ext.setSystemFormId(null);
-            ext.setSystemFormSnapshot(null);
-            return;
-        }
-        AppointmentSystemForm form = systemFormMapper.selectById(ext.getSystemFormId());
-        if (form == null || Boolean.TRUE.equals(form.getDeleteFlag())
-                || (CharSequenceUtil.isNotBlank(storeId) && !storeId.equals(form.getStoreId()))) {
-            throw new ServiceException(ResultCode.APPOINTMENT_SYSTEM_FORM_NOT_FOUND);
-        }
-        ext.setSystemFormSnapshot(AppointmentFormAnswerSupport.snapshotSchema(form.getFormSchema()));
-    }
 }

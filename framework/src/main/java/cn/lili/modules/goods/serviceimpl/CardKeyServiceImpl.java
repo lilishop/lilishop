@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.modules.goods.support.CardKeyPoolSupport;
 import cn.lili.modules.goods.support.CardKeyImportSupport;
 import cn.lili.modules.goods.support.CardKeyTradeSupport;
 import cn.hutool.core.collection.CollUtil;
@@ -68,6 +69,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> implements CardKeyService {
+
+    @Autowired
+    private CardKeyPoolSupport cardKeyPoolSupport;
 
     @Autowired
     private GoodsSkuService goodsSkuService;
@@ -255,22 +259,12 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncSkuStock(String skuId) {
-        GoodsSku goodsSku = goodsSkuService.getById(skuId);
-        if (goodsSku == null) {
-            return;
-        }
-        int availableStock = countUnusedPoolStock(skuId);
-        goodsSkuService.updateStockFromCardKeySync(skuId, availableStock);
-        // 商家商品列表读 li_goods.quantity，须同步 SPU 级库存
-        goodsService.updateStock(goodsSku.getGoodsId());
+        cardKeyPoolSupport.syncSkuStock(skuId);
     }
 
     @Override
     public int countUnusedPoolStock(String skuId) {
-        return Math.toIntExact(this.count(new LambdaQueryWrapper<CardKey>()
-                .eq(CardKey::getSkuId, skuId)
-                .eq(CardKey::getStatus, CardKeyStatusEnum.UNUSED.name())
-                .eq(CardKey::getDeleteFlag, false)));
+        return cardKeyPoolSupport.countUnusedPoolStock(skuId);
     }
 
     @Override
@@ -306,12 +300,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void softDeletePoolOnSkuRemove(String skuId) {
-        this.update(new LambdaUpdateWrapper<CardKey>()
-                .eq(CardKey::getSkuId, skuId)
-                .inSql(CardKey::getStatus, "'UNUSED', 'VOIDED'")
-                .eq(CardKey::getDeleteFlag, false)
-                .set(CardKey::getDeleteFlag, true));
-        syncSkuStock(skuId);
+        cardKeyPoolSupport.softDeletePoolOnSkuRemove(skuId);
     }
 
     @Override

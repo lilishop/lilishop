@@ -1,8 +1,13 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsStockAggregateSupport;
+import cn.lili.modules.goods.support.GoodsSkuStockManager;
+import cn.lili.modules.goods.support.CardKeyPoolSupport;
+import cn.lili.modules.goods.mapper.CardKeyMapper;
+import cn.lili.modules.goods.mapper.GoodsSkuMapper;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.ArgumentMatchers.any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +33,14 @@ class CardKeyServiceImplSyncSkuStockTest {
     private CardKeyServiceImpl cardKeyService;
 
     @Mock
-    private GoodsSkuService goodsSkuService;
+    private GoodsSkuMapper goodsSkuMapper;
+    @Mock
+    private CardKeyMapper cards;
+    @Mock
+    private GoodsSkuStockManager stocks;
 
     @Mock
-    private GoodsService goodsService;
+    private GoodsStockAggregateSupport goodsService;
 
     private CardKeyServiceImpl serviceSpy;
 
@@ -41,6 +50,8 @@ class CardKeyServiceImplSyncSkuStockTest {
     @BeforeEach
     void setUp() {
         serviceSpy = spy(cardKeyService);
+        ReflectionTestUtils.setField(serviceSpy, "cardKeyPoolSupport",
+                new CardKeyPoolSupport(cards, goodsSkuMapper, stocks, goodsService));
     }
 
     /**
@@ -51,12 +62,12 @@ class CardKeyServiceImplSyncSkuStockTest {
         GoodsSku sku = new GoodsSku();
         sku.setId("sku-1");
         sku.setGoodsId("goods-1");
-        when(goodsSkuService.getById("sku-1")).thenReturn(sku);
-        doReturn(42).when(serviceSpy).countUnusedPoolStock("sku-1");
+        when(goodsSkuMapper.selectById("sku-1")).thenReturn(sku);
+        when(cards.selectCount(any())).thenReturn(42L);
 
         serviceSpy.syncSkuStock("sku-1");
 
-        verify(goodsSkuService).updateStockFromCardKeySync("sku-1", 42);
+        verify(stocks).updateStockFromCardKeySync("sku-1", 42);
         verify(goodsService).updateStock("goods-1");
     }
 }

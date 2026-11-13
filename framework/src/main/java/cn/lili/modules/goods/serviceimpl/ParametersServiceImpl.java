@@ -1,27 +1,21 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.CategoryParameter;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
-import cn.lili.modules.goods.entity.dto.GoodsParamsItemDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsSearchDTO;
 import cn.lili.modules.goods.mapper.ParametersMapper;
 import cn.lili.modules.goods.service.CategoryParameterService;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.ParametersService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 商品参数业务层实现
+ * 商品参数定义及分类关联服务，不回写商品已保存的参数内容或发送商品索引消息。
  *
  * @author pikachu
  * @since 2020-03-02 16:18:56
@@ -38,20 +32,15 @@ import java.util.List;
 @Service
 public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Parameters> implements ParametersService {
 
-
-    @Autowired
-    @Lazy
-    private GoodsService goodsService;
-
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-
-    @Autowired
-    private LiliMessageTemplate liliMessageTemplate;
-
     @Autowired
     private CategoryParameterService categoryParameterService;
 
+    /**
+     * 按参数名称模糊分页查询商品参数定义，并按创建时间倒序排列。
+     *
+     * @param goodsParamsSearchDTO 参数名称及分页条件
+     * @return 商品参数分页结果
+     */
     @Override
     public IPage<Parameters> parametersPage(GoodsParamsSearchDTO goodsParamsSearchDTO) {
         LambdaQueryWrapper<Parameters> queryWrapper = new LambdaQueryWrapper<>();
@@ -63,6 +52,12 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         return this.page(PageUtil.initPage(goodsParamsSearchDTO), queryWrapper);
     }
 
+    /**
+     * 保存商品参数定义后维护分类关联，返回参数记录的保存结果。
+     *
+     * @param goodsParamsDTO 商品参数定义及分类关联列表
+     * @return 参数记录是否保存成功
+     */
     @Override
     public boolean addParameter(GoodsParamsDTO goodsParamsDTO) {
 
@@ -79,7 +74,8 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
     }
 
     /**
-     * 更新参数组信息
+     * 校验参数定义存在后更新其内容及分类关联，两类写入参与同一事务。
+     * 保留商品已有参数内容，不触发历史商品回写或索引消息。
      *
      * @param goodsParamsDTO 参数信息
      * @return 是否更新成功
@@ -92,26 +88,6 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
             throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
 
-        List<String> goodsIds = new ArrayList<>();
-//        LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.select(Goods::getId, Goods::getParams);
-//        queryWrapper.like(Goods::getParams, parameters.getId());
-//        List<Map<String, Object>> goodsList = this.goodsService.listMaps(queryWrapper);
-//
-//        if (!goodsList.isEmpty()) {
-//            for (Map<String, Object> goods : goodsList) {
-//                String params = (String) goods.get("params");
-//                List<GoodsParamsDTO> goodsParamsDTOS = JSON.parseArray(params, GoodsParamsDTO.class);
-//                this.setGoodsItemDTOList(goodsParamsDTOS, parameters);
-//                this.goodsService.updateGoodsParams(goods.get("id").toString(), JSON.toJSONString(goodsParamsDTOS));
-//                goodsIds.add(goods.get("id").toString());
-//            }
-//
-//            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX.name();
-//            //发送mq消息
-//            liliMessageTemplate.asyncSend(destination, JSON.toJSONString(goodsIds), MessageSendCallbackBuilder.commonCallback());
-//        }
-
         Boolean isUpdate = this.updateById(goodsParamsDTO);
         List<String> categoryIds = new ArrayList<>();
         for (CategoryParameter categoryParameter : goodsParamsDTO.getCategoryParameterList()) {
@@ -121,6 +97,12 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         return isUpdate;
     }
 
+    /**
+     * 读取商品参数定义及其当前关联的分类列表。
+     *
+     * @param id 商品参数定义主键
+     * @return 参数定义及分类关联信息
+     */
     @Override
     public GoodsParamsDTO getGoodsParamsDTO(String id) {
 
@@ -131,6 +113,12 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         return goodsParamsDTO;
     }
 
+    /**
+     * 根据分类关联查询商品参数定义，无关联时直接返回空列表。
+     *
+     * @param categoryId 商品分类主键
+     * @return 该分类关联的参数定义列表
+     */
     @Override
     public List<Parameters> getParametersByCategoryId(String categoryId) {
         List<CategoryParameter> categoryParameterList = categoryParameterService.getCategoryParamList(categoryId);
@@ -143,43 +131,4 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         }
         return this.list(new LambdaQueryWrapper<Parameters>().in(Parameters::getId, parametersId));
     }
-
-//    /**
-//     * 更新商品参数信息
-//     *
-//     * @param goodsParamsDTOList 商品参数项列表
-//     * @param parameters         参数信息
-//     */
-//    private void setGoodsItemDTOList(List<GoodsParamsDTO> goodsParamsDTOList, Parameters parameters) {
-//        for (GoodsParamsDTO goodsParamsDTO : goodsParamsDTOList) {
-//            List<GoodsParamsItemDTO> goodsParamsItemDTOList = goodsParamsDTO.getGoodsParamsItemDTOList().stream().filter(i -> i.getParamId() != null && i.getParamId().equals(parameters.getId())).collect(Collectors.toList());
-//            for (GoodsParamsItemDTO goodsParamsItemDTO : goodsParamsItemDTOList) {
-//                this.setGoodsItemDTO(goodsParamsItemDTO, parameters);
-//            }
-//        }
-//    }
-
-    /**
-     * 更新商品参数详细信息
-     *
-     * @param goodsParamsItemDTO 商品参数项信息
-     * @param parameters         参数信息
-     */
-    private void setGoodsItemDTO(GoodsParamsItemDTO goodsParamsItemDTO, Parameters parameters) {
-        if (goodsParamsItemDTO.getParamId().equals(parameters.getId())) {
-            goodsParamsItemDTO.setParamId(parameters.getId());
-            goodsParamsItemDTO.setParamName(parameters.getParamName());
-            goodsParamsItemDTO.setRequired(parameters.getRequired());
-            goodsParamsItemDTO.setIsIndex(parameters.getIsIndex());
-            goodsParamsItemDTO.setSort(parameters.getSort());
-            if (CharSequenceUtil.isNotEmpty(parameters.getOptions()) && CharSequenceUtil.isNotEmpty(goodsParamsItemDTO.getParamValue()) && !parameters.getOptions().contains(goodsParamsItemDTO.getParamValue())) {
-                if (parameters.getOptions().contains(",")) {
-                    goodsParamsItemDTO.setParamValue(parameters.getOptions().substring(0, parameters.getOptions().indexOf(",")));
-                } else {
-                    goodsParamsItemDTO.setParamValue(parameters.getOptions());
-                }
-            }
-        }
-    }
-
 }

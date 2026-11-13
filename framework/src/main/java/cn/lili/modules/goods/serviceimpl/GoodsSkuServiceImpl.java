@@ -29,7 +29,8 @@ import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.entity.vos.SpecValueVO;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
-import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.support.GoodsVOAssembler;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.support.GoodsSkuSpecAssembler;
 import cn.lili.modules.goods.support.GoodsSkuStockExcelSupport;
@@ -59,7 +60,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,7 +68,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 商品sku业务层实现
+ * 商品SKU业务层实现，复用基础读取和商品视图组件，不反向依赖完整商品业务服务。
  *
  * @author pikachu
  * @since 2020-02-23 15:18:56
@@ -81,7 +81,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private Cache cache;
 
     @Autowired
-    @Lazy
     private MemberCouponService memberCouponService;
 
     @Autowired
@@ -94,22 +93,21 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
-    @Lazy
-    private GoodsService goodsService;
+    private GoodsVOAssembler goodsVOAssembler;
 
     @Autowired
-    @Lazy
+    private GoodsSkuReadSupport skuReads;
+
+    @Autowired
     private GoodsIndexService goodsIndexService;
 
     @Autowired
-    @Lazy
     private PromotionGoodsService promotionGoodsService;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    @Lazy
     private CouponService couponService;
 
     @Autowired
@@ -130,11 +128,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     private GoodsSkuStockManager getGoodsSkuStockManager() {
-        if (this.goodsSkuStockManager == null) {
-            this.goodsSkuStockManager = new GoodsSkuStockManager(
-                    this.baseMapper, this, this.goodsService, this.promotionGoodsService, this.cache, this.applicationEventPublisher
-            );
-        }
         return this.goodsSkuStockManager;
     }
 
@@ -213,15 +206,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public GoodsSku getGoodsSkuByIdFromCache(String id) {
-        GoodsSku goodsSku = (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(id));
-        if (goodsSku == null) {
-            goodsSku = this.getById(id);
-            if (goodsSku == null) {
-                return null;
-            }
-            cache.put(GoodsSkuService.getCacheKeys(id), goodsSku);
-        }
-        return goodsSku;
+        return skuReads.getGoodsSkuByIdFromCache(id);
     }
 
     @Override
@@ -232,7 +217,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public Map<String, Object> getGoodsSkuDetail(String goodsId, String skuId) {
         Map<String, Object> map = new HashMap<>(16);
-        GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
+        GoodsVO goodsVO = goodsVOAssembler.getGoodsVO(goodsId);
         if (goodsVO == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
@@ -399,8 +384,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public List<GoodsSkuVO> getGoodsListByGoodsId(String goodsId) {
-        List<GoodsSku> list = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goodsId));
-        return this.getGoodsSkuVOList(list);
+        return skuReads.getGoodsListByGoodsId(goodsId);
     }
 
     @Override
@@ -487,11 +471,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO) {
         getGoodsSkuStockManager().updateAlertQuantity(goodsSkuStockDTO);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchUpdateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
         getGoodsSkuStockManager().batchUpdateAlertQuantity(goodsSkuStockDTOS);
     }

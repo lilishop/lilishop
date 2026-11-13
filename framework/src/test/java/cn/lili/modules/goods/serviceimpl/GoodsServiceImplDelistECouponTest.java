@@ -10,8 +10,10 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
-import cn.lili.modules.goods.service.CardKeyService;
+import cn.lili.modules.goods.support.CardKeyPoolSupport;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.mapper.GoodsMapper;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -48,7 +50,9 @@ class GoodsServiceImplDelistECouponTest {
     private static final String SKU_ID = "sku-ecoupon-1";
 
     private GoodsServiceImpl goodsService;
-    private CardKeyService cardKeyService;
+    private GoodsSkuReadSupport skuReads;
+    private GoodsMapper goodsMapper;
+    private CardKeyPoolSupport cardKeyService;
     private GoodsSkuService goodsSkuService;
     private Cache<GoodsVO> cache;
     private ApplicationEventPublisher applicationEventPublisher;
@@ -68,7 +72,11 @@ class GoodsServiceImplDelistECouponTest {
     @BeforeEach
     void setUp() {
         goodsService = spy(new GoodsServiceImpl());
-        cardKeyService = mock(CardKeyService.class);
+        skuReads = mock(GoodsSkuReadSupport.class);
+        goodsMapper = mock(GoodsMapper.class);
+        ReflectionTestUtils.setField(goodsService, "baseMapper", goodsMapper);
+        when(goodsMapper.update(org.mockito.ArgumentMatchers.<Goods>isNull(), any(Wrapper.class))).thenReturn(1);
+        cardKeyService = mock(CardKeyPoolSupport.class);
         goodsSkuService = mock(GoodsSkuService.class);
         cache = mock(Cache.class);
         applicationEventPublisher = mock(ApplicationEventPublisher.class);
@@ -76,11 +84,16 @@ class GoodsServiceImplDelistECouponTest {
         RocketmqCustomProperties rocketmqCustomProperties = new RocketmqCustomProperties();
         rocketmqCustomProperties.setGoodsTopic("goods-topic");
 
-        ReflectionTestUtils.setField(goodsService, "cardKeyService", cardKeyService);
+        ReflectionTestUtils.setField(goodsService, "cardKeyPoolSupport", cardKeyService);
         ReflectionTestUtils.setField(goodsService, "goodsSkuService", goodsSkuService);
         ReflectionTestUtils.setField(goodsService, "cache", cache);
         ReflectionTestUtils.setField(goodsService, "applicationEventPublisher", applicationEventPublisher);
         ReflectionTestUtils.setField(goodsService, "rocketmqCustomProperties", rocketmqCustomProperties);
+        ReflectionTestUtils.setField(goodsService, "goodsVOAssembler",
+                new cn.lili.modules.goods.support.GoodsVOAssembler(goodsMapper, null, skuReads, null, null, (Cache) cache));
+        ReflectionTestUtils.setField(goodsService, "goodsMarketAuditManager",
+                new cn.lili.modules.goods.support.GoodsMarketAuditManager(goodsMapper, goodsSkuService,
+                        (Cache) cache, null, rocketmqCustomProperties, null, applicationEventPublisher));
     }
 
     /** 下架（DOWN）不触发 softDeletePoolOnSkuRemove。 */

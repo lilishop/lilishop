@@ -16,7 +16,6 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.trigger.enums.DelayTypeEnums;
@@ -32,7 +31,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +42,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 商品审核、上下架及定时上下架管理器
+ * 商品审核、上下架及定时上下架管理器，SPU读写统一使用Mapper，保留SKU联动、缓存和事件处理
  * <p>
  * 集中管理 SPU 的审核流转、平台/商家上下架控制、定时延时队列任务调度以及商品状态变更事件广播。
  *
@@ -60,11 +58,6 @@ public class GoodsMarketAuditManager {
     private GoodsMapper goodsMapper;
 
     @Autowired
-    @Lazy
-    private GoodsService goodsService;
-
-    @Autowired
-    @Lazy
     private GoodsSkuService goodsSkuService;
 
     @Autowired
@@ -86,7 +79,6 @@ public class GoodsMarketAuditManager {
      * 全参构造函数，用于单元测试与非 Spring 环境装配
      *
      * @param goodsMapper              商品映射器
-     * @param goodsService             商品服务
      * @param goodsSkuService          SKU 业务服务
      * @param cache                    商品 VO 缓存
      * @param liliMessageTemplate      消息发送模板
@@ -95,7 +87,6 @@ public class GoodsMarketAuditManager {
      * @param applicationEventPublisher 领域事件发布器
      */
     public GoodsMarketAuditManager(GoodsMapper goodsMapper,
-                                   GoodsService goodsService,
                                    GoodsSkuService goodsSkuService,
                                    Cache<GoodsVO> cache,
                                    LiliMessageTemplate liliMessageTemplate,
@@ -103,7 +94,6 @@ public class GoodsMarketAuditManager {
                                    TimeTrigger timeTrigger,
                                    ApplicationEventPublisher applicationEventPublisher) {
         this.goodsMapper = goodsMapper;
-        this.goodsService = goodsService;
         this.goodsSkuService = goodsSkuService;
         this.cache = cache;
         this.liliMessageTemplate = liliMessageTemplate;
@@ -126,7 +116,7 @@ public class GoodsMarketAuditManager {
         for (String goodsId : goodsIds) {
             Goods goods = this.checkExist(goodsId);
             goods.setAuthFlag(goodsAuthEnum.name());
-            result = this.goodsService != null ? this.goodsService.updateById(goods) : this.goodsMapper.updateById(goods) > 0;
+            result = this.goodsMapper.updateById(goods) > 0;
             if (this.goodsSkuService != null) {
                 this.goodsSkuService.updateGoodsSkuStatus(goods);
             }
@@ -167,7 +157,7 @@ public class GoodsMarketAuditManager {
             updateWrapper.set(Goods::getScheduledDownReason, null);
         }
         updateWrapper.in(Goods::getId, goodsIds);
-        boolean result = this.goodsService != null ? this.goodsService.update(updateWrapper) : this.goodsMapper.update(null, updateWrapper) > 0;
+        boolean result = this.goodsMapper.update(null, updateWrapper) > 0;
 
         this.updateGoodsStatus(goodsIds, goodsStatusEnum);
         return result;
@@ -193,7 +183,7 @@ public class GoodsMarketAuditManager {
             updateWrapper.set(Goods::getScheduledDownReason, null);
         }
         updateWrapper.eq(Goods::getStoreId, storeId);
-        boolean result = this.goodsService != null ? this.goodsService.update(updateWrapper) : this.goodsMapper.update(null, updateWrapper) > 0;
+        boolean result = this.goodsMapper.update(null, updateWrapper) > 0;
 
         if (this.goodsSkuService != null) {
             this.goodsSkuService.updateGoodsSkuStatusByStoreId(storeId, goodsStatusEnum.name(), null);
@@ -228,7 +218,7 @@ public class GoodsMarketAuditManager {
             updateWrapper.set(Goods::getScheduledDownReason, null);
         }
         updateWrapper.in(Goods::getId, goodsIds);
-        boolean result = this.goodsService != null ? this.goodsService.update(updateWrapper) : this.goodsMapper.update(null, updateWrapper) > 0;
+        boolean result = this.goodsMapper.update(null, updateWrapper) > 0;
 
         this.updateGoodsStatus(goodsIds, goodsStatusEnum);
         return result;
@@ -256,8 +246,7 @@ public class GoodsMarketAuditManager {
             throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
         }
         List<String> distinctGoodsIds = goodsIds.stream().distinct().collect(Collectors.toList());
-        List<Goods> oldGoodsList = this.goodsService != null ? this.goodsService.listByIds(distinctGoodsIds)
-                : this.goodsMapper.selectBatchIds(distinctGoodsIds);
+        List<Goods> oldGoodsList = this.goodsMapper.selectBatchIds(distinctGoodsIds);
         if (oldGoodsList.size() != distinctGoodsIds.size()) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
@@ -285,11 +274,7 @@ public class GoodsMarketAuditManager {
             uw.set(Goods::getScheduledDownTime, scheduledDate);
             uw.set(Goods::getScheduledDownReason, reason);
         }
-        if (this.goodsService != null) {
-            this.goodsService.update(uw);
-        } else {
-            this.goodsMapper.update(null, uw);
-        }
+        this.goodsMapper.update(null, uw);
         for (String goodsId : distinctGoodsIds) {
             String uniqueKey = DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.GOODS, goodsId);
             Date oldTime = oldGoodsList.stream()
@@ -346,7 +331,7 @@ public class GoodsMarketAuditManager {
             update.eq(Goods::getScheduledDownTime, time)
                     .set(Goods::getScheduledDownTime, null).set(Goods::getScheduledDownReason, null);
         }
-        boolean updateSuccess = this.goodsService != null ? this.goodsService.update(update) : this.goodsMapper.update(null, update) > 0;
+        boolean updateSuccess = this.goodsMapper.update(null, update) > 0;
         if (!updateSuccess) {
             throw new ServiceException("定时计划已变化，请刷新后重试");
         }
@@ -458,8 +443,7 @@ public class GoodsMarketAuditManager {
      * @return 商品实体
      */
     private Goods checkExist(String goodsId) {
-        Goods goods = this.goodsService != null ? this.goodsService.getById(goodsId)
-                : (this.goodsMapper != null ? this.goodsMapper.selectById(goodsId) : null);
+        Goods goods = this.goodsMapper.selectById(goodsId);
         if (goods == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }

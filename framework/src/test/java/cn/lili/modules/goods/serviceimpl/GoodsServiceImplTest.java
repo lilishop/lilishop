@@ -15,6 +15,8 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.service.GoodsSearchParamService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.mapper.GoodsMapper;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -69,6 +71,8 @@ class GoodsServiceImplTest {
     private static final String GOODS_ID = "goods-1";
 
     private GoodsServiceImpl goodsService;
+    private GoodsSkuReadSupport skuReads;
+    private GoodsMapper goodsMapper;
     private GoodsSearchParamService goodsSearchParamService;
     private GoodsSkuService goodsSkuService;
     private GoodsGalleryService goodsGalleryService;
@@ -92,6 +96,10 @@ class GoodsServiceImplTest {
     @BeforeEach
     void setUp() {
         goodsService = spy(new GoodsServiceImpl());
+        skuReads = mock(GoodsSkuReadSupport.class);
+        goodsMapper = mock(GoodsMapper.class);
+        ReflectionTestUtils.setField(goodsService, "baseMapper", goodsMapper);
+        when(goodsMapper.update(org.mockito.ArgumentMatchers.<Goods>isNull(), any(Wrapper.class))).thenReturn(1);
         goodsSearchParamService = mock(GoodsSearchParamService.class);
         goodsSkuService = mock(GoodsSkuService.class);
         goodsGalleryService = mock(GoodsGalleryService.class);
@@ -106,7 +114,6 @@ class GoodsServiceImplTest {
         ReflectionTestUtils.setField(goodsService, "settingService", settingService);
         ReflectionTestUtils.setField(goodsService, "storeService", storeService);
         ReflectionTestUtils.setField(goodsService, "cache", cache);
-        ReflectionTestUtils.setField(goodsService, "categoryService", categoryService);
 
         GoodsSetting goodsSetting = new GoodsSetting();
         goodsSetting.setGoodsCheck(false);
@@ -132,10 +139,16 @@ class GoodsServiceImplTest {
         doReturn(true).when(goodsService).update(any(Wrapper.class));
         doNothing().when(goodsService).notifyGoodsDelete(anyList());
         doReturn(existingGoods()).when(goodsService).getById(GOODS_ID);
+        when(goodsMapper.selectById(GOODS_ID)).thenReturn(existingGoods());
         doNothing().when(goodsSkuService).add(any(Goods.class), any(GoodsOperationDTO.class));
         doNothing().when(goodsSkuService).update(any(Goods.class), any(GoodsOperationDTO.class));
         doNothing().when(goodsGalleryService).add(anyList(), anyString());
         when(cache.remove(any())).thenReturn(true);
+        ReflectionTestUtils.setField(goodsService, "goodsVOAssembler",
+                new cn.lili.modules.goods.support.GoodsVOAssembler(goodsMapper, goodsGalleryService, skuReads, categoryService, null, (Cache) cache));
+        ReflectionTestUtils.setField(goodsService, "goodsMarketAuditManager",
+                new cn.lili.modules.goods.support.GoodsMarketAuditManager(goodsMapper, goodsSkuService,
+                        (Cache) cache, null, null, null, null));
     }
 
     /**
@@ -310,9 +323,10 @@ class GoodsServiceImplTest {
         Goods goods = existingGoods();
         goods.setParams(JSON.toJSONString(List.of(nonIndex)));
         doReturn(goods).when(goodsService).getById(GOODS_ID);
+        when(goodsMapper.selectById(GOODS_ID)).thenReturn(goods);
         when(cache.get(any())).thenReturn(null);
         when(goodsGalleryService.goodsGalleryList(GOODS_ID)).thenReturn(Collections.emptyList());
-        when(goodsSkuService.getGoodsListByGoodsId(GOODS_ID)).thenReturn(Collections.emptyList());
+        when(skuReads.getGoodsListByGoodsId(GOODS_ID)).thenReturn(Collections.emptyList());
         when(categoryService.getCategoryNamesByPath(any())).thenReturn(Collections.emptyList());
 
         GoodsVO vo = goodsService.getGoodsVO(GOODS_ID);
@@ -338,11 +352,14 @@ class GoodsServiceImplTest {
         goods.setScheduledUpperTime(time);
         goods.setScheduledDownTime(time);
         doReturn(goods).when(goodsService).getById(GOODS_ID);
+        when(goodsMapper.selectById(GOODS_ID)).thenReturn(goods);
         cn.lili.trigger.interfaces.TimeTrigger trigger = mock(cn.lili.trigger.interfaces.TimeTrigger.class);
         cn.lili.common.properties.RocketmqCustomProperties properties = new cn.lili.common.properties.RocketmqCustomProperties();
         properties.setPromotionTopic("promotion");
         ReflectionTestUtils.setField(goodsService, "timeTrigger", trigger);
+        ReflectionTestUtils.setField(ReflectionTestUtils.getField(goodsService, "goodsMarketAuditManager"), "timeTrigger", trigger);
         ReflectionTestUtils.setField(goodsService, "rocketmqCustomProperties", properties);
+        ReflectionTestUtils.setField(ReflectionTestUtils.getField(goodsService, "goodsMarketAuditManager"), "rocketmqCustomProperties", properties);
         try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
             context.when(UserContext::getCurrentUser).thenReturn(storeUser());
             if (manager) context.when(UserContext::getCurrentUser).thenReturn(AuthUser.builder().role(UserEnums.MANAGER).id("manager-1").build());
@@ -350,7 +367,7 @@ class GoodsServiceImplTest {
                     cn.lili.modules.goods.entity.enums.GoodsStatusEnum.valueOf(direction));
         }
         ArgumentCaptor<com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Goods>> wrapper = ArgumentCaptor.forClass(com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper.class);
-        verify(goodsService).update(wrapper.capture());
+        verify(goodsMapper).update(org.mockito.ArgumentMatchers.<Goods>isNull(), wrapper.capture());
         String prefix = direction.equals("UPPER") ? "scheduled_upper" : "scheduled_down";
         String other = direction.equals("UPPER") ? "scheduled_down" : "scheduled_upper";
         assertThat(wrapper.getValue().getSqlSet()).contains(prefix + "_time", prefix + "_reason")
@@ -368,12 +385,14 @@ class GoodsServiceImplTest {
         Goods goods = existingGoods();
         goods.setStoreId("other-store");
         doReturn(goods).when(goodsService).getById(GOODS_ID);
+        when(goodsMapper.selectById(GOODS_ID)).thenReturn(goods);
         try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
             context.when(UserContext::getCurrentUser).thenReturn(storeUser());
             org.junit.jupiter.api.Assertions.assertThrows(cn.lili.common.exception.ServiceException.class,
                     () -> goodsService.cancelGoodsMarketSchedule(GOODS_ID, cn.lili.modules.goods.entity.enums.GoodsStatusEnum.UPPER));
         }
         verify(goodsService, never()).update(any(Wrapper.class));
+        verify(goodsMapper, never()).update(org.mockito.ArgumentMatchers.<Goods>isNull(), any(Wrapper.class));
         verify(cache, never()).remove(any());
     }
 

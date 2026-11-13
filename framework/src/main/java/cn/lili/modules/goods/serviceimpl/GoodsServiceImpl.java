@@ -17,7 +17,7 @@ import cn.lili.modules.store.entity.dos.FreightTemplate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.message.LiliMessageTemplate;
-import cn.lili.modules.appointment.service.AppointmentService;
+import cn.lili.modules.appointment.support.AppointmentGoodsMetadataSupport;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -32,10 +32,12 @@ import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.goods.support.GoodsMarketAuditManager;
 import cn.lili.modules.goods.support.GoodsVOAssembler;
+import cn.lili.modules.goods.support.CardKeyPoolSupport;
+import cn.lili.modules.goods.support.GoodsStockAggregateSupport;
 import cn.lili.modules.goods.util.GoodsCodeGenerator;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
-import cn.lili.modules.member.service.MemberEvaluationService;
+import cn.lili.modules.member.mapper.MemberEvaluationMapper;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.FreightTemplateService;
@@ -54,7 +56,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +63,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 商品业务层实现
+ * 商品业务层实现，商品查询、库存汇总、卡密池及预约发品通过独立组件协作，避免服务相互依赖。
  *
  * @author pikachu
  * @since 2020-02-23 15:18:56
@@ -71,33 +72,25 @@ import java.util.stream.Collectors;
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
     @Autowired
-    @Lazy
-    private CategoryService categoryService;
-
-    @Autowired
     private SettingService settingService;
 
     @Autowired
     private GoodsGalleryService goodsGalleryService;
 
     @Autowired
-    @Lazy
     private GoodsSkuService goodsSkuService;
 
     @Autowired
     private StoreService storeService;
 
     @Autowired
-    @Lazy
-    private MemberEvaluationService memberEvaluationService;
+    private MemberEvaluationMapper memberEvaluationMapper;
 
     @Autowired
-    @Lazy
-    private CardKeyService cardKeyService;
+    private CardKeyPoolSupport cardKeyPoolSupport;
 
     @Autowired
-    @Lazy
-    private AppointmentService appointmentService;
+    private AppointmentGoodsMetadataSupport appointmentGoodsMetadataSupport;
 
     @Autowired
     private LiliMessageTemplate liliMessageTemplate;
@@ -124,23 +117,16 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private GoodsVOAssembler goodsVOAssembler;
 
     @Autowired
+    private GoodsStockAggregateSupport stockAggregates;
+
+    @Autowired
     private GoodsMarketAuditManager goodsMarketAuditManager;
 
     private GoodsVOAssembler getGoodsVOAssembler() {
-        if (this.goodsVOAssembler == null) {
-            this.goodsVOAssembler = new GoodsVOAssembler(
-                    this.baseMapper, this, this.goodsGalleryService, this.goodsSkuService, this.categoryService, this.appointmentService, this.cache
-            );
-        }
         return this.goodsVOAssembler;
     }
 
     private GoodsMarketAuditManager getGoodsMarketAuditManager() {
-        if (this.goodsMarketAuditManager == null) {
-            this.goodsMarketAuditManager = new GoodsMarketAuditManager(
-                    this.baseMapper, this, this.goodsSkuService, this.cache, this.liliMessageTemplate, this.rocketmqCustomProperties, this.timeTrigger, this.applicationEventPublisher
-            );
-        }
         return this.goodsMarketAuditManager;
     }
 
@@ -199,7 +185,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
         if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
-            appointmentService.syncGoodsExtFromPublish(goods.getId(), goodsOperationDTO);
+            appointmentGoodsMetadataSupport.syncGoodsExtFromPublish(goods.getId(), goodsOperationDTO);
         }
         return goods.getId();
     }
@@ -250,7 +236,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             this.notifyGoodsDelete(Collections.singletonList(goodsId));
         }
         if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
-            appointmentService.syncGoodsExtFromPublish(goodsId, goodsOperationDTO);
+            appointmentGoodsMetadataSupport.syncGoodsExtFromPublish(goodsId, goodsOperationDTO);
         }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
@@ -360,7 +346,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             if (GoodsTypeEnum.E_COUPON.name().equals(goods.getGoodsType())) {
                 List<GoodsSku> skus = goodsSkuService.getGoodsSkuListByGoodsId(goods.getId());
                 for (GoodsSku sku : skus) {
-                    cardKeyService.softDeletePoolOnSkuRemove(sku.getId());
+                    cardKeyPoolSupport.softDeletePoolOnSkuRemove(sku.getId());
                 }
             }
         }
@@ -409,14 +395,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    @SystemLogPoint(description = "同步商品库存", customerLog = "'同步商品商品ID的库存:['+#goodsId+']'")
     public void updateStock(String goodsId) {
-        LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        Integer stock = goodsSkuService.getGoodsStock(goodsId);
-        lambdaUpdateWrapper.set(Goods::getQuantity, stock);
-        lambdaUpdateWrapper.eq(Goods::getId, goodsId);
-        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
-        this.update(lambdaUpdateWrapper);
+        stockAggregates.updateStock(goodsId);
     }
 
     @Override
@@ -430,11 +410,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         Goods goods = this.getById(goodsId);
         EvaluationQueryParams queryParams = new EvaluationQueryParams();
         queryParams.setGoodsId(goodsId);
-        long count = memberEvaluationService.getEvaluationCount(queryParams);
+        long count = memberEvaluationMapper.selectCount(queryParams.queryWrapper());
         goods.setCommentNum((int) count);
 
         queryParams.setGrade("GOOD");
-        long goodCount = memberEvaluationService.getEvaluationCount(queryParams);
+        long goodCount = memberEvaluationMapper.selectCount(queryParams.queryWrapper());
         if (count != 0) {
             double rate = (double) goodCount / count;
             rate = Math.round(rate * 100.0) / 100.0;

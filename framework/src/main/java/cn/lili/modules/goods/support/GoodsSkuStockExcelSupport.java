@@ -8,7 +8,6 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +29,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,8 +56,7 @@ public class GoodsSkuStockExcelSupport {
     private GoodsSkuMapper goodsSkuMapper;
 
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
+    private GoodsSkuStockManager stockManager;
 
     /**
      * 导出商品 SKU 库存数据至 Excel 文件
@@ -168,7 +165,7 @@ public class GoodsSkuStockExcelSupport {
             throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, e.getMessage());
         }
 
-        this.goodsSkuService.updateStocksByType(goodsSkuStockDTOList);
+        this.stockManager.updateStocksByType(goodsSkuStockDTOList);
     }
 
     /**

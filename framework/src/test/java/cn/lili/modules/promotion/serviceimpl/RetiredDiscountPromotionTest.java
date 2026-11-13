@@ -59,6 +59,8 @@ class RetiredDiscountPromotionTest {
         goods.setPromotionType(type);
         goods.setPromotionId("retired-activity");
         PromotionServiceImpl service = new PromotionServiceImpl();
+        ReflectionTestUtils.setField(service, "skuPromotionQueries",
+                new cn.lili.modules.promotion.support.SkuPromotionQuerySupport(null, null, null, null, null, null, null, null));
 
         assertThat(service.wrapperPromotionMapList(List.of(goods))).isEmpty();
         assertThat(PromotionTypeEnum.haveStock(type)).isFalse();

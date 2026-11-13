@@ -84,7 +84,7 @@ spring:
   # 主数据库连接池配置（阿里巴巴 Druid 连接池）
   datasource:
     # MySQL 数据库 JDBC 连接串
-    url: jdbc:mysql://192.168.31.100:3306/lilishop_123?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     # 数据库登录用户名
     username: root
     # 数据库登录密码

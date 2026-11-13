@@ -3,7 +3,7 @@ package cn.lili.modules.goods.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
-import cn.lili.modules.appointment.service.AppointmentService;
+import cn.lili.modules.appointment.support.AppointmentGoodsMetadataSupport;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
@@ -12,19 +12,16 @@ import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsGalleryService;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 商品 SPU 视图对象组装器
+ * 商品 SPU 视图对象组装器，商品实体统一通过Mapper查询，不反向依赖商品服务
  * <p>
  * 聚合 SPU 实体、相册图片、SKU 列表、分类路径、规格参数及预约拓展信息，统一维护商品详情视图及两小时缓存。
  *
@@ -39,23 +36,16 @@ public class GoodsVOAssembler {
     private GoodsMapper goodsMapper;
 
     @Autowired
-    @Lazy
-    private GoodsService goodsService;
-
-    @Autowired
     private GoodsGalleryService goodsGalleryService;
 
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
+    private GoodsSkuReadSupport skuReads;
 
     @Autowired
-    @Lazy
     private CategoryService categoryService;
 
     @Autowired
-    @Lazy
-    private AppointmentService appointmentService;
+    private AppointmentGoodsMetadataSupport appointmentGoodsMetadataSupport;
 
     @Autowired
     private Cache<GoodsVO> cache;
@@ -64,26 +54,23 @@ public class GoodsVOAssembler {
      * 全参构造函数，用于单元测试或非 Spring 环境灵活装配
      *
      * @param goodsMapper         商品数据映射器
-     * @param goodsService        商品业务服务
      * @param goodsGalleryService 商品相册服务
-     * @param goodsSkuService     SKU 业务服务
+     * @param skuReads             SKU基础查询组件
      * @param categoryService     分类服务
-     * @param appointmentService 预约拓展服务
+     * @param appointmentGoodsMetadataSupport 预约发品元数据组件
      * @param cache               缓存客户端
      */
     public GoodsVOAssembler(GoodsMapper goodsMapper,
-                            GoodsService goodsService,
                             GoodsGalleryService goodsGalleryService,
-                            GoodsSkuService goodsSkuService,
+                            GoodsSkuReadSupport skuReads,
                             CategoryService categoryService,
-                            AppointmentService appointmentService,
+                            AppointmentGoodsMetadataSupport appointmentGoodsMetadataSupport,
                             Cache<GoodsVO> cache) {
         this.goodsMapper = goodsMapper;
-        this.goodsService = goodsService;
         this.goodsGalleryService = goodsGalleryService;
-        this.goodsSkuService = goodsSkuService;
+        this.skuReads = skuReads;
         this.categoryService = categoryService;
-        this.appointmentService = appointmentService;
+        this.appointmentGoodsMetadataSupport = appointmentGoodsMetadataSupport;
         this.cache = cache;
     }
 
@@ -99,8 +86,7 @@ public class GoodsVOAssembler {
             return goodsVO;
         }
 
-        Goods goods = this.goodsService != null ? this.goodsService.getById(goodsId)
-                : (this.goodsMapper != null ? this.goodsMapper.selectById(goodsId) : null);
+        Goods goods = this.goodsMapper.selectById(goodsId);
         if (goods == null) {
             return null;
         }
@@ -120,8 +106,8 @@ public class GoodsVOAssembler {
         }
         goodsVO.setGoodsGalleryList(images);
 
-        if (goodsSkuService != null) {
-            List<GoodsSkuVO> goodsListByGoodsId = goodsSkuService.getGoodsListByGoodsId(goodsId);
+        if (skuReads != null) {
+            List<GoodsSkuVO> goodsListByGoodsId = skuReads.getGoodsListByGoodsId(goodsId);
             if (goodsListByGoodsId != null && !goodsListByGoodsId.isEmpty()) {
                 goodsVO.setSkuList(goodsListByGoodsId);
             }
@@ -135,8 +121,8 @@ public class GoodsVOAssembler {
             goodsVO.setGoodsParamsDTOList(GoodsSearchParamParser.parseAll(goods.getParams()));
         }
 
-        if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType()) && appointmentService != null) {
-            appointmentService.enrichGoodsVoForSeller(goodsVO);
+        if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType()) && appointmentGoodsMetadataSupport != null) {
+            appointmentGoodsMetadataSupport.enrichGoodsVoForSeller(goodsVO);
         }
 
         if (cache != null) {

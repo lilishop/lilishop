@@ -11,6 +11,8 @@ import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.mapper.GoodsMapper;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.FreightTemplateService;
@@ -58,6 +60,8 @@ class GoodsServiceImplSecurityTest {
     private static final String GOODS_ID = "goods-100";
 
     private GoodsServiceImpl goodsService;
+    private GoodsSkuReadSupport skuReads;
+    private GoodsMapper goodsMapper;
     private SettingService settingService;
     private StoreService storeService;
     private FreightTemplateService freightTemplateService;
@@ -73,6 +77,9 @@ class GoodsServiceImplSecurityTest {
     @BeforeEach
     void setUp() {
         goodsService = spy(new GoodsServiceImpl());
+        skuReads = mock(GoodsSkuReadSupport.class);
+        goodsMapper = mock(GoodsMapper.class);
+        ReflectionTestUtils.setField(goodsService, "baseMapper", goodsMapper);
         settingService = mock(SettingService.class);
         storeService = mock(StoreService.class);
         freightTemplateService = mock(FreightTemplateService.class);
@@ -96,6 +103,11 @@ class GoodsServiceImplSecurityTest {
         storeVO.setStoreName("Current Store");
         storeVO.setSelfOperated(false);
         when(storeService.getStoreDetail()).thenReturn(storeVO);
+        ReflectionTestUtils.setField(goodsService, "goodsVOAssembler",
+                new cn.lili.modules.goods.support.GoodsVOAssembler(goodsMapper, null, skuReads, null, null, (Cache) cache));
+        ReflectionTestUtils.setField(goodsService, "goodsMarketAuditManager",
+                new cn.lili.modules.goods.support.GoodsMarketAuditManager(goodsMapper, goodsSkuService,
+                        (Cache) cache, null, null, null, null));
     }
 
     private AuthUser currentStoreUser() {
@@ -181,7 +193,7 @@ class GoodsServiceImplSecurityTest {
         g2.setId("g-2");
         g2.setStoreId(OTHER_STORE_ID); // 属于其他店铺
 
-        doReturn(List.of(g1, g2)).when(goodsService).listByIds(List.of("g-1", "g-2"));
+        when(goodsMapper.selectBatchIds(List.of("g-1", "g-2"))).thenReturn(List.of(g1, g2));
 
         Date future = new Date(System.currentTimeMillis() + 3600000);
 

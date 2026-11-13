@@ -5,7 +5,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCustomerRelation;
 import cn.lili.modules.distribution.entity.dos.DistributionGrade;
@@ -21,19 +20,15 @@ import cn.lili.modules.distribution.entity.vos.DistributionInvitePageVO;
 import cn.lili.modules.distribution.entity.vos.DistributionMemberDetailVO;
 import cn.lili.modules.distribution.entity.vos.DistributionMemberVO;
 import cn.lili.modules.distribution.entity.vos.DistributionPromotionPosterVO;
-import cn.lili.modules.distribution.mapper.DistributionCustomerRelationMapper;
-import cn.lili.modules.distribution.mapper.DistributionInviteMapper;
 import cn.lili.modules.distribution.mapper.DistributionMapper;
 import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
 import cn.lili.modules.distribution.service.DistributionGradeService;
 import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.service.DistributionService;
-import cn.lili.modules.distribution.support.DistributionInviteCardSettingSupport;
 import cn.lili.modules.distribution.support.DistributionMemberAdminSupport;
 import cn.lili.modules.distribution.support.DistributionMemberExportSupport;
 import cn.lili.modules.distribution.support.DistributionMemberSupport;
 import cn.lili.modules.distribution.support.DistributionParentBindSupport;
-import cn.lili.modules.distribution.support.DistributionPromotionPosterSettingSupport;
 import cn.lili.modules.distribution.support.DistributionPromotionSupport;
 import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.member.entity.dos.Member;
@@ -57,7 +52,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 分销员接口实现
+ * 分销员接口实现，管理维护、导出及推广组件均为必需依赖，不在业务入口手动创建支持类
  *
  * @author pikachu
  * @since 2020-03-14 23:04:56
@@ -65,57 +60,30 @@ import java.util.Optional;
 @Service
 public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Distribution> implements DistributionService {
 
-    /**
-     * 客户
-     */
     @Autowired
     private MemberService memberService;
-
     @Autowired
     private DistributionCustomerRelationService customerRelationService;
-
     @Autowired
     private DistributionRecruitService recruitService;
-
-    @Autowired
-    private DistributionInviteMapper distributionInviteMapper;
-
     @Autowired
     private DistributionGradeService gradeService;
-
     @Autowired
     private DistributionMemberSupport distributionMemberSupport;
-
-    @Autowired
-    private DistributionCustomerRelationMapper customerRelationMapper;
-
     @Autowired
     private DistributionSettingSupport distributionSettingSupport;
-
-    @Autowired
-    private DistributionPromotionPosterSettingSupport distributionPromotionPosterSettingSupport;
-
-    @Autowired
-    private DistributionInviteCardSettingSupport distributionInviteCardSettingSupport;
-
     @Autowired
     private DistributionParentBindSupport distributionParentBindSupport;
-
     @Autowired
-    private ConnectService connectService;
-
-    @Autowired(required = false)
     private DistributionMemberAdminSupport distributionMemberAdminSupport;
-
-    @Autowired(required = false)
+    @Autowired
     private DistributionMemberExportSupport distributionMemberExportSupport;
-
-    @Autowired(required = false)
+    @Autowired
     private DistributionPromotionSupport distributionPromotionSupport;
 
     @Override
     public IPage<Distribution> distributionPage(DistributionSearchParams distributionSearchParams, PageVO page) {
-        return getMemberAdminSupport().buildMemberQueryWrapper(this, distributionSearchParams)
+        return distributionMemberAdminSupport.buildMemberQueryWrapper(this, distributionSearchParams)
                 .map(queryWrapper -> this.page(PageUtil.initPage(page), queryWrapper))
                 .orElseGet(() -> new Page<>(page.getPageNumber(), page.getPageSize(), 0));
     }
@@ -255,7 +223,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
 
     @Override
     public DistributionMemberDetailVO getMemberDetail(String id) {
-        return getMemberAdminSupport().getMemberDetail(this, this.baseMapper, id);
+        return distributionMemberAdminSupport.getMemberDetail(this, this.baseMapper, id);
     }
 
     @Override
@@ -302,8 +270,8 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
                 if (member != null && inviterMobile.equals(member.getMobile())) {
                     throw new ServiceException(ResultCode.PARAMS_ERROR, "邀请人不能是本人");
                 }
-                String parentDistributionId = getMemberAdminSupport().resolveDistributionIdByMobile(this, inviterMobile);
-                getMemberAdminSupport().validateInviteCycle(this, id, parentDistributionId);
+                String parentDistributionId = distributionMemberAdminSupport.resolveDistributionIdByMobile(this, inviterMobile);
+                distributionMemberAdminSupport.validateInviteCycle(this, id, parentDistributionId);
                 updateParentByAdmin(id, parentDistributionId);
                 distribution.setParentDistributionId(parentDistributionId);
                 if (member != null && customerRelationService != null) {
@@ -321,13 +289,13 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DistributionMemberVO createMember(DistributionMemberCreateDTO createDTO) {
-        return getMemberAdminSupport().createMember(this, createDTO);
+        return distributionMemberAdminSupport.createMember(this, createDTO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchUpdateGrade(DistributionMemberBatchGradeDTO batchGradeDTO) {
-        getMemberAdminSupport().batchUpdateGrade(this, batchGradeDTO);
+        distributionMemberAdminSupport.batchUpdateGrade(this, batchGradeDTO);
     }
 
     @Override
@@ -335,10 +303,10 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         if (DistributionStatusEnum.APPLY.name().equals(distributionSearchParams.getDistributionStatus())) {
             recruitService.syncPendingApplyDistributions();
         }
-        List<Distribution> distributions = getMemberAdminSupport().buildMemberQueryWrapper(this, distributionSearchParams)
+        List<Distribution> distributions = distributionMemberAdminSupport.buildMemberQueryWrapper(this, distributionSearchParams)
                 .map(this::list)
                 .orElse(Collections.emptyList());
-        getMemberExportSupport().exportMembers(this, this.baseMapper, response, distributions);
+        distributionMemberExportSupport.exportMembers(this, this.baseMapper, response, distributions);
     }
 
     @Override
@@ -348,7 +316,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         if (distribution == null || isRetreated(distribution.getMemberId())) {
             throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);
         }
-        return getPromotionSupport().getPromotionPoster(distribution);
+        return distributionPromotionSupport.getPromotionPoster(distribution);
     }
 
     @Override
@@ -358,7 +326,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         if (distribution == null || isRetreated(distribution.getMemberId())) {
             throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);
         }
-        return getPromotionSupport().getInviteCard(distribution);
+        return distributionPromotionSupport.getInviteCard(distribution);
     }
 
     @Override
@@ -396,11 +364,11 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
 
     @Override
     public DistributionInvitePageVO pageInvitees(String parentDistributionId, DistributionInviteeQueryDTO query) {
-        return getPromotionSupport().pageInvitees(parentDistributionId, query);
+        return distributionPromotionSupport.pageInvitees(parentDistributionId, query);
     }
 
     private DistributionMemberVO toMemberVO(Distribution distribution) {
-        return getMemberAdminSupport().toMemberVO(this, distribution);
+        return distributionMemberAdminSupport.toMemberVO(this, distribution);
     }
 
     private String getBoundDistributorId(String memberId) {
@@ -412,31 +380,4 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         distributionParentBindSupport.syncInviteCountAndGrade(distributionId);
     }
 
-    private DistributionMemberAdminSupport getMemberAdminSupport() {
-        if (this.distributionMemberAdminSupport == null) {
-            this.distributionMemberAdminSupport = new DistributionMemberAdminSupport(
-                    memberService, gradeService, recruitService, customerRelationService,
-                    customerRelationMapper, distributionMemberSupport);
-        }
-        return this.distributionMemberAdminSupport;
-    }
-
-    private DistributionMemberExportSupport getMemberExportSupport() {
-        if (this.distributionMemberExportSupport == null) {
-            this.distributionMemberExportSupport = new DistributionMemberExportSupport(
-                    memberService, connectService, gradeService, customerRelationMapper);
-        }
-        return this.distributionMemberExportSupport;
-    }
-
-    private DistributionPromotionSupport getPromotionSupport() {
-        if (this.distributionPromotionSupport == null) {
-            this.distributionPromotionSupport = new DistributionPromotionSupport(
-                    distributionPromotionPosterSettingSupport,
-                    distributionInviteCardSettingSupport,
-                    distributionInviteMapper,
-                    memberService);
-        }
-        return this.distributionPromotionSupport;
-    }
 }
