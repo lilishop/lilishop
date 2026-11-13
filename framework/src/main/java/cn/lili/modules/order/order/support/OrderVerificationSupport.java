@@ -10,12 +10,10 @@ import cn.lili.modules.appointment.entity.dos.AppointmentVerificationCode;
 import cn.lili.modules.appointment.entity.enums.AppointmentVerificationCodeStatusEnum;
 import cn.lili.modules.appointment.entity.vo.AppointmentVerificationResultVO;
 import cn.lili.modules.appointment.service.AppointmentService;
-import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderVerificationRecordSearchParams;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderVerificationGoodsVO;
 import cn.lili.modules.order.order.entity.vo.OrderVerificationPreviewVO;
 import cn.lili.modules.order.order.entity.vo.OrderVerificationRecordVO;
@@ -51,6 +49,9 @@ public class OrderVerificationSupport {
     private OrderItemService orderItemService;
 
     @Autowired
+    private OrderPickupSupport orderPickupSupport;
+
+    @Autowired
     private ObjectProvider<AppointmentService> appointmentServiceProvider;
 
     private AppointmentService appointmentService;
@@ -58,10 +59,19 @@ public class OrderVerificationSupport {
     public OrderVerificationSupport() {
     }
 
+    /**
+     * 注入订单明细、预约协作和带事务及日志代理的提货组件。
+     *
+     * @param orderItemService 订单明细查询
+     * @param appointmentService 预约核销协作
+     * @param orderPickupSupport 自提及虚拟订单核销组件
+     */
     public OrderVerificationSupport(OrderItemService orderItemService,
-                                   AppointmentService appointmentService) {
+                                   AppointmentService appointmentService,
+                                   OrderPickupSupport orderPickupSupport) {
         this.orderItemService = orderItemService;
         this.appointmentService = appointmentService;
+        this.orderPickupSupport = orderPickupSupport;
     }
 
     private AppointmentService getAppointmentService() {
@@ -81,20 +91,7 @@ public class OrderVerificationSupport {
      * @param verificationCode 核销码
      */
     public void checkVerificationOrder(Order order, String verificationCode) {
-        if (order == null) {
-            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
-        }
-        if (!OrderTypeEnum.VIRTUAL.name().equals(order.getOrderType())
-                && !DeliveryMethodEnum.SELF_PICK_UP.name().equals(order.getDeliveryMethod())) {
-            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
-        }
-        if (!OrderStatusEnum.TAKE.name().equals(order.getOrderStatus())
-                && !OrderStatusEnum.STAY_PICKED_UP.name().equals(order.getOrderStatus())) {
-            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
-        }
-        if (!verificationCode.equals(order.getVerificationCode())) {
-            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
-        }
+        orderPickupSupport.checkVerificationOrder(order, verificationCode);
     }
 
     /**
@@ -106,11 +103,7 @@ public class OrderVerificationSupport {
      * @return 提货完成后的订单
      */
     public Order take(String orderSn, String verificationCode, OrderService orderService) {
-        Order order = orderService.getBySn(orderSn);
-        checkVerificationOrder(order, verificationCode);
-        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
-        orderService.complete(orderSn);
-        return order;
+        return orderPickupSupport.take(orderSn, verificationCode, orderService);
     }
 
     /**
@@ -168,7 +161,7 @@ public class OrderVerificationSupport {
                 && !OrderStatusEnum.STAY_PICKED_UP.name().equals(order.getOrderStatus())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
-        ((OrderService) SpringContextUtil.getBean(OrderService.class)).take(order.getSn(), verificationCode);
+        orderPickupSupport.take(order.getSn(), verificationCode, orderService);
         return "核销成功";
     }
 

@@ -42,6 +42,9 @@ import java.util.List;
 @Component
 @Slf4j
 public class CashierSupport {
+
+    @Autowired
+    private PaymentTransferSupport paymentTransfers;
     /**
      * 收银台
      */
@@ -225,8 +228,7 @@ public class CashierSupport {
      * @param memberWithdrawApply 用户提现申请
      */
     public TransferResultDTO transfer(PaymentMethodEnum paymentMethodEnum, MemberWithdrawApply memberWithdrawApply) {
-        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
-        return payment.transfer(memberWithdrawApply);
+        return paymentTransfers.transfer(paymentMethodEnum, memberWithdrawApply);
     }
 
     /**

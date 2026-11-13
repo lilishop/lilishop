@@ -30,9 +30,7 @@ import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
-import cn.lili.common.utils.SpringContextUtil;
-import cn.lili.modules.system.service.LogisticsService;
-import org.springframework.beans.factory.ObjectProvider;
+import cn.lili.modules.system.support.LogisticsGatewaySupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import jakarta.servlet.ServletOutputStream;
@@ -74,19 +72,7 @@ public class OrderDeliverySupport {
     private OrderPackageItemService orderPackageItemService;
 
     @Autowired
-    private ObjectProvider<LogisticsService> logisticsServiceProvider;
-
-    private LogisticsService logisticsService;
-
-    private LogisticsService getLogisticsService() {
-        if (this.logisticsService != null) {
-            return this.logisticsService;
-        }
-        if (this.logisticsServiceProvider != null) {
-            return this.logisticsServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(LogisticsService.class);
-    }
+    private LogisticsGatewaySupport logisticsGateway;
 
     @Autowired
     private OrderLogService orderLogService;
@@ -100,17 +86,28 @@ public class OrderDeliverySupport {
     public OrderDeliverySupport() {
     }
 
+    /**
+     * 注入订单履约所需存储服务、独立物流网关和订单来源查询。
+     *
+     * @param orderItemService 订单明细维护
+     * @param orderPackageService 包裹维护
+     * @param orderPackageItemService 包裹明细维护
+     * @param logisticsGateway 物流基础查询和供应商调用
+     * @param orderLogService 订单日志维护
+     * @param storeDetailService 店铺寄件信息查询
+     * @param pickupCardOrderService 提货卡订单来源查询
+     */
     public OrderDeliverySupport(OrderItemService orderItemService,
                                 OrderPackageService orderPackageService,
                                 OrderPackageItemService orderPackageItemService,
-                                LogisticsService logisticsService,
+                                LogisticsGatewaySupport logisticsGateway,
                                 OrderLogService orderLogService,
                                 StoreDetailService storeDetailService,
                                 PickupCardOrderService pickupCardOrderService) {
         this.orderItemService = orderItemService;
         this.orderPackageService = orderPackageService;
         this.orderPackageItemService = orderPackageItemService;
-        this.logisticsService = logisticsService;
+        this.logisticsGateway = logisticsGateway;
         this.orderLogService = orderLogService;
         this.storeDetailService = storeDetailService;
         this.pickupCardOrderService = pickupCardOrderService;
@@ -174,7 +171,7 @@ public class OrderDeliverySupport {
             if (CharSequenceUtil.isBlank(params.getLogisticsId()) || CharSequenceUtil.isBlank(params.getLogisticsNo())) {
                 throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
             }
-            logistics = getLogisticsService().getById(params.getLogisticsId());
+            logistics = logisticsGateway.getById(params.getLogisticsId());
             if (logistics == null) {
                 throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
             }
@@ -254,8 +251,8 @@ public class OrderDeliverySupport {
      */
     public Order shunFengDelivery(String orderSn, OrderService orderService, OrderMapper orderMapper) {
         OrderDetailVO orderDetailVO = orderService.queryDetail(orderSn);
-        String logisticsNo = getLogisticsService().sfCreateOrder(orderDetailVO);
-        Logistics logistics = getLogisticsService().getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getCode, "SF"));
+        String logisticsNo = logisticsGateway.sfCreateOrder(orderDetailVO);
+        Logistics logistics = logisticsGateway.getByCode("SF");
         return delivery(orderSn, logisticsNo, logistics.getId(), orderService, orderMapper);
     }
 
@@ -268,7 +265,7 @@ public class OrderDeliverySupport {
      */
     public Traces getTraces(String orderSn, OrderService orderService) {
         Order order = orderService.getBySn(orderSn);
-        return getLogisticsService().getLogisticTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile());
+        return logisticsGateway.getLogisticTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile());
     }
 
     /**
@@ -284,7 +281,7 @@ public class OrderDeliverySupport {
         String from = storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().substring(0,
                 storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().indexOf(",") - 1);
         String to = order.getConsigneeAddressPath().substring(0, order.getConsigneeAddressPath().indexOf(",") - 1);
-        return getLogisticsService().getLogisticMapTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile(), from, to);
+        return logisticsGateway.getLogisticMapTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile(), from, to);
     }
 
     /**
@@ -356,7 +353,7 @@ public class OrderDeliverySupport {
      * @param orderService 订单服务接口
      */
     public void checkBatchDeliver(List<OrderBatchDeliverDTO> list, OrderService orderService) {
-        Map<String, String> logisticsMap = getLogisticsService().list().stream()
+        Map<String, String> logisticsMap = logisticsGateway.list().stream()
                 .collect(Collectors.toMap(Logistics::getName, Logistics::getId));
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
             Order order = orderService.getOne(new LambdaQueryWrapper<Order>()

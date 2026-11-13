@@ -16,7 +16,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.mapper.OrderMapper;
-import cn.lili.modules.system.service.LogisticsService;
+import cn.lili.modules.system.support.LogisticsGatewaySupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,7 @@ import java.util.List;
 
 /**
  * 订单包裹业务层实现
+ * 包裹轨迹通过独立物流网关读取，不依赖会回调订单发货的完整物流服务，避免订单装配循环。
  *
  * @author Chopper
  * @since 2020/11/17 7:38 下午
@@ -41,7 +42,7 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
     private OrderPackageItemService orderpackageItemService;
 
     @Autowired
-    private LogisticsService logisticsService;
+    private LogisticsGatewaySupport logisticsGateway;
 
     @Autowired
     private OrderMapper orderMapper;
@@ -82,7 +83,7 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
                     && CharSequenceUtil.isNotBlank(orderPackage.getConsigneeMobile())) {
                 String mobile = orderPackage.getConsigneeMobile();
                 String suffix = mobile.length() >= 4 ? mobile.substring(mobile.length() - 4) : mobile;
-                Traces traces = logisticsService.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), suffix);
+                Traces traces = logisticsGateway.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), suffix);
                 orderPackageVO.setTraces(traces);
             }
             orderPackageVOS.add(orderPackageVO);

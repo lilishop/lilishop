@@ -14,7 +14,7 @@ import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
-import cn.lili.modules.payment.kit.CashierSupport;
+import cn.lili.modules.payment.kit.PaymentTransferSupport;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.WithdrawalSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -30,7 +30,7 @@ import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import cn.lili.modules.wallet.mapper.MemberWalletMapper;
 import cn.lili.modules.wallet.service.MemberWalletService;
-import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
+import cn.lili.modules.wallet.mapper.MemberWithdrawApplyMapper;
 import cn.lili.modules.wallet.service.WalletLogService;
 import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
@@ -40,7 +40,6 @@ import com.google.gson.Gson;
 import cn.lili.message.LiliMessageTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +51,7 @@ import java.util.Map;
 
 /**
  * 客户余额业务层实现
+ * 提现申请基础读写使用存储层，打款分发复用独立组件，不反向依赖提现审核服务或完整收银台。
  *
  * @author pikachu
  * @since 2020-02-25 14:10:16
@@ -81,15 +81,10 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
      */
     @Autowired
     private MemberService memberService;
-    /**
-     * 客户提现申请
-     */
     @Autowired
-    @Lazy
-    private MemberWithdrawApplyService memberWithdrawApplyService;
+    private MemberWithdrawApplyMapper withdrawApplyMapper;
     @Autowired
-    @Lazy
-    private CashierSupport cashierSupport;
+    private PaymentTransferSupport paymentTransfers;
 
     @Override
     public MemberWalletVO getMemberWallet(String memberId) {
@@ -346,7 +341,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         memberWithdrawApply.setSn("W" + SnowFlake.getId());
 
         //添加提现申请记录
-        memberWithdrawApplyService.save(memberWithdrawApply);
+        withdrawApplyMapper.insert(memberWithdrawApply);
 
         //扣减余额到冻结金额
         this.reduceWithdrawal(new MemberWalletUpdateDTO(price, authUser.getId(), "提现金额已冻结", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
@@ -365,7 +360,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
 
     @Override
     public void withdrawal(String withdrawApplyId) {
-        MemberWithdrawApply memberWithdrawApply = memberWithdrawApplyService.getById(withdrawApplyId);
+        MemberWithdrawApply memberWithdrawApply = withdrawApplyMapper.selectById(withdrawApplyId);
         //状态闸门：只有审核通过待打款的申请才能执行，防止 MQ 重投/并发导致重复打款
         if (memberWithdrawApply == null
                 || !WithdrawStatusEnum.VIA_AUDITING.name().equals(memberWithdrawApply.getApplyStatus())) {
@@ -379,7 +374,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
 
         //调用提现方法
         TransferResultDTO transferResultDTO = "WECHAT".equals(withdrawalSetting.getType()) ?
-                cashierSupport.transfer(PaymentMethodEnum.WECHAT, memberWithdrawApply) : cashierSupport.transfer(PaymentMethodEnum.ALIPAY,
+                paymentTransfers.transfer(PaymentMethodEnum.WECHAT, memberWithdrawApply) : paymentTransfers.transfer(PaymentMethodEnum.ALIPAY,
                 memberWithdrawApply);
 
         //成功则扣减冻结金额
@@ -399,7 +394,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
             memberWithdrawApply.setErrorMessage(transferResultDTO.getResponse());
         }
         //修改提现申请
-        this.memberWithdrawApplyService.updateById(memberWithdrawApply);
+        withdrawApplyMapper.updateById(memberWithdrawApply);
 
         //发送余额提现申请消息
         MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();

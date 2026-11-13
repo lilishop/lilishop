@@ -8,9 +8,8 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
-import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.FullDiscountGiftItem;
@@ -20,13 +19,12 @@ import cn.lili.modules.promotion.entity.enums.FullDiscountTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.mapper.FullDiscountMapper;
-import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.FullDiscountService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.support.CouponPromotionReferenceSupport;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +41,7 @@ import static cn.lili.modules.promotion.tools.PromotionTools.queryPromotionStatu
 
 /**
  * 满优惠业务层实现（支持满减 FULL_MINUS、满折 FULL_RATE、满赠 FULL_GIFT 及 1~3 级阶梯）
+ * 赠品读取与赠券存在性校验复用独立支持组件，不反向依赖商品或优惠券业务服务。
  * <p>
  * 关键业务规则：
  * <ul>
@@ -76,16 +75,12 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      */
     private static final double MAX_THRESHOLD_MONEY = 99999999.00D;
 
-    @Lazy
     @Autowired
-    private CouponService couponService;
-
+    private CouponPromotionReferenceSupport couponReferences;
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-
-    @Lazy
     @Autowired
-    private GoodsSkuService goodsSkuService;
+    private GoodsSkuReadSupport skuReads;
 
     @Override
     public List<FullDiscountVO> currentPromotion(List<String> storeId) {
@@ -525,8 +520,8 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             }
             for (FullDiscountGiftItem item : rule.getGiftItems()) {
                 if (item != null && CharSequenceUtil.isNotBlank(item.getSkuId())
-                        && CharSequenceUtil.isBlank(item.getGoodsName()) && this.goodsSkuService != null) {
-                    GoodsSku sku = this.goodsSkuService.getGoodsSkuByIdFromCache(item.getSkuId());
+                        && CharSequenceUtil.isBlank(item.getGoodsName()) && this.skuReads != null) {
+                    GoodsSku sku = this.skuReads.getGoodsSkuByIdFromCache(item.getSkuId());
                     if (sku != null) {
                         item.setGoodsId(sku.getGoodsId());
                         item.setGoodsName(sku.getGoodsName());
@@ -539,9 +534,9 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             }
         }
         if (Boolean.TRUE.equals(fullDiscountVO.getGiftFlag()) && CharSequenceUtil.isNotBlank(fullDiscountVO.getGiftId())
-                && CharSequenceUtil.isBlank(fullDiscountVO.getGiftSkuName()) && this.goodsSkuService != null) {
+                && CharSequenceUtil.isBlank(fullDiscountVO.getGiftSkuName()) && this.skuReads != null) {
             String firstSkuId = fullDiscountVO.getGiftId().split(",")[0].trim();
-            GoodsSku sku = this.goodsSkuService.getGoodsSkuByIdFromCache(firstSkuId);
+            GoodsSku sku = this.skuReads.getGoodsSkuByIdFromCache(firstSkuId);
             if (sku != null) {
                 fullDiscountVO.setGiftSkuId(firstSkuId);
                 fullDiscountVO.setGiftSkuName(sku.getGoodsName());
@@ -583,7 +578,7 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      * @return 赠品 SKU 实体
      */
     private GoodsSku checkGiftSku(String giftSkuId) {
-        GoodsSku giftSku = this.goodsSkuService.getGoodsSkuByIdFromCache(giftSkuId);
+        GoodsSku giftSku = this.skuReads.getGoodsSkuByIdFromCache(giftSkuId);
         if (giftSku == null) {
             throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
         }
@@ -591,19 +586,12 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
     }
 
     /**
-     * 检查优惠券信息
+     * 通过公共关联校验检查赠送优惠券是否存在，不额外改变状态、有效期或店铺限制。
      *
      * @param couponId 优惠券编号
      */
     private void checkCoupon(String couponId) {
-        boolean noCouponSelected = couponId == null;
-        if (noCouponSelected) {
-            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
-        }
-        Coupon coupon = this.couponService.getById(couponId);
-        if (coupon == null) {
-            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
-        }
+        couponReferences.checkCouponExists(couponId);
     }
 
     /**

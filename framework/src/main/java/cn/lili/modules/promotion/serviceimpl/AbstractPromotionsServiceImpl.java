@@ -29,7 +29,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.constraints.NotNull;
@@ -38,16 +37,14 @@ import java.util.*;
 import static cn.lili.modules.promotion.tools.PromotionTools.queryPromotionStatus;
 
 /**
+ * 通用促销生命周期处理，复用促销商品服务维护绑定，不依赖延迟注入。
+ *
  * @author paulG
  * @since 2021/11/30
  **/
 public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
 
-    /**
-     * 促销商品
-     */
     @Autowired
-    @Lazy
     private PromotionGoodsService promotionGoodsService;
 
     /**

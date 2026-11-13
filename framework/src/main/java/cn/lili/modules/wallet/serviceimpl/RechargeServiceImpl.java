@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -32,6 +31,7 @@ import java.util.Objects;
 
 /**
  * 预存款业务层实现
+ * 钱包打款不依赖完整收银台，充值到账可正常注入钱包服务，保留原支付校验与入账顺序。
  *
  * @author pikachu
  * @since 2020-02-25 14:10:16
@@ -44,7 +44,6 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
      * 客户预存款
      */
     @Autowired
-    @Lazy
     private MemberWalletService memberWalletService;
 
     @Override

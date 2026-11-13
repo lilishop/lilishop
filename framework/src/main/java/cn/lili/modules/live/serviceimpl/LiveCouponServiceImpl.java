@@ -6,6 +6,7 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.modules.live.entity.dos.LiveCoupon;
 import cn.lili.modules.live.mapper.LiveCouponMapper;
 import cn.lili.modules.live.service.LiveCouponService;
+import cn.lili.modules.live.support.LiveCouponReadSupport;
 import cn.lili.modules.live.util.MqttUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -26,9 +27,10 @@ public class LiveCouponServiceImpl extends ServiceImpl<LiveCouponMapper, LiveCou
 
     @Autowired
     private Cache cache;
-
     @Autowired
     private MqttUtil mqttUtil;
+    @Autowired
+    private LiveCouponReadSupport couponReads;
 
     private final String COUPON = "coupon/";
 
@@ -92,11 +94,16 @@ public class LiveCouponServiceImpl extends ServiceImpl<LiveCouponMapper, LiveCou
         return this.removeByIds(ids);
     }
 
+    /**
+     * 复用直播领券查询，按直播间及优惠券主键读取唯一关联，多条记录时仍抛出异常。
+     *
+     * @param liveRoomId 直播间主键
+     * @param couponId 优惠券主键
+     * @return 直播券关联，不存在时为null
+     */
     @Override
     public LiveCoupon getByLiveRoomIdAndCouponId(String liveRoomId, String couponId) {
-        return this.getOne(new LambdaQueryWrapper<LiveCoupon>()
-                .eq(LiveCoupon::getLiveRoomId, liveRoomId)
-                .eq(LiveCoupon::getCouponId, couponId));
+        return couponReads.getByLiveRoomIdAndCouponId(liveRoomId, couponId);
     }
 
     private boolean updateAndSendMqtt(LiveCoupon liveCoupon) {

@@ -11,7 +11,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dos.Seckill;
@@ -25,16 +25,15 @@ import cn.lili.modules.promotion.entity.vos.SeckillTimelineVO;
 import cn.lili.modules.promotion.mapper.SeckillApplyMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
-import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.modules.promotion.support.SeckillApplySalesSupport;
+import cn.lili.modules.promotion.support.SeckillMetadataSupport;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 
 /**
  * 秒杀申请业务层实现
+ * 活动读取、商品数量和范围同步由基础维护组件提供，不反向调用秒杀活动服务。
  *
  * @author Chopper
  * @since 2020/8/21
@@ -57,23 +57,14 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      */
     @Autowired
     private Cache<Object> cache;
-    /**
-     * 规格商品
-     */
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
-    /**
-     * 促销商品
-     */
+    private GoodsSkuReadSupport skuReads;
+    @Autowired
+    private SeckillApplySalesSupport seckillApplySales;
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    /**
-     * 秒杀
-     */
-    @Lazy
     @Autowired
-    private SeckillService seckillService;
+    private SeckillMetadataSupport seckillMetadata;
 
     @Override
     public List<SeckillTimelineVO> getSeckillTimeline() {
@@ -159,7 +150,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addSeckillApply(String seckillId, String storeId, List<SeckillApplyVO> seckillApplyList) {
-        Seckill seckill = this.seckillService.getById(seckillId);
+        Seckill seckill = seckillMetadata.getById(seckillId);
         if (seckill == null) {
             throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
@@ -174,7 +165,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
         for (SeckillApplyVO seckillApply : seckillApplyList) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = skuReads.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
             if (!goodsSku.getStoreId().equals(storeId)) {
                 continue;
             }
@@ -207,10 +198,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             result = promotionGoodsService.saveBatch(promotionGoodsList);
         }
         //设置秒杀活动的商品数量、店铺数量
-        seckillService.updateSeckillGoodsNum(seckillId);
+        seckillMetadata.updateSeckillGoodsNum(seckillId);
         cache.vagueDel(CachePrefix.STORE_ID_SECKILL);
         if (result) {
-            this.seckillService.syncSeckillScope(seckill, originList);
+            seckillMetadata.syncSeckillScope(seckill, originList);
         }
     }
 
@@ -224,7 +215,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeSeckillApply(String seckillId, String id) {
-        Seckill seckill = this.seckillService.getById(seckillId);
+        Seckill seckill = seckillMetadata.getById(seckillId);
         if (seckill == null) {
             throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
@@ -239,24 +230,21 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 .eq(SeckillApply::getSeckillId, seckillId)
                 .in(SeckillApply::getId, id));
 
-        this.seckillService.removeSeckillSku(seckill, Collections.singletonList(seckillApply.getSkuId()));
+        // 搜索实时组装促销信息，无需额外移除外部索引中的秒杀SKU。
         //删除促销商品
         this.promotionGoodsService.deletePromotionGoods(seckillId, Collections.singletonList(seckillApply.getSkuId()));
     }
 
     /**
-     * 更新秒杀商品出售数量
+     * 按活动和SKU覆盖秒杀申请的累计销量，沿用调用方事务，不做增量累加。
      *
      * @param seckillId 秒杀活动id
      * @param skuId     商品skuId
-     * @param saleNum   库存
+     * @param saleNum   当前累计销量，单位件
      */
     @Override
     public void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum) {
-        LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(SeckillApply::getSeckillId, seckillId).eq(SeckillApply::getSkuId, skuId);
-        updateWrapper.set(SeckillApply::getSalesNum, saleNum);
-        this.update(updateWrapper);
+        seckillApplySales.updateSaleNum(seckillId, skuId, saleNum);
     }
 
     /**
@@ -277,7 +265,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
         for (SeckillApply seckillApply : list) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = skuReads.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
             //获取促销商品
             PromotionGoods promotionGoods = this.setSeckillGoods(goodsSku, seckillApply, seckill);
             promotionGoodsList.add(promotionGoods);
@@ -291,7 +279,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             //初始化促销商品
             List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
             result = promotionGoodsService.saveBatch(promotionGoods);
-            this.seckillService.syncSeckillScope(seckill, list);
+            seckillMetadata.syncSeckillScope(seckill, list);
 
             LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
             deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
@@ -299,7 +287,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             this.remove(deleteWrapper);
         }
 
-        seckillService.updateSeckillGoodsNum(seckill.getId());
+        seckillMetadata.updateSeckillGoodsNum(seckill.getId());
 
         return result;
     }
@@ -344,7 +332,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         Date now = new Date();
         queryWrapper.between(BasePromotions::getStartTime, DateUtil.beginOfDay(now), DateUtil.endOfDay(now));
         queryWrapper.ge(BasePromotions::getEndTime, DateUtil.endOfDay(now));
-        List<Seckill> seckillList = this.seckillService.list(queryWrapper);
+        List<Seckill> seckillList = seckillMetadata.list(queryWrapper);
         for (Seckill seckill : seckillList) {
             //读取系统时间的时刻
             Calendar c = Calendar.getInstance();
@@ -389,7 +377,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         if (!seckillApplyList.isEmpty()) {
             List<SeckillApply> collect = seckillApplyList.stream().filter(i -> i.getTimeLine().equals(startTimeline) && i.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())).collect(Collectors.toList());
             for (SeckillApply seckillApply : collect) {
-                GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
+                GoodsSku goodsSku = skuReads.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
                 if (goodsSku != null) {
                     SeckillGoodsVO goodsVO = new SeckillGoodsVO();
                     BeanUtil.copyProperties(seckillApply, goodsVO);

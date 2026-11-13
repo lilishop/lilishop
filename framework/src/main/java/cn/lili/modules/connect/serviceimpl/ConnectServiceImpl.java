@@ -21,6 +21,7 @@ import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.mapper.ConnectMapper;
 import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.connect.support.ConnectBindingSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.member.service.MemberService;
@@ -40,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import cn.lili.message.LiliMessageTemplate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +55,7 @@ import java.util.*;
 
 /**
  * 联合登录接口实现
+ * 绑定基础读写由独立组件提供，会员支持类不反向依赖本服务。
  *
  * @author Chopper
  */
@@ -65,8 +66,10 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     @Autowired
     private SettingService settingService;
     @Autowired
-    @Lazy
     private MemberService memberService;
+
+    @Autowired
+    private ConnectBindingSupport connectBindings;
     @Autowired
     private MemberTokenGenerate memberTokenGenerate;
     /**
@@ -200,22 +203,12 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
     @Override
     public Connect queryConnect(ConnectQueryDTO connectQueryDTO) {
-
-        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId,
-                        connectQueryDTO.getUserId())
-                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType,
-                        connectQueryDTO.getUnionType())
-                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId,
-                        connectQueryDTO.getUnionId());
-        return this.getOne(queryWrapper, false);
+        return connectBindings.queryConnect(connectQueryDTO);
     }
 
     @Override
     public void deleteByMemberId(String userId) {
-        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Connect::getUserId, userId);
-        this.remove(queryWrapper);
+        connectBindings.deleteByMemberId(userId);
     }
 
     /**

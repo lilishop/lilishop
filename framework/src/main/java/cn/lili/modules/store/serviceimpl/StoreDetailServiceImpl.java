@@ -11,7 +11,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.support.GoodsStoreMetadataSupport;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -24,7 +24,7 @@ import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
 import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import cn.lili.modules.store.mapper.StoreDetailMapper;
 import cn.lili.modules.store.service.StoreDetailService;
-import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.store.mapper.StoreMapper;
 import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.rocketmq.tags.StoreTagsEnum;
@@ -40,6 +40,7 @@ import java.util.*;
 
 /**
  * 店铺详细业务层实现
+ * 店铺基础读写使用存储层，商品店铺信息同步复用独立组件，不回调店铺或商品业务服务。
  *
  * @author pikachu
  * @since 2020-03-07 16:18:56
@@ -47,11 +48,8 @@ import java.util.*;
 @Service
 public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, StoreDetail> implements StoreDetailService {
 
-    /**
-     * 店铺
-     */
     @Autowired
-    private StoreService storeService;
+    private StoreMapper storeMapper;
     /**
      * 分类
      */
@@ -59,7 +57,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     private CategoryService categoryService;
 
     @Autowired
-    private GoodsService goodsService;
+    private GoodsStoreMetadataSupport goodsStoreMetadata;
 
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
@@ -96,9 +94,9 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     public Boolean editStoreSetting(StoreSettingDTO storeSettingDTO) {
         AuthUser tokenUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //修改店铺
-        Store store = storeService.getById(tokenUser.getStoreId());
+        Store store = storeMapper.selectById(tokenUser.getStoreId());
         BeanUtil.copyProperties(storeSettingDTO, store);
-        boolean result = storeService.updateById(store);
+        boolean result = storeMapper.updateById(store) > 0;
         if (result) {
             this.updateStoreGoodsInfo(store);
             this.removeCache(store.getId());
@@ -111,16 +109,16 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
     @Override
     public void updateStoreGoodsInfo(Store store) {
-        goodsService.updateStoreDetail(store);
+        goodsStoreMetadata.updateStoreDetail(store);
     }
 
     @Override
     public Boolean editMerchantEuid(String merchantEuid) {
         AuthUser tokenUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        Store store = storeService.getById(tokenUser.getStoreId());
+        Store store = storeMapper.selectById(tokenUser.getStoreId());
         store.setMerchantEuid(merchantEuid);
         this.removeCache(store.getId());
-        return storeService.updateById(store);
+        return storeMapper.updateById(store) > 0;
     }
 
     /**

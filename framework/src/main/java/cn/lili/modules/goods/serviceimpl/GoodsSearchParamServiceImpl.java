@@ -20,11 +20,11 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 商品参数倒排：写侧按 goods_id 物理删除后重建；全量重建走专用单线程执行器。
+ * 单商品重建通过事务模板开启独立事务，避免为事务代理注入自身；普通同步沿用商品保存事务。
  *
  * @author Mike
  * @date 2026-09-03
@@ -58,20 +59,24 @@ public class GoodsSearchParamServiceImpl extends ServiceImpl<GoodsSearchParamMap
 
     @Autowired
     private GoodsMapper goodsMapper;
-
     @Autowired
     private RedissonClient redissonClient;
-
     @Autowired
     private Cache<RebuildStatus> cache;
-
     @Autowired
     @Qualifier(GoodsSearchParamRebuildConfig.EXECUTOR_BEAN_NAME)
     private ThreadPoolTaskExecutor rebuildExecutor;
+    private final TransactionTemplate rebuildTransaction;
 
-    @Autowired
-    @Lazy
-    private GoodsSearchParamService self;
+    /**
+     * 配置单商品重建的独立事务，存在外层事务时先挂起，避免一个商品失败影响其他商品。
+     *
+     * @param transactionManager 商品倒排写入使用的事务管理器
+     */
+    public GoodsSearchParamServiceImpl(PlatformTransactionManager transactionManager) {
+        this.rebuildTransaction = new TransactionTemplate(transactionManager);
+        this.rebuildTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    }
 
     @Override
     public void syncByGoodsId(String goodsId, String paramsJson) {
@@ -80,11 +85,24 @@ public class GoodsSearchParamServiceImpl extends ServiceImpl<GoodsSearchParamMap
     }
 
     /**
-     * 现读商品 params JSON，非法则清空倒排并抛错记入失败清单；成功则返回写入行数。
+     * 在独立事务中现读商品参数并重建倒排，读取、删除、插入整体提交或回滚。
+     * 参数非法或写入失败时回滚并抛出异常，全量任务由调用方记录失败商品后继续处理。
+     *
+     * @param goodsId 商品主键
+     * @return 写入倒排表的行数
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public int rebuildByGoodsId(String goodsId) {
+        return rebuildTransaction.execute(status -> doRebuildByGoodsId(goodsId));
+    }
+
+    /**
+     * 读取当前商品参数并替换倒排数据；非法JSON抛出异常，由外层事务回滚本次修改。
+     *
+     * @param goodsId 商品主键，不存在的商品按空参数处理
+     * @return 写入倒排表的行数
+     */
+    private int doRebuildByGoodsId(String goodsId) {
         Goods goods = goodsMapper.selectById(goodsId);
         String paramsJson = goods == null || goods.getParams() == null ? "[]" : goods.getParams();
         if (isIllegalParamsJson(paramsJson)) {
@@ -206,7 +224,7 @@ public class GoodsSearchParamServiceImpl extends ServiceImpl<GoodsSearchParamMap
                 for (String goodsId : ids) {
                     status.setScanned(nullToZero(status.getScanned()) + 1);
                     try {
-                        self.rebuildByGoodsId(goodsId);
+                        rebuildByGoodsId(goodsId);
                         status.setRebuilt(nullToZero(status.getRebuilt()) + 1);
                     } catch (Exception e) {
                         log.warn("rebuild goods search param failed, goodsId={}", goodsId, e);

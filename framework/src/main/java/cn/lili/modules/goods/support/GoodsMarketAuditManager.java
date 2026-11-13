@@ -58,6 +58,9 @@ public class GoodsMarketAuditManager {
     private GoodsMapper goodsMapper;
 
     @Autowired
+    private GoodsStoreMarketSupport storeMarkets;
+
+    @Autowired
     private GoodsSkuService goodsSkuService;
 
     @Autowired
@@ -79,6 +82,7 @@ public class GoodsMarketAuditManager {
      * 全参构造函数，用于单元测试与非 Spring 环境装配
      *
      * @param goodsMapper              商品映射器
+     * @param storeMarkets             按店铺上下架组件
      * @param goodsSkuService          SKU 业务服务
      * @param cache                    商品 VO 缓存
      * @param liliMessageTemplate      消息发送模板
@@ -87,6 +91,7 @@ public class GoodsMarketAuditManager {
      * @param applicationEventPublisher 领域事件发布器
      */
     public GoodsMarketAuditManager(GoodsMapper goodsMapper,
+                                   GoodsStoreMarketSupport storeMarkets,
                                    GoodsSkuService goodsSkuService,
                                    Cache<GoodsVO> cache,
                                    LiliMessageTemplate liliMessageTemplate,
@@ -94,6 +99,7 @@ public class GoodsMarketAuditManager {
                                    TimeTrigger timeTrigger,
                                    ApplicationEventPublisher applicationEventPublisher) {
         this.goodsMapper = goodsMapper;
+        this.storeMarkets = storeMarkets;
         this.goodsSkuService = goodsSkuService;
         this.cache = cache;
         this.liliMessageTemplate = liliMessageTemplate;
@@ -172,23 +178,7 @@ public class GoodsMarketAuditManager {
      * @return 更新结果
      */
     public Boolean updateGoodsMarketAbleByStoreId(String storeId, GoodsStatusEnum goodsStatusEnum, String underReason) {
-        LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
-        updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
-        updateWrapper.set(Goods::getUnderMessage, underReason);
-        if (GoodsStatusEnum.UPPER.equals(goodsStatusEnum)) {
-            updateWrapper.set(Goods::getScheduledUpperTime, null);
-            updateWrapper.set(Goods::getScheduledUpperReason, null);
-        } else if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            updateWrapper.set(Goods::getScheduledDownTime, null);
-            updateWrapper.set(Goods::getScheduledDownReason, null);
-        }
-        updateWrapper.eq(Goods::getStoreId, storeId);
-        boolean result = this.goodsMapper.update(null, updateWrapper) > 0;
-
-        if (this.goodsSkuService != null) {
-            this.goodsSkuService.updateGoodsSkuStatusByStoreId(storeId, goodsStatusEnum.name(), null);
-        }
-        return result;
+        return storeMarkets.updateByStoreId(storeId, goodsStatusEnum, underReason);
     }
 
     /**
@@ -392,11 +382,7 @@ public class GoodsMarketAuditManager {
      * @return 登录店铺用户信息
      */
     public AuthUser checkStoreAuthority() {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        if (currentUser == null || currentUser.getRole() == null || !currentUser.getRole().equals(UserEnums.STORE)) {
-            throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
-        }
-        return currentUser;
+        return storeMarkets.checkStoreAuthority();
     }
 
     /**

@@ -1,22 +1,16 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.alibaba.fastjson2.JSON;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.promotion.entity.dos.Coupon;
-import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
-import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
@@ -25,25 +19,24 @@ import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.mapper.CouponMapper;
 import cn.lili.modules.promotion.service.*;
+import cn.lili.modules.promotion.support.CouponPromotionReferenceSupport;
+import cn.lili.modules.promotion.support.CouponReceiveSupport;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * 优惠券活动业务层实现
+ * 商品读取和满额活动引用校验复用独立支持组件，避免依赖完整商品、满额活动服务。
  *
  * @author Chopper
  * @since 2020/8/21
@@ -51,61 +44,29 @@ import java.util.stream.Collectors;
 @Service
 public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMapper, Coupon> implements CouponService {
 
-    /**
-     * 规格商品
-     */
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
-    /**
-     * 促销商品
-     */
+    private GoodsSkuReadSupport skuReads;
     @Autowired
-    @Lazy
     private PromotionGoodsService promotionGoodsService;
-    /**
-     * 客户优惠券
-     */
     @Autowired
     private MemberCouponService memberCouponService;
-    /**
-     * 满额活动
-     */
-    @Lazy
     @Autowired
-    private FullDiscountService fullDiscountService;
-    /**
-     * 优惠券活动-优惠券关联
-     */
+    private CouponPromotionReferenceSupport couponReferences;
+    @Autowired
+    private CouponReceiveSupport couponReceive;
     @Autowired
     private CouponActivityItemService couponActivityItemService;
 
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
     /**
      * 领取优惠券
+     * 发行量保护复用基础组件，已领数量按SQL原子增加，沿用调用方事务。
      *
      * @param couponId   优惠券id
      * @param receiveNum 领取数量
      */
     @Override
     public void receiveCoupon(String couponId, Integer receiveNum) {
-        Coupon coupon = this.getById(couponId);
-        if (coupon == null) {
-            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
-        }
-        if (receiveNum == null || receiveNum <= 0) {
-            throw new ServiceException(ResultCode.PARAMS_ERROR);
-        }
-        // 原子递增已领数量，并在 SQL 层面防止超过 publish_num（防超发）
-        int rows = this.baseMapper.increaseReceivedNum(couponId, receiveNum);
-        if (rows == 0) {
-            throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
-        }
+        couponReceive.receiveCoupon(couponId, receiveNum);
     }
 
     @Override
@@ -281,6 +242,13 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         this.checkCouponScope((CouponVO) coupon);
     }
 
+    /**
+     * 校验优惠券金额为有限数值、不超过99999999元且最多两位小数。
+     *
+     * @param amount 待校验金额，单位元
+     * @param allowZero 是否允许零金额
+     * @return 金额符合范围及精度要求时为true
+     */
     private boolean validCouponAmount(Double amount, boolean allowZero) {
         return amount != null && Double.isFinite(amount) && (allowZero ? amount >= 0 : amount > 0)
                 && amount <= 99999999
@@ -290,14 +258,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     @Override
     public void checkStatus(Coupon promotions) {
         super.checkStatus(promotions);
-        FullDiscountSearchParams searchParams = new FullDiscountSearchParams();
-        searchParams.setCouponFlag(true);
-        searchParams.setCouponId(promotions.getId());
-        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
-        List<FullDiscount> fullDiscounts = fullDiscountService.listFindAll(searchParams);
-        if (fullDiscounts != null && !fullDiscounts.isEmpty()) {
-            throw new ServiceException("当前优惠券参与了促销活动【" + fullDiscounts.get(0).getPromotionName() + "】不能进行编辑删除操作");
-        }
+        couponReferences.checkCouponNotUsedByActiveFullDiscount(promotions.getId());
     }
 
     @Override
@@ -370,7 +331,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
             throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
         }
         for (String id : split) {
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
+            GoodsSku goodsSku = skuReads.getGoodsSkuByIdFromCache(id);
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }

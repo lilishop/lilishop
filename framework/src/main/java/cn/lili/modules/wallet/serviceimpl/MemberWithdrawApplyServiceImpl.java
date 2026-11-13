@@ -36,7 +36,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +44,7 @@ import java.util.Date;
 
 /**
  * 客户提现申请业务层实现
+ * 钱包通过存储层维护申请记录，不回调本服务；审核时正常注入钱包服务读取冻结余额。
  *
  * @author pikachu
  * @since 2020-02-25 14:10:16
@@ -63,7 +63,6 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
      * 客户余额
      */
     @Autowired
-    @Lazy
     private MemberWalletService memberWalletService;
 
     @Override

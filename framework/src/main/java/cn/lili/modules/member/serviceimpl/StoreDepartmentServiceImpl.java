@@ -8,7 +8,7 @@ import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.StoreDepartment;
 import cn.lili.modules.member.entity.vo.StoreDepartmentVO;
 import cn.lili.modules.member.mapper.StoreDepartmentMapper;
-import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.mapper.ClerkMapper;
 import cn.lili.modules.member.service.StoreDepartmentRoleService;
 import cn.lili.modules.member.service.StoreDepartmentService;
 import cn.lili.mybatis.util.PageUtil;
@@ -16,7 +16,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +24,7 @@ import java.util.List;
 
 /**
  * 店铺部门业务层实现
+ * 删除前通过员工存储检查部门占用，不反向依赖员工业务服务。
  *
  * @author Chopper
  * @since 2020/11/17 3:47 下午
@@ -38,9 +38,15 @@ public class StoreDepartmentServiceImpl extends ServiceImpl<StoreDepartmentMappe
     private StoreDepartmentRoleService storeDepartmentRoleService;
 
     @Autowired
-    @Lazy
-    private ClerkService clerkService;
+    private ClerkMapper clerkMapper;
 
+    /**
+     * 校验全部部门属于当前店铺且未绑定员工后，在同一事务内删除部门及部门角色关联。
+     * 员工占用查询沿用原部门ID范围和存储层逻辑删除规则，不改变角色服务的缓存失效处理。
+     *
+     * @param ids 待删除的店铺部门主键列表
+     * @throws ServiceException 存在其他店铺部门或部门已绑定员工时抛出
+     */
     @Override
     public void deleteByIds(List<String> ids) {
         //校验是否有操作店铺部门权限
@@ -51,7 +57,7 @@ public class StoreDepartmentServiceImpl extends ServiceImpl<StoreDepartmentMappe
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         //校验店员是否绑定部门
-        if (clerkService.count(new QueryWrapper<Clerk>().in("department_id", ids)) > 0) {
+        if (clerkMapper.selectCount(new QueryWrapper<Clerk>().in("department_id", ids)) > 0) {
             throw new ServiceException(ResultCode.PERMISSION_DEPARTMENT_DELETE_ERROR);
         }
         //删除店铺部门

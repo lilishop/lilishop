@@ -20,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +37,6 @@ import java.util.Map;
 public class MemberManageSupport {
 
     @Autowired
-    @Lazy
     private MemberGroupUserService memberGroupUserService;
 
     public MemberManageSupport() {
@@ -126,32 +124,6 @@ public class MemberManageSupport {
             memberService.revokeMemberTokens(Collections.singletonList(member.getId()));
         }
         return member;
-    }
-
-    /**
-     * 更新客户是否拥有店铺状态
-     *
-     * @param memberService 客户服务实例
-     * @param haveStore     是否拥有店铺
-     * @param storeId       店铺ID
-     * @param memberIds     客户ID列表
-     */
-    public void updateHaveShop(MemberService memberService, Boolean haveStore, String storeId, List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
-            return;
-        }
-        List<Member> members = memberService.listByIds(memberIds);
-        if (members != null && !members.isEmpty()) {
-            members.forEach(member -> {
-                member.setHaveStore(haveStore);
-                if (Boolean.TRUE.equals(haveStore)) {
-                    member.setStoreId(storeId);
-                } else {
-                    member.setStoreId(null);
-                }
-            });
-            memberService.updateBatchById(members);
-        }
     }
 
     /**

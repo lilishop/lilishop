@@ -19,14 +19,12 @@ import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.mapper.BillMapper;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreDetailService;
-import cn.lili.mybatis.util.PageUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.lili.modules.store.support.BillQuerySupport;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +34,7 @@ import java.util.Date;
 
 /**
  * 结算单业务层实现
+ * 详情与列表读取由独立查询组件提供，商家流水和导出服务不反向依赖本服务。
  *
  * @author Chopper
  * @since 2020/11/17 4:28 下午
@@ -48,15 +47,12 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Autowired
     private StoreDetailService storeDetailService;
-    /**
-     * 商家流水
-     */
     @Autowired
-    @Lazy
     private StoreFlowService storeFlowService;
-
     @Autowired
     private FinanceExportService financeExportService;
+    @Autowired
+    private BillQuerySupport billQueries;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -189,10 +185,15 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 //       this.createBill(storeId, startTime, endTime);
     }
 
+    /**
+     * 委托公共查询组件分页读取结算单，保留原有筛选、排序及展示字段。
+     *
+     * @param billSearchParams 结算单筛选与分页参数
+     * @return 结算单展示分页
+     */
     @Override
     public IPage<BillListVO> billPage(BillSearchParams billSearchParams) {
-        QueryWrapper<BillListVO> queryWrapper = billSearchParams.queryWrapperBillList();
-        return this.baseMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
+        return billQueries.billPage(billSearchParams);
     }
 
     @Override

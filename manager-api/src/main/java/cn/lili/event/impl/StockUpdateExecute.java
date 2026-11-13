@@ -1,6 +1,7 @@
 package cn.lili.event.impl;
 
 import cn.lili.modules.promotion.service.PickupCardOrderService;
+import cn.lili.modules.promotion.service.PickupCardService;
 import cn.hutool.core.convert.Convert;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -48,6 +49,7 @@ import java.util.Objects;
 
 /**
  * 库存扣减，他表示了订单状态是否出库成功
+ * 提货卡取消单向调用兑换服务恢复库存，兑换服务不依赖本事件处理器，无需延迟注入。
  *
  * @author Chopper
  * @since 2020-07-03 11:20
@@ -115,8 +117,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
-    @org.springframework.context.annotation.Lazy
-    private cn.lili.modules.promotion.service.PickupCardService pickupCardService;
+    private PickupCardService pickupCardService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

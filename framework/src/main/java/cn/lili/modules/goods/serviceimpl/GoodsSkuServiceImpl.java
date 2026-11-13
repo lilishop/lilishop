@@ -31,6 +31,7 @@ import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.support.GoodsVOAssembler;
 import cn.lili.modules.goods.support.GoodsSkuReadSupport;
+import cn.lili.modules.goods.support.GoodsSkuStatusSupport;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.support.GoodsSkuSpecAssembler;
 import cn.lili.modules.goods.support.GoodsSkuStockExcelSupport;
@@ -97,6 +98,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Autowired
     private GoodsSkuReadSupport skuReads;
+
+    @Autowired
+    private GoodsSkuStatusSupport skuStatus;
 
     @Autowired
     private GoodsIndexService goodsIndexService;
@@ -333,15 +337,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag) {
-        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(GoodsSku::getStoreId, storeId);
-        updateWrapper.set(CharSequenceUtil.isNotEmpty(marketEnable), GoodsSku::getMarketEnable, marketEnable);
-        updateWrapper.set(CharSequenceUtil.isNotEmpty(authFlag), GoodsSku::getAuthFlag, authFlag);
-        this.update(updateWrapper);
-        List<GoodsSku> list = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getStoreId, storeId));
-        for (GoodsSku goodsSku : list) {
-            this.clearCache(goodsSku.getId());
-        }
+        skuStatus.updateByStoreId(storeId, marketEnable, authFlag);
     }
 
     @Override
@@ -362,24 +358,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public List<GoodsSku> getGoodsSkuByIdFromCache(List<String> ids) {
-        List<GoodsSku> list = new ArrayList<>();
-        List<String> notExistIds = new ArrayList<>();
-        for (String id : ids) {
-            GoodsSku goodsSku = (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(id));
-            if (goodsSku == null) {
-                notExistIds.add(id);
-            } else {
-                list.add(goodsSku);
-            }
-        }
-        if (!notExistIds.isEmpty()) {
-            List<GoodsSku> notExistGoodsSkuList = this.listByIds(notExistIds);
-            for (GoodsSku goodsSku : notExistGoodsSkuList) {
-                cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
-            }
-            list.addAll(notExistGoodsSkuList);
-        }
-        return list;
+        return skuReads.getGoodsSkuByIdFromCache(ids);
     }
 
     @Override

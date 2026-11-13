@@ -36,7 +36,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -52,6 +51,7 @@ import java.util.function.Supplier;
 
 /**
  * 砍价活动参与记录业务层实现
+ * 单向调用日志服务完成砍价记录写入；日志服务不回调本服务，无需延迟注入。
  *
  * @author qiuqiu
  * @since 2021/7/1
@@ -61,7 +61,6 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
 
     @Autowired
     private KanjiaActivityGoodsService kanjiaActivityGoodsService;
-    @Lazy
     @Autowired
     private KanjiaActivityLogService kanjiaActivityLogService;
     @Autowired

@@ -20,13 +20,13 @@ import cn.lili.modules.member.entity.dto.ClerkQueryDTO;
 import cn.lili.modules.member.entity.vo.ClerkVO;
 import cn.lili.modules.member.mapper.ClerkMapper;
 import cn.lili.modules.member.service.*;
+import cn.lili.modules.member.support.MemberAccountSupport;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 
 /**
  * 店员业务实现
+ * 部门服务不反向依赖员工服务，部门读取通过正常服务注入完成。
+ * 会员查询、密码重置和开店状态维护复用独立账号组件，避免反向依赖会员业务服务。
  *
  * @author wget
  * @title: ClerkServiceImpl
@@ -50,11 +52,9 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
     @Autowired
     private StoreRoleService storeRoleService;
     @Autowired
-    @Lazy
     private StoreDepartmentService storeDepartmentService;
     @Autowired
-    @Lazy
-    private MemberService memberService;
+    private MemberAccountSupport memberAccounts;
     @Autowired
     private StoreClerkRoleService storeClerkRoleService;
     @Autowired
@@ -156,7 +156,7 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         }
         ClerkVO clerkVO = new ClerkVO(clerk);
         //手机号码
-        clerkVO.setMobile(memberService.getById(clerk.getMemberId()).getMobile());
+        clerkVO.setMobile(memberAccounts.getById(clerk.getMemberId()).getMobile());
         if (!CharSequenceUtil.isEmpty(clerk.getDepartmentId())) {
             clerkVO.setDepartmentTitle(storeDepartmentService.getById(clerk.getDepartmentId()).getTitle());
         }
@@ -292,7 +292,7 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
             }
             memberIds.add(clerk.getMemberId());
         });
-        memberService.resetPassword(memberIds);
+        memberAccounts.resetPassword(memberIds);
     }
 
 
@@ -322,14 +322,14 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 }
                 memberIds.add(clerk.getMemberId());
             });
-            memberService.updateHaveShop(false, null, memberIds);
+            memberAccounts.updateHaveShop(false, null, memberIds);
         }
     }
 
     @Override
     public Member checkClerk(String mobile) {
         //校验是否已经是客户
-        Member member = memberService.findByMobile(mobile);
+        Member member = memberAccounts.findByMobile(mobile);
         if (member != null) {
             //校验要添加的客户是否已经是店主
             if (Boolean.TRUE.equals(member.getHaveStore())) {

@@ -7,6 +7,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsStockAggregateSupport;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -38,7 +39,6 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -54,6 +54,7 @@ import java.util.*;
  * 提货卡一次性兑换：行锁串行化同卡请求，成功核销与跨店创单同事务。
  * 商品销售价按下单时快照全额结算，免邮且不执行促销、会员价、赠品、积分或分销。
  * Redis 使用既有库存脚本原子扣减，数据库回滚时补回库存；取消仅恢复商品库存，不恢复卡权益。
+ * 库存汇总复用独立组件，交易、订单及下单校验保持单向依赖，无需延迟注入。
  *
  * @author Bulbasaur
  * @since 2026-11-05
@@ -71,20 +72,16 @@ public class PickupCardServiceImpl implements PickupCardService {
     @Autowired
     private cn.lili.cache.Cache<Object> cache;
     @Autowired
-    @Lazy
-    private cn.lili.modules.goods.service.GoodsService goodsService;
+    private GoodsStockAggregateSupport stockAggregates;
     @Autowired
     private MemberAddressService memberAddressService;
     @Autowired
-    @Lazy
     private TradeService tradeService;
     @Autowired
-    @Lazy
     private OrderService orderService;
     @Autowired
     private OrderGiftCardRecordMapper recordMapper;
     @Autowired
-    @Lazy
     private CheckDataRender checkDataRender;
     @Autowired
     private SkuFreightRender freightRender;
@@ -213,7 +210,7 @@ public class PickupCardServiceImpl implements PickupCardService {
             if (!goodsSkuService.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, item.getSkuId())
                     .setSql("quantity = quantity + {0}", item.getNum()))) throw error("恢复商品库存失败，请重试");
         }
-        items.stream().map(cn.lili.modules.order.order.entity.dos.OrderItem::getGoodsId).distinct().sorted().forEach(goodsService::updateStock);
+        items.stream().map(cn.lili.modules.order.order.entity.dos.OrderItem::getGoodsId).distinct().sorted().forEach(stockAggregates::updateStock);
         OrderGiftCardRecord marker = new OrderGiftCardRecord();
         marker.setId(SnowFlake.getIdStr());
         marker.setOrderSn(order.getSn());
@@ -328,7 +325,7 @@ public class PickupCardServiceImpl implements PickupCardService {
                     .gt(GoodsSku::getQuantity, 0).setSql("quantity = quantity - 1")))
                 throw error("商品库存已变更，请刷新后重试");
         }
-        skus.stream().map(GoodsSku::getGoodsId).distinct().sorted().forEach(goodsService::updateStock);
+        skus.stream().map(GoodsSku::getGoodsId).distinct().sorted().forEach(stockAggregates::updateStock);
     }
 
     /**

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * SKU基础读取能力，统一缓存读取与详情列表组装，不依赖商品、SKU或促销业务服务。
@@ -50,6 +51,34 @@ public class GoodsSkuReadSupport {
             }
         }
         return sku;
+    }
+
+    /**
+     * 批量读取SKU缓存，未命中主键一次查库后回填，不缓存不存在的SKU。
+     * 保留原有结果顺序：缓存命中项按入参顺序返回，查库结果追加在后；不额外去重或重排。
+     *
+     * @param ids SKU主键列表，空列表返回空结果
+     * @return 查到的SKU列表，不额外限定上下架或审核状态
+     */
+    public List<GoodsSku> getGoodsSkuByIdFromCache(List<String> ids) {
+        List<GoodsSku> list = new ArrayList<>();
+        List<String> notExistIds = new ArrayList<>();
+        for (String id : ids) {
+            GoodsSku goodsSku = (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(id));
+            if (goodsSku == null) {
+                notExistIds.add(id);
+            } else {
+                list.add(goodsSku);
+            }
+        }
+        if (!notExistIds.isEmpty()) {
+            List<GoodsSku> notExistGoodsSkuList = mapper.selectByIds(notExistIds);
+            for (GoodsSku goodsSku : notExistGoodsSkuList) {
+                cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+            }
+            list.addAll(notExistGoodsSkuList);
+        }
+        return list;
     }
 
     /**

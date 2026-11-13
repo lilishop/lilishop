@@ -4,77 +4,50 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ArrayUtil;
-import com.alibaba.fastjson2.JSON;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
-import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
-import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.modules.promotion.support.SeckillMetadataSupport;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
-import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 秒杀活动业务层实现
+ * 活动与申请共用基础维护组件，申请服务不再反向依赖本服务。
  *
  * @author Chopper
  * @since 2020/8/21
  */
 @Service
-@Slf4j
 public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
-    /**
-     * 设置
-     */
     @Autowired
     private SettingService settingService;
-
-    @Lazy
     @Autowired
     private SeckillApplyService seckillApplyService;
-
-    /**
-     * rocketMq配置
-     */
     @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-
-    /**
-     * rocketMq
-     */
-    @Autowired
-    private LiliMessageTemplate liliMessageTemplate;
+    private SeckillMetadataSupport seckillMetadata;
 
 
     @Override
@@ -120,29 +93,19 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         return this.count(queryWrapper);
     }
 
+    /**
+     * 按现有申请查询条件统计商品数量，不按SKU去重或限定审核状态，沿用调用方事务。
+     *
+     * @param seckillId 活动主键，不存在时跳过更新
+     */
     @Override
     public void updateSeckillGoodsNum(String seckillId) {
-        Seckill seckill = this.getById(seckillId);
-        if (seckill != null) {
-            SeckillSearchParams searchParams = new SeckillSearchParams();
-            searchParams.setSeckillId(seckillId);
-            LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Seckill::getId, seckillId);
-            updateWrapper.set(Seckill::getGoodsNum,
-                    this.seckillApplyService.getSeckillApplyCount(searchParams));
-            this.update(updateWrapper);
-
-        }
+        seckillMetadata.updateSeckillGoodsNum(seckillId);
     }
 
     /**
-     * 通用促销更新
-     * 调用顺序:
-     * 1. checkStatus 检查促销状态
-     * 2. checkPromotions 检查促销参数
-     * 3. saveOrUpdate 保存促销信息
-     * 4. updatePromotionGoods 更新促销商品信息
-     * 5. updateGoodsIndex 促销变更后处理
+     * 检查活动状态、促销参数和报名截止时间后更新活动，再同步申请时间及促销商品。
+     * 报名截止时间不得早于当前时间或晚于活动开始时间；关联数据库修改在同一事务中回滚。
      *
      * @param promotions 促销信息
      * @return 是否更新成功
@@ -164,28 +127,17 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
 
     /**
      * 同步秒杀活动商品范围
+     * 非空申请列表按原顺序覆盖范围；空列表保留原范围。数据库写入参与当前事务。
      *
      * @param seckill 限时抢购信息
+     * @param seckillApplies 参与活动的申请列表，可为null
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncSeckillScope(Seckill seckill, List<SeckillApply> seckillApplies) {
+        seckillMetadata.syncSeckillScope(seckill, seckillApplies);
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
-            // 更新促销范围
-            seckill.setScopeId(ArrayUtil.join(seckillApplies.stream().map(SeckillApply::getSkuId).toArray(), ","));
-            UpdateWrapper<Seckill> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("id", seckill.getId());
-            updateWrapper.set("scope_id", seckill.getScopeId());
-            this.update(updateWrapper);
-            //循环秒杀商品数据，将数据按照时间段进行存储
-            for (SeckillApply seckillApply : seckillApplies) {
-                if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
-                    this.setSeckillApplyTime(seckill, seckillApply);
-                }
-            }
-            if (!seckillApplies.isEmpty()) {
-                this.updateGoodsIndex(seckill);
-            }
+            this.updateGoodsIndex(seckill);
         }
     }
 
@@ -200,21 +152,15 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         // Elasticsearch 已移除
     }
 
+    /**
+     * 按申请场次回填活动对象的起止时间，不写入数据库，边界规则由基础维护组件统一处理。
+     *
+     * @param seckill 提供日期和场次配置、接收计算结果的活动对象
+     * @param seckillApply 提供场次小时的申请记录
+     */
     @Override
     public void setSeckillApplyTime(Seckill seckill, SeckillApply seckillApply) {
-        //下一个时间，默认为当天结束时间
-        int nextHour = PromotionTools.nextHour(seckill.getHours().split(","), seckillApply.getTimeLine());
-
-        String format = DateUtil.format(seckill.getStartTime(), DatePattern.NORM_DATE_PATTERN);
-        DateTime parseStartTime = DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
-        DateTime parseEndTime = DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
-        //如果是当天最后的时间段则设置到当天结束时间的59分59秒
-        if (nextHour == seckillApply.getTimeLine()) {
-            parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), DatePattern.NORM_DATETIME_PATTERN);
-        }
-        seckill.setStartTime(parseStartTime);
-        //当时商品的秒杀活动结束时间为下个时间段的开始
-        seckill.setEndTime(parseEndTime);
+        seckillMetadata.setSeckillApplyTime(seckill, seckillApply);
     }
 
     /**

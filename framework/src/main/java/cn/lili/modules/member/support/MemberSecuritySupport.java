@@ -8,24 +8,22 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.support.LoginFailLimitSupport;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.UuidUtils;
-import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.connect.support.ConnectBindingSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * 客户账号安全、密码与注销业务支持类
+ * 注销时通过独立绑定组件删除联合登录记录，不依赖完整联合登录服务。
  *
  * @author Bulbasaur
  * @since 2026-11-12
@@ -40,37 +38,22 @@ public class MemberSecuritySupport {
     private LoginFailLimitSupport loginFailLimitSupport;
 
     @Autowired
-    @Lazy
-    private ConnectService connectService;
+    private ConnectBindingSupport connectBindings;
 
     public MemberSecuritySupport() {
     }
 
-    public MemberSecuritySupport(Cache cache, LoginFailLimitSupport loginFailLimitSupport, ConnectService connectService) {
+    /**
+     * 注入账号缓存、登录失败限制和联合登录绑定基础读写组件。
+     *
+     * @param cache 账号相关缓存
+     * @param loginFailLimitSupport 登录失败限制维护
+     * @param connectBindings 联合登录绑定存储组件
+     */
+    public MemberSecuritySupport(Cache cache, LoginFailLimitSupport loginFailLimitSupport, ConnectBindingSupport connectBindings) {
         this.cache = cache;
         this.loginFailLimitSupport = loginFailLimitSupport;
-        this.connectService = connectService;
-    }
-
-    /**
-     * 重置客户密码
-     *
-     * @param memberService 客户服务实例
-     * @param ids           客户ID列表
-     */
-    public void resetPassword(MemberService memberService, List<String> ids) {
-        String password = new BCryptPasswordEncoder().encode(StringUtils.md5("123456"));
-        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.in(Member::getId, ids);
-        lambdaUpdateWrapper.set(Member::getPassword, password);
-        memberService.update(lambdaUpdateWrapper);
-        memberService.revokeMemberTokens(ids);
-        if (ids != null && !ids.isEmpty() && loginFailLimitSupport != null) {
-            List<Member> members = memberService.listByIds(ids);
-            if (members != null) {
-                members.forEach(m -> loginFailLimitSupport.clearLoginFail(UserEnums.MEMBER, m.getUsername()));
-            }
-        }
+        this.connectBindings = connectBindings;
     }
 
     /**
@@ -148,8 +131,8 @@ public class MemberSecuritySupport {
         }
         Member member = memberService.getById(tokenUser.getId());
         if (member != null) {
-            if (connectService != null) {
-                connectService.deleteByMemberId(member.getId());
+            if (connectBindings != null) {
+                connectBindings.deleteByMemberId(member.getId());
             }
             confusionMember(memberService, member);
         }

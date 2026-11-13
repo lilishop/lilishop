@@ -31,7 +31,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -43,7 +43,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +51,7 @@ import java.util.Map;
 
 /**
  * 客户商品评价业务层实现
+ * 评价所需订单通过存储层读取，不依赖包含评价相关协作的完整订单服务。
  *
  * @author Bulbasaur
  * @since 2020-02-25 14:10:16
@@ -59,12 +59,8 @@ import java.util.Map;
 @Service
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
-    /**
-     * 订单
-     */
     @Autowired
-    @Lazy
-    private OrderService orderService;
+    private OrderMapper orderMapper;
     /**
      * 子订单
      */
@@ -111,7 +107,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         }
 
         //获取订单信息
-        Order order = orderService.getBySn(orderItem.getOrderSn());
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderItem.getOrderSn()));
 
         if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);

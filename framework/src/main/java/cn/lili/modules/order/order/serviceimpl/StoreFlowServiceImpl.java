@@ -26,7 +26,7 @@ import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
-import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.store.support.BillQuerySupport;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -36,7 +36,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import java.util.Map;
 
 /**
  * 商家订单流水业务层实现
+ * 结算单读取复用独立查询组件，避免与结算单生成服务相互依赖。
  *
  * @author Chopper
  * @since 2020/11/17 7:38 下午
@@ -55,29 +55,16 @@ import java.util.Map;
 @Service
 public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow> implements StoreFlowService {
 
-    /**
-     * 订单
-     */
     @Autowired
     private OrderMapper orderMapper;
-    /**
-     * 订单货物
-     */
     @Autowired
     private OrderItemService orderItemService;
-    /**
-     * 退款日志
-     */
     @Autowired
     private RefundLogService refundLogService;
-
     @Autowired
-    @Lazy
-    private BillService billService;
-
+    private BillQuerySupport billQueries;
     @Autowired
     private DistributionOrderService distributionOrderService;
-
     @Autowired
     private MemberOrderPointService memberOrderPointService;
 
@@ -310,13 +297,13 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
     @Override
     public IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO) {
-        Bill bill = billService.getById(id);
+        Bill bill = billQueries.getById(id);
         return this.getStoreFlow(StoreFlowQueryDTO.builder().type(type).pageVO(pageVO).bill(bill).build());
     }
 
     @Override
     public IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO) {
-        Bill bill = billService.getById(id);
+        Bill bill = billQueries.getById(id);
         return this.getStoreFlow(StoreFlowQueryDTO.builder().pageVO(pageVO).bill(bill).build());
     }
 

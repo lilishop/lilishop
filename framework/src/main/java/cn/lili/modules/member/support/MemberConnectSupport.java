@@ -12,18 +12,19 @@ import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.connect.support.ConnectBindingSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
 /**
  * 客户第三方联合登录与绑定支持类
+ * 绑定记录通过独立存储组件读写，不反向调用联合登录业务服务。
  *
  * @author Bulbasaur
  * @since 2026-11-12
@@ -36,8 +37,7 @@ public class MemberConnectSupport {
     private static final int NICKNAME_SUFFIX_LENGTH = 4;
 
     @Autowired
-    @Lazy
-    private ConnectService connectService;
+    private ConnectBindingSupport connectBindings;
 
     @Autowired
     private Cache cache;
@@ -45,8 +45,14 @@ public class MemberConnectSupport {
     public MemberConnectSupport() {
     }
 
-    public MemberConnectSupport(ConnectService connectService, Cache cache) {
-        this.connectService = connectService;
+    /**
+     * 注入绑定基础读写和认证上下文缓存。
+     *
+     * @param connectBindings 联合登录绑定存储组件
+     * @param cache 联合登录认证上下文缓存
+     */
+    public MemberConnectSupport(ConnectBindingSupport connectBindings, Cache cache) {
+        this.connectBindings = connectBindings;
         this.cache = cache;
     }
 
@@ -99,12 +105,12 @@ public class MemberConnectSupport {
                 if (connectAuthUser == null) {
                     return;
                 }
-                Connect connect = connectService.queryConnect(
+                Connect connect = connectBindings.queryConnect(
                         ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
                 );
                 if (connect == null) {
                     connect = new Connect(member.getId(), connectAuthUser.getUuid(), connectType);
-                    connectService.save(connect);
+                    connectBindings.save(connect);
                 }
             } catch (ServiceException e) {
                 throw e;

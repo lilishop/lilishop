@@ -19,8 +19,7 @@ import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.support.GoodsSearchParamParser;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.promotion.service.PromotionService;
+import cn.lili.modules.promotion.support.SkuPromotionQuerySupport;
 import cn.lili.modules.search.entity.dos.GoodsIndex;
 import cn.lili.modules.search.entity.dos.GoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.GoodsSearchDTO;
@@ -32,7 +31,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -50,6 +48,7 @@ import java.util.stream.Stream;
 
 /**
  * 商品搜索：列表走倒排 SQL 下推 + 真分页，selector 走三条全量聚合。
+ * 促销映射及活动价复用独立查询组件，不依赖完整促销业务服务或延迟注入。
  */
 @Service
 public class GoodsSearchServiceImpl implements GoodsSearchService {
@@ -62,24 +61,14 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
     );
 
     private final GoodsSkuService goodsSkuService;
-
     @Autowired
     private GoodsSkuMapper goodsSkuMapper;
-
     @Autowired
     private GoodsSearchParamMapper goodsSearchParamMapper;
-
     @Autowired
-    @Lazy
     private CategoryService categoryService;
-
     @Autowired
-    @Lazy
-    private PromotionService promotionService;
-
-    @Autowired
-    @Lazy
-    private PromotionGoodsService promotionGoodsService;
+    private SkuPromotionQuerySupport skuPromotionQueries;
 
     public GoodsSearchServiceImpl(GoodsSkuService goodsSkuService) {
         this.goodsSkuService = goodsSkuService;
@@ -384,19 +373,31 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
         return index;
     }
 
+    /**
+     * 按搜索结果的店铺和SKU主键查询促销映射，与商品索引共用适用范围和活动类型过滤规则。
+     *
+     * @param index 待补充促销信息的搜索结果，可为null
+     * @return 活动类型及活动ID组成的促销映射；结果、查询依赖缺失或查询返回null时为空映射
+     */
     private Map<String, Object> buildPromotionMap(GoodsIndex index) {
-        if (promotionService == null || index == null) {
+        if (skuPromotionQueries == null || index == null) {
             return Collections.emptyMap();
         }
-        Map<String, Object> promotionMap = promotionService.getGoodsSkuPromotionMap(index.getStoreId(), index.getId());
+        Map<String, Object> promotionMap = skuPromotionQueries.getGoodsSkuPromotionMap(index.getStoreId(), index.getId());
         return promotionMap == null ? Collections.emptyMap() : promotionMap;
     }
 
+    /**
+     * 回填当前有效的秒杀、拼团最低活动价，金额单位为元，不将其他活动类型纳入价格比较。
+     * 没有有效活动价时保留原值；调用方仅对当前页结果或指定SKU列表执行查询。
+     *
+     * @param index 待补充活动价的搜索结果，可为null
+     */
     private void fillPromotionPrice(GoodsIndex index) {
-        if (promotionGoodsService == null || index == null) {
+        if (skuPromotionQueries == null || index == null) {
             return;
         }
-        Double promotionPrice = promotionGoodsService.getValidPromotionsGoodsPrice(index.getId(),
+        Double promotionPrice = skuPromotionQueries.getValidPromotionsGoodsPrice(index.getId(),
                 Arrays.asList(PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.PINTUAN.name()));
         if (promotionPrice != null) {
             index.setPromotionPrice(promotionPrice);

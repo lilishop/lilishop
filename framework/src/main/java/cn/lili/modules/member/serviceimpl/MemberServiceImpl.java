@@ -35,6 +35,7 @@ import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberGradeService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.support.MemberConnectSupport;
+import cn.lili.modules.member.support.MemberAccountSupport;
 import cn.lili.modules.member.support.MemberManageSupport;
 import cn.lili.modules.member.support.MemberQrCodeLoginSupport;
 import cn.lili.modules.member.support.MemberSecuritySupport;
@@ -122,6 +123,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Autowired(required = false)
     private MemberSecuritySupport memberSecuritySupport;
 
+    @Autowired
+    private MemberAccountSupport memberAccounts;
+
     @Override
     public Member findByUsername(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
@@ -144,9 +148,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Member findByMobile(String mobile) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("mobile", mobile);
-        return this.baseMapper.selectOne(queryWrapper);
+        return memberAccounts.findByMobile(mobile);
     }
 
     @Override
@@ -180,12 +182,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public void resetPassword(List<String> ids) {
-        getMemberSecuritySupport().resetPassword(this, ids);
+        memberAccounts.resetPassword(ids);
     }
 
     @Override
     public void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds) {
-        getMemberManageSupport().updateHaveShop(this, haveStore, storeId, memberIds);
+        memberAccounts.updateHaveShop(haveStore, storeId, memberIds);
     }
 
     @Override
@@ -447,14 +449,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public void revokeMemberTokens(List<String> memberIds) {
-        if (memberIds != null && !memberIds.isEmpty()) {
-            memberIds.forEach(memberId -> {
-                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
-                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
-                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE, memberId));
-                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.STORE, memberId));
-            });
-        }
+        memberAccounts.revokeMemberTokens(memberIds);
     }
 
     public void disableMemberLogout(List<String> memberIds) {

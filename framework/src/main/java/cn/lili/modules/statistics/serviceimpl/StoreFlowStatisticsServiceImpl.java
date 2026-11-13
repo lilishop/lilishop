@@ -7,6 +7,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
@@ -16,15 +17,16 @@ import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
 import cn.lili.modules.statistics.mapper.StoreFlowStatisticsMapper;
-import cn.lili.modules.statistics.service.OrderStatisticsService;
+import cn.lili.modules.statistics.mapper.OrderStatisticsMapper;
 import cn.lili.modules.statistics.service.StoreFlowStatisticsService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
+import org.apache.ibatis.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 
 /**
  * 商品统计业务层实现
+ * 订单聚合直接使用统计存储，不回调汇总本组件结果的订单统计服务。
  *
  * @author Bulbasaur
  * @since 2020/12/9 11:30
@@ -44,9 +47,8 @@ import java.util.stream.Collectors;
 public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatisticsMapper, StoreFlow> implements StoreFlowStatisticsService {
 
 
-    @Lazy
     @Autowired
-    private OrderStatisticsService orderStatisticsService;
+    private OrderStatisticsMapper orderStatisticsMapper;
     @Autowired
     private CategoryService categoryService;
 
@@ -157,7 +159,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //查询流水金额和订单数量
         queryWrapper.select("SUM(flow_price) AS price , COUNT(0) AS num");
         //获取查询结果
-        Map<String, Object> order = orderStatisticsService.getMap(queryWrapper);
+        Map<String, Object> order = getOrderMap(queryWrapper);
         //赋予订单数和流水金额
         orderOverviewVO.setOrderNum(order != null && order.containsKey("num") ? Long.parseLong(order.get("num").toString()) : 0L);
         orderOverviewVO.setOrderAmount(order != null && order.containsKey("price") ? Double.parseDouble(order.get("price").toString()) : 0L);
@@ -173,9 +175,20 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //查询下单人数的sql
         queryWrapper.select("count(DISTINCT member_id) AS num");
         //获取查询结果
-        Map memberNum = orderStatisticsService.getMap(queryWrapper);
+        Map memberNum = getOrderMap(queryWrapper);
         //写入下单人数
         orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? Long.parseLong(memberNum.get("num").toString()) : 0L);
+    }
+
+    /**
+     * 执行原有订单聚合条件，沿用服务getMap的取首条结果及空结果返回null的规则。
+     *
+     * @param queryWrapper 原有时间范围、店铺范围和聚合字段条件
+     * @return 首条聚合结果，无记录时为null
+     */
+    private Map<String, Object> getOrderMap(QueryWrapper<Order> queryWrapper) {
+        return SqlHelper.getObject(LogFactory.getLog(StoreFlowStatisticsServiceImpl.class),
+                orderStatisticsMapper.selectMaps(queryWrapper));
     }
 
     /**

@@ -32,7 +32,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +44,7 @@ import java.util.stream.Collectors;
 
 /**
  * 用户业务层实现
+ * 部门服务不反向依赖管理员服务，部门展示数据通过正常服务注入读取。
  *
  * @author Chopper
  * @since 2020/11/17 3:46 下午
@@ -60,7 +60,6 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private UserRoleService userRoleService;
     @Autowired
     private RoleService roleService;
-    @Lazy
     @Autowired
     private DepartmentService departmentService;
     @Autowired

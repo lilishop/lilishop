@@ -5,18 +5,18 @@ import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
-import cn.lili.modules.order.cart.service.CartService;
+import cn.lili.modules.order.cart.support.CartTradeCacheSupport;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.service.TradeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * 交易构造&&创建
+ * 交易上下文从公共缓存组件读取，不回调购物车业务服务。
  *
  * @author Chopper
  * @since2020-04-01 9:47 下午
@@ -25,23 +25,12 @@ import java.util.List;
 @Slf4j
 public class TradeBuilder {
 
-    /**
-     * 购物车渲染步骤
-     */
     @Autowired
     private List<CartRenderStep> cartRenderSteps;
-    /**
-     * 交易
-     */
     @Autowired
     private TradeService tradeService;
-    /**
-     * 购物车业务
-     */
-    @Lazy
     @Autowired
-    private CartService cartService;
-
+    private CartTradeCacheSupport tradeCache;
     @Autowired
     private CardKeyService cardKeyService;
 
@@ -55,7 +44,7 @@ public class TradeBuilder {
      */
     public TradeDTO buildCart(CartTypeEnum checkedWay) {
         //读取对应购物车的商品信息
-        TradeDTO tradeDTO = cartService.readDTO(checkedWay);
+        TradeDTO tradeDTO = tradeCache.readDTO(checkedWay);
 
         //购物车需要将交易中的优惠券取消掉
         if (checkedWay.equals(CartTypeEnum.CART)) {
@@ -73,7 +62,7 @@ public class TradeBuilder {
      */
     public TradeDTO buildChecked(CartTypeEnum checkedWay) {
         //读取对应购物车的商品信息
-        TradeDTO tradeDTO = cartService.readDTO(checkedWay);
+        TradeDTO tradeDTO = tradeCache.readDTO(checkedWay);
         if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
             cardKeyService.normalizeECouponTrade(tradeDTO);
         }

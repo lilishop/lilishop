@@ -34,6 +34,8 @@ import cn.lili.modules.goods.support.GoodsMarketAuditManager;
 import cn.lili.modules.goods.support.GoodsVOAssembler;
 import cn.lili.modules.goods.support.CardKeyPoolSupport;
 import cn.lili.modules.goods.support.GoodsStockAggregateSupport;
+import cn.lili.modules.goods.support.GoodsStoreMetadataSupport;
+import cn.lili.modules.goods.support.GoodsStoreMarketSupport;
 import cn.lili.modules.goods.util.GoodsCodeGenerator;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
@@ -120,6 +122,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private GoodsStockAggregateSupport stockAggregates;
 
     @Autowired
+    private GoodsStoreMetadataSupport storeMetadata;
+
+    @Autowired
+    private GoodsStoreMarketSupport storeMarkets;
+
+    @Autowired
     private GoodsMarketAuditManager goodsMarketAuditManager;
 
     private GoodsVOAssembler getGoodsVOAssembler() {
@@ -138,7 +146,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void underStoreGoods(String storeId) {
-        this.updateGoodsMarketAbleByStoreId(storeId, GoodsStatusEnum.DOWN, "店铺关闭");
+        storeMarkets.underStoreGoods(storeId);
     }
 
     @Override
@@ -436,10 +444,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStoreDetail(Store store) {
-        this.update(new LambdaUpdateWrapper<Goods>()
-                .eq(Goods::getStoreId, store.getId())
-                .set(Goods::getStoreName, store.getStoreName())
-                .set(Goods::getSelfOperated, store.getSelfOperated()));
+        storeMetadata.updateStoreDetail(store);
     }
 
     @Override

@@ -27,12 +27,12 @@ import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.mapper.LogisticsMapper;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.modules.system.support.LogisticsGatewaySupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +40,7 @@ import java.util.Map;
 
 /**
  * 物流公司业务层实现
+ * 轨迹与寄件调用复用独立网关，订单履约不反向依赖本服务，发货协作保持正常服务注入。
  *
  * @author Chopper
  * @since 2020/11/17 8:02 下午
@@ -50,8 +51,10 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
     @Autowired
     private LogisticsPluginFactory logisticsPluginFactory;
     @Autowired
-    @Lazy
     private OrderService orderService;
+
+    @Autowired
+    private LogisticsGatewaySupport logisticsGateway;
     @Autowired
     private OrderItemService orderItemService;
     @Autowired
@@ -64,24 +67,12 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
 
     @Override
     public Traces getLogisticTrack(String logisticsId, String logisticsNo, String phone) {
-        try {
-            return logisticsPluginFactory.filePlugin().pollQuery(this.getById(logisticsId), logisticsNo, phone);
-        } catch (Exception e) {
-            log.error("获取物流公司错误", e);
-
-        }
-        return null;
+        return logisticsGateway.getLogisticTrack(logisticsId, logisticsNo, phone);
     }
 
     @Override
     public Traces getLogisticMapTrack(String logisticsId, String logisticsNo, String phone, String from, String to) {
-        try {
-            return logisticsPluginFactory.filePlugin().pollMapTrack(this.getById(logisticsId), logisticsNo, phone, from, to);
-        } catch (Exception e) {
-            log.error("获取物流公司错误", e);
-
-        }
-        return null;
+        return logisticsGateway.getLogisticMapTrack(logisticsId, logisticsNo, phone, from, to);
     }
 
     @Override
@@ -136,7 +127,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
 
     @Override
     public String sfCreateOrder(OrderDetailVO orderDetailVO) {
-        return logisticsPluginFactory.filePlugin().createOrder(orderDetailVO);
+        return logisticsGateway.sfCreateOrder(orderDetailVO);
     }
 
 

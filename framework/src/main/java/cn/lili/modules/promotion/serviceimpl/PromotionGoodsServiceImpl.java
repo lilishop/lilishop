@@ -6,16 +6,14 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.support.SkuPromotionQuerySupport;
+import cn.lili.modules.promotion.support.SeckillApplySalesSupport;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
-import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.GoodsIndex;
 import cn.lili.modules.search.service.GoodsIndexService;
@@ -29,7 +27,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +35,7 @@ import java.util.stream.Collectors;
 
 /**
  * 促销商品业务层实现
+ * 秒杀申请销量通过独立支持类回写，不反向依赖秒杀申请业务服务。
  *
  * @author Chopper
  * @since 2021/3/18 9:22 上午
@@ -47,18 +45,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
     private static final String SKU_ID_COLUMN = "sku_id";
 
-    /**
-     * 秒杀活动申请
-     */
     @Autowired
-    @Lazy
-    private SeckillApplyService seckillApplyService;
+    private SeckillApplySalesSupport seckillApplySales;
     @Autowired
     private SkuPromotionQuerySupport skuPromotionQueries;
-
     @Autowired
     private GoodsIndexService goodsIndexService;
-
     @Autowired
     private Cache cache;
 
@@ -204,6 +196,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
     /**
      * 更新促销活动商品库存
+     * 秒杀申请存在时同步覆盖累计销量，申请销量和促销库存数据库写入沿用本方法事务。
+     * 库存缓存仍在数据库更新后写入，不作为数据库事务的一部分。
      *
      * @param promotionGoodsList 更新促销活动商品信息
      */
@@ -213,13 +207,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         for (PromotionGoods promotionGoods : promotionGoodsList) {
             String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionGoods.getPromotionType()), promotionGoods.getPromotionId(), promotionGoods.getSkuId());
             if (promotionGoods.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())) {
-                SeckillSearchParams searchParams = new SeckillSearchParams();
-                searchParams.setSeckillId(promotionGoods.getPromotionId());
-                searchParams.setSkuId(promotionGoods.getSkuId());
-                SeckillApply seckillApply = this.seckillApplyService.getSeckillApply(searchParams);
-                if (seckillApply != null) {
-                    seckillApplyService.updateSeckillApplySaleNum(promotionGoods.getPromotionId(), promotionGoods.getSkuId(), promotionGoods.getNum());
-                }
+                seckillApplySales.updateSaleNumIfPresent(promotionGoods.getPromotionId(),
+                        promotionGoods.getSkuId(), promotionGoods.getNum());
             }
 
             LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<>();

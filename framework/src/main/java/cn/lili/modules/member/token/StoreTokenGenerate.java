@@ -17,9 +17,8 @@ import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
 import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.StoreMenuRoleService;
 import cn.lili.modules.store.entity.dos.Store;
-import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.store.mapper.StoreMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import java.util.Map;
 
 /**
  * 商家token生成
+ * 店铺基础信息直接通过存储层读取，不依赖开店、审核等店铺业务服务。
  *
  * @author Chopper
  * @version v4.0
@@ -37,8 +37,7 @@ import java.util.Map;
 @Component
 public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
     @Autowired
-    @Lazy
-    private StoreService storeService;
+    private StoreMapper storeMapper;
     @Autowired
     private TokenUtil tokenUtil;
     @Autowired
@@ -67,7 +66,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         //缓存权限列表
         cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + member.getId(), this.permissionList(storeUserMenuVOS));
         //查询店铺信息
-        Store store = storeService.getById(clerk.getStoreId());
+        Store store = storeMapper.selectById(clerk.getStoreId());
         if (store == null) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }

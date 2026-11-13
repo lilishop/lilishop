@@ -1,7 +1,6 @@
 package cn.lili.modules.order.cart.service;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -10,7 +9,6 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.CardKeyService;
-import cn.lili.modules.member.service.MemberAddressService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
@@ -19,14 +17,12 @@ import cn.lili.modules.order.cart.render.TradeBuilder;
 import cn.lili.modules.order.cart.support.CartCouponSupport;
 import cn.lili.modules.order.cart.support.CartPromotionCheckSupport;
 import cn.lili.modules.order.cart.support.CartTradeSettingSupport;
+import cn.lili.modules.order.cart.support.CartTradeCacheSupport;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import com.alibaba.fastjson2.JSONException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +31,7 @@ import java.util.stream.Collectors;
 
 /**
  * 购物车业务层实现
+ * 交易上下文缓存由公共组件维护，单向调用交易构造器，不依赖延迟获取。
  *
  * @author Chopper
  * @since 2020-03-23 12:29 下午
@@ -46,11 +43,9 @@ public class CartServiceImpl implements CartService {
     static String errorMessage = "购物车异常，请稍后重试";
 
     @Autowired
-    private Cache<Object> cache;
+    private CartTradeCacheSupport tradeCache;
     @Autowired
-    private MemberAddressService memberAddressService;
-    @Autowired
-    private ObjectProvider<TradeBuilder> tradeBuilderProvider;
+    private TradeBuilder tradeBuilder;
     @Autowired
     private PromotionGoodsService promotionGoodsService;
     @Autowired
@@ -139,67 +134,14 @@ public class CartServiceImpl implements CartService {
     }
 
     /**
-     * 读取当前客户购物原始数据key
+     * 复用缓存组件读取当前会员交易上下文，保留默认地址、特殊商品归一化和读取失败处理规则。
      *
-     * @param cartTypeEnum 获取方式
-     * @return 当前客户购物原始数据key
+     * @param checkedWay 购买方式
+     * @return 初始化后的交易上下文
      */
-    private String getOriginKey(CartTypeEnum cartTypeEnum) {
-        if (cartTypeEnum != null) {
-            AuthUser currentUser = UserContext.getCurrentUser();
-            return cartTypeEnum.getPrefix() + currentUser.getId();
-        }
-        throw new ServiceException(ResultCode.ERROR);
-    }
-
     @Override
     public TradeDTO readDTO(CartTypeEnum checkedWay) {
-        String cacheKey = this.getOriginKey(checkedWay);
-        TradeDTO tradeDTO = null;
-        try {
-            tradeDTO = (TradeDTO) cache.get(cacheKey);
-        } catch (RuntimeException ex) {
-            if (!isCacheSerializationFailure(ex)) {
-                throw ex;
-            }
-            log.error("购物车缓存反序列化失败，保留原缓存等待修复, key={}", cacheKey, ex);
-            String message = checkedWay == CartTypeEnum.CART
-                    ? "购物车数据读取失败，请刷新重试"
-                    : "结算信息已失效，请重新购买";
-            throw new ServiceException(ResultCode.CART_ERROR, message);
-        }
-        if (tradeDTO == null) {
-            tradeDTO = new TradeDTO(checkedWay);
-            AuthUser currentUser = UserContext.getCurrentUser();
-            tradeDTO.setMemberId(currentUser.getId());
-            tradeDTO.setMemberName(currentUser.getUsername());
-        }
-        // E_COUPON / APPOINTMENT 免默认收货地址；读取时即归一化虚拟发货与促销选择
-        if (tradeDTO.getMemberAddress() == null
-                && !cardKeyService.isECouponOnlyTrade(tradeDTO)
-                && !appointmentService.isAppointmentOnlyTrade(tradeDTO)) {
-            tradeDTO.setMemberAddress(this.memberAddressService.getDefaultMemberAddress());
-        }
-        // 电子卡券交易归一化虚拟发货与促销选择
-        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
-            cardKeyService.normalizeECouponTrade(tradeDTO);
-        }
-        // 预约交易归一化虚拟发货与促销选择
-        if (appointmentService.isAppointmentOnlyTrade(tradeDTO)) {
-            appointmentService.normalizeAppointmentTrade(tradeDTO);
-        }
-        return tradeDTO;
-    }
-
-    private boolean isCacheSerializationFailure(Throwable throwable) {
-        Throwable current = throwable;
-        while (current != null) {
-            if (current instanceof JSONException || current instanceof SerializationException) {
-                return true;
-            }
-            current = current.getCause();
-        }
-        return false;
+        return tradeCache.readDTO(checkedWay);
     }
 
     @Override
@@ -264,7 +206,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void clean() {
-        cache.remove(this.getOriginKey(CartTypeEnum.CART));
+        tradeCache.cleanCart();
     }
 
     public void cleanChecked(TradeDTO tradeDTO) {
@@ -284,12 +226,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void resetTradeDTO(TradeDTO tradeDTO) {
-        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
+        tradeCache.resetTradeDTO(tradeDTO);
     }
 
     @Override
     public TradeDTO getCheckedTradeDTO(CartTypeEnum way) {
-        return getTradeBuilder().buildChecked(way);
+        return tradeBuilder.buildChecked(way);
     }
 
     /**
@@ -306,7 +248,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public TradeDTO getAllTradeDTO() {
-        return getTradeBuilder().buildCart(CartTypeEnum.CART);
+        return tradeBuilder.buildCart(CartTypeEnum.CART);
     }
 
     @Override
@@ -406,7 +348,7 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         getCartTradeSettingSupport().validateAddressBeforeTrade(tradeDTO);
-        Trade trade = getTradeBuilder().createTrade(tradeDTO);
+        Trade trade = tradeBuilder.createTrade(tradeDTO);
         this.cleanChecked(this.readDTO(cartTypeEnum));
         return trade;
     }
@@ -441,10 +383,6 @@ public class CartServiceImpl implements CartService {
             }
         }
         return cartTypeEnum;
-    }
-
-    private TradeBuilder getTradeBuilder() {
-        return tradeBuilderProvider.getObject();
     }
 
     private CartCouponSupport getCartCouponSupport() {

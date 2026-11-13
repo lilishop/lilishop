@@ -27,7 +27,6 @@ import cn.lili.modules.promotion.service.PickupCardOrderService;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.vo.Traces;
-import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -79,9 +78,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private OrderItemService orderItemService;
     @Autowired
-    private ObjectProvider<LogisticsService> logisticsServiceProvider;
-    private LogisticsService logisticsService;
-    @Autowired
     private OrderLogService orderLogService;
     @Autowired
     private LiliMessageTemplate liliMessageTemplate;
@@ -123,16 +119,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderStatusSupport orderStatusSupport;
     @Autowired
     private OrderPaymentSupport orderPaymentSupport;
-
-    private LogisticsService getLogisticsService() {
-        if (this.logisticsService != null) {
-            return this.logisticsService;
-        }
-        if (this.logisticsServiceProvider != null) {
-            return this.logisticsServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(LogisticsService.class);
-    }
 
     private CardKeyService getCardKeyService() {
         if (this.cardKeyService != null) {
@@ -178,18 +164,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return orderQuerySupport;
     }
 
+    /**
+     * 返回必需的订单履约组件，物流依赖由组件自身正常注入，不在运行时手动装配。
+     *
+     * @return Spring装配的订单履约组件
+     */
     public OrderDeliverySupport getOrderDeliverySupport() {
-        if (orderDeliverySupport == null) {
-            orderDeliverySupport = new OrderDeliverySupport(orderItemService, orderPackageService,
-                    orderPackageItemService, getLogisticsService(), orderLogService, storeDetailService, pickupCardOrderService);
-        }
         return orderDeliverySupport;
     }
 
     public OrderVerificationSupport getOrderVerificationSupport() {
-        if (orderVerificationSupport == null) {
-            orderVerificationSupport = new OrderVerificationSupport(orderItemService, getAppointmentService());
-        }
         return orderVerificationSupport;
     }
 
@@ -379,7 +363,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']提货，核销码['+#verificationCode+']'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public Order take(String orderSn, String verificationCode) {
         return getOrderVerificationSupport().take(orderSn, verificationCode, this);

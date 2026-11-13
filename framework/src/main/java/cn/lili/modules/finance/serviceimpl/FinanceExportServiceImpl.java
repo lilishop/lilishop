@@ -26,7 +26,7 @@ import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
-import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.store.support.BillQuerySupport;
 import cn.lili.modules.wallet.entity.dos.WalletLog;
 import cn.lili.modules.wallet.service.WalletLogService;
 import cn.lili.mybatis.util.PageUtil;
@@ -36,7 +36,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -56,32 +55,27 @@ import java.util.zip.ZipOutputStream;
  * 大数据量导出采用分页批量写入（每批 {@link #BATCH_SIZE} 行），
  * 写入前通过 {@link FinanceExportHelper#checkRowLimit(long)} 校验总行数不超过 5 万。
  * 结算单导出包含三个 Sheet：汇总信息、入账订单、退款订单。
+ * 结算单数据复用独立查询组件，避免导出与结算业务服务相互依赖。
  */
 @Service
 public class FinanceExportServiceImpl implements FinanceExportService {
 
     /** 分页查询每批条数，用于流式写入 Excel，避免一次性加载全表 */
     private static final int BATCH_SIZE = 1000;
-
     @Autowired
-    @Lazy
-    private BillService billService;
-
+    private BillQuerySupport billQueries;
     @Autowired
     private StoreFlowService storeFlowService;
-
     @Autowired
     private OrderService orderService;
-
     @Autowired
     private RefundLogService refundLogService;
-
     @Autowired
     private WalletLogService walletLogService;
 
     @Override
     public void exportBill(HttpServletResponse response, String billId) {
-        Bill bill = billService.getById(billId);
+        Bill bill = billQueries.getById(billId);
         if (bill == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "结算单不存在");
         }
@@ -94,7 +88,7 @@ public class FinanceExportServiceImpl implements FinanceExportService {
         params.setPageSize(BATCH_SIZE);
         List<BillListVO> all = new ArrayList<>();
         while (true) {
-            IPage<BillListVO> page = billService.billPage(params);
+            IPage<BillListVO> page = billQueries.billPage(params);
             if (page.getRecords() == null || page.getRecords().isEmpty()) {
                 break;
             }
@@ -130,7 +124,7 @@ public class FinanceExportServiceImpl implements FinanceExportService {
                     "attachment;filename=" + URLEncoder.encode("结算单批量下载", StandardCharsets.UTF_8) + ".zip");
             ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
             for (String id : billIds) {
-                Bill bill = billService.getById(id);
+                Bill bill = billQueries.getById(id);
                 if (bill == null) {
                     continue;
                 }

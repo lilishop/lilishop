@@ -35,7 +35,7 @@ import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
-import cn.lili.modules.system.service.LogisticsService;
+import cn.lili.modules.system.support.LogisticsGatewaySupport;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -54,6 +54,7 @@ import java.util.List;
 
 /**
  * 售后业务层实现
+ * 物流公司及退货轨迹复用独立物流网关，不依赖包含订单发货协作的物流服务。
  *
  * @author Chopper
  * @since 2020/11/17 7:38 下午
@@ -68,7 +69,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Autowired
     private OrderItemService orderItemService;
     @Autowired
-    private LogisticsService logisticsService;
+    private LogisticsGatewaySupport logisticsGateway;
     @Autowired
     private StoreDetailService storeDetailService;
     @Autowired
@@ -177,7 +178,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.PASS.name())) {
             throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
-        Logistics logistics = logisticsService.getById(logisticsId);
+        Logistics logistics = logisticsGateway.getById(logisticsId);
         if (logistics == null) {
             throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
@@ -195,7 +196,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Override
     public Traces deliveryTraces(String afterSaleSn) {
         AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
-        return logisticsService.getLogisticTrack(afterSale.getMLogisticsCode(), afterSale.getMLogisticsNo(),
+        return logisticsGateway.getLogisticTrack(afterSale.getMLogisticsCode(), afterSale.getMLogisticsNo(),
                 storeDetailService.getStoreDetail(afterSale.getStoreId()).getSalesConsigneeMobile());
     }
 

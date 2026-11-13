@@ -25,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +32,7 @@ import java.util.*;
 
 /**
  * 权限业务层实现
+ * 角色菜单服务仅使用存储查询菜单，不回调本服务，删除菜单时可正常注入检查角色占用。
  *
  * @author Chopper
  * @since 2020/11/17 3:49 下午
@@ -40,11 +40,7 @@ import java.util.*;
 @Slf4j
 @Service
 public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu> implements StoreMenuService {
-    /**
-     * 菜单角色
-     */
     @Autowired
-    @Lazy
     private StoreMenuRoleService storeMenuRoleService;
 
     @Autowired

@@ -16,16 +16,16 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.support.GoodsStoreMarketSupport;
+import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.ClerkService;
-import cn.lili.modules.member.service.FootprintService;
-import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.member.mapper.FootprintMapper;
+import cn.lili.modules.member.support.MemberAccountSupport;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.*;
@@ -46,7 +46,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +55,7 @@ import java.util.Objects;
 
 /**
  * 店铺业务层实现
+ * 店主会员读取及开店状态维护复用独立账号组件，避免反向依赖会员业务服务。
  *
  * @author pikachu
  * @since 2020-03-07 16:18:56
@@ -63,33 +63,23 @@ import java.util.Objects;
 @Service
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
-    /**
-     * 客户
-     */
     @Autowired
-    @Lazy
-    private MemberService memberService;
+    private MemberAccountSupport memberAccounts;
 
     /**
      * 店员
      */
     @Autowired
     private ClerkService clerkService;
-    /**
-     * 商品
-     */
     @Autowired
-    @Lazy
-    private GoodsService goodsService;
+    private GoodsStoreMarketSupport storeMarkets;
 
     @Autowired
-    @Lazy
-    private GoodsSkuService goodsSkuService;
+    private GoodsSkuReadSupport skuReads;
     /**
      * 店铺详情
      */
     @Autowired
-    @Lazy
     private StoreDetailService storeDetailService;
 
     @Autowired
@@ -99,8 +89,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     private LiliMessageTemplate liliMessageTemplate;
 
     @Autowired
-    @Lazy
-    private FootprintService footprintService;
+    private FootprintMapper footprintMapper;
 
     @Autowired
     private Cache cache;
@@ -129,7 +118,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
         }
 
-        Member member = memberService.getById(adminStoreApplyDTO.getMemberId());
+        Member member = memberAccounts.getById(adminStoreApplyDTO.getMemberId());
         //判断用户是否存在
         if (member == null) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
@@ -149,10 +138,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         storeDetailService.save(storeDetail);
 
         //设置客户-店铺信息
-        memberService.update(new LambdaUpdateWrapper<Member>()
-                .eq(Member::getId, member.getId())
-                .set(Member::getHaveStore, true)
-                .set(Member::getStoreId, store.getId()));
+        memberAccounts.markStoreOpened(member.getId(), store.getId());
         return store;
 
     }
@@ -219,10 +205,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (passed == 0) {
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
             //修改客户 表示已有店铺
-            Member member = memberService.getById(store.getMemberId());
+            Member member = memberAccounts.getById(store.getMemberId());
             member.setHaveStore(true);
             member.setStoreId(id);
-            memberService.updateById(member);
+            memberAccounts.updateStoreOwner(member);
             //创建店员
             ClerkAddDTO clerkAddDTO = new ClerkAddDTO();
             clerkAddDTO.setMemberId(member.getId());
@@ -253,7 +239,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             //下架所有此店铺商品
             if (update) {
                 cache.remove(CachePrefix.STORE.getPrefix() + id);
-                goodsService.underStoreGoods(id);
+                storeMarkets.underStoreGoods(id);
             }
 
             //删除店员token
@@ -295,7 +281,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //店铺为空，则新增店铺
         if (store == null) {
             AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-            Member member = memberService.getById(authUser.getId());
+            Member member = memberAccounts.getById(authUser.getId());
             //根据客户创建店铺
             store = new Store(member);
             BeanUtil.copyProperties(storeCompanyDTO, store);
@@ -409,17 +395,23 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         clerkService.saveBatch(clerkList);
     }
 
+    /**
+     * 按当前店铺及会员查询足迹，再复用批量SKU缓存读取；保留原有记录范围和结果顺序规则。
+     *
+     * @param memberId 待查询浏览记录的会员主键
+     * @return 足迹中存在的SKU列表
+     */
     @Override
     public List<GoodsSku> getToMemberHistory(String memberId) {
         AuthUser currentUser = UserContext.getCurrentUser();
         List<String> skuIdList = new ArrayList<>();
         for (FootPrint footPrint :
-                footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
+                footprintMapper.selectList(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
             if (footPrint.getSkuId() != null) {
                 skuIdList.add(footPrint.getSkuId());
             }
         }
-        return goodsSkuService.getGoodsSkuByIdFromCache(skuIdList);
+        return skuReads.getGoodsSkuByIdFromCache(skuIdList);
     }
 
     @Override

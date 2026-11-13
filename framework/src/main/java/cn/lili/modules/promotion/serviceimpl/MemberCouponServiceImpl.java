@@ -10,8 +10,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.live.entity.dos.LiveCoupon;
 import cn.lili.modules.live.entity.dos.LiveRoom;
 import cn.lili.modules.live.entity.enums.LiveStautsEnum;
-import cn.lili.modules.live.service.LiveCouponService;
-import cn.lili.modules.live.service.LiveRoomService;
+import cn.lili.modules.live.support.LiveCouponReadSupport;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
@@ -21,8 +20,8 @@ import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
-import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.support.CouponReceiveSupport;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +42,7 @@ import java.util.*;
 
 /**
  * 客户优惠券业务层实现
+ * 优惠券发行量更新与直播资格数据读取复用独立组件，不反向依赖优惠券或直播业务服务。
  *
  * @author Chopper
  * @since 2020/8/21
@@ -52,12 +51,8 @@ import java.util.*;
 @CacheConfig(cacheNames = "{MemberCoupon}")
 public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, MemberCoupon> implements MemberCouponService {
 
-    /**
-     * 优惠券
-     */
     @Autowired
-    @Lazy
-    private CouponService couponService;
+    private CouponReceiveSupport couponReceive;
 
     /**
      * 缓存
@@ -66,16 +61,11 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     private Cache cache;
 
     @Autowired
-    @Lazy
-    private LiveCouponService liveCouponService;
-
-    @Autowired
-    @Lazy
-    private LiveRoomService liveRoomService;
+    private LiveCouponReadSupport liveCouponReads;
 
     @Override
     public void checkCouponLimit(String couponId, String memberId) {
-        Coupon coupon = couponService.getById(couponId);
+        Coupon coupon = couponReceive.getById(couponId);
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<MemberCoupon>()
                 .eq(MemberCoupon::getCouponId, couponId)
                 .eq(MemberCoupon::getMemberId, memberId);
@@ -102,7 +92,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @CacheEvict(key = "#memberId")
     @Transactional(rollbackFor = Exception.class)
     public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
-        Coupon coupon = couponService.getById(couponId);
+        Coupon coupon = couponReceive.getById(couponId);
         if (coupon == null) {
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
@@ -116,18 +106,18 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @CacheEvict(key = "#memberId")
     @Transactional(rollbackFor = Exception.class)
     public MemberCoupon receiveLiveBuyerCoupon(String couponId, String liveRoomId, String memberId, String memberName) {
-        LiveRoom liveRoom = liveRoomService.getById(liveRoomId);
+        LiveRoom liveRoom = liveCouponReads.getLiveRoomById(liveRoomId);
         if (liveRoom == null) {
             throw new ServiceException(ResultCode.LIVE_ROOM_NOT_EXIST);
         }
         if (!LiveStautsEnum.LIVING.name().equals(liveRoom.getLiveStatus())) {
             throw new ServiceException(ResultCode.LIVE_COUPON_RECEIVE_ERROR);
         }
-        LiveCoupon liveCoupon = liveCouponService.getByLiveRoomIdAndCouponId(liveRoomId, couponId);
+        LiveCoupon liveCoupon = liveCouponReads.getByLiveRoomIdAndCouponId(liveRoomId, couponId);
         if (liveCoupon == null) {
             throw new ServiceException(ResultCode.LIVE_COUPON_NOT_EXIST);
         }
-        Coupon coupon = couponService.getById(couponId);
+        Coupon coupon = couponReceive.getById(couponId);
         if (coupon == null) {
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
@@ -143,7 +133,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @CacheEvict(key = "#memberId")
     @Transactional(rollbackFor = Exception.class)
     public void receiveCoupon(String couponId, String memberId, String memberName) {
-        Coupon coupon = couponService.getById(couponId);
+        Coupon coupon = couponReceive.getById(couponId);
         if (coupon != null) {
             this.receiverCoupon(couponId, memberId, memberName, coupon, null, null);
         } else {
@@ -400,6 +390,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.update(updateWrapper);
     }
 
+    /**
+     * 判断查询结果中是否存在结束时间早于当前时间的券，保留原有到期边界。
+     *
+     * @param coupons 查询到的会员券列表，可为null
+     * @return 存在到期券时为true
+     */
     private boolean containsExpiredCoupon(List<MemberCoupon> coupons) {
         if (coupons == null || coupons.isEmpty()) {
             return false;
@@ -408,11 +404,23 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return coupons.stream().anyMatch(coupon -> coupon.getEndTime() != null && coupon.getEndTime().before(now));
     }
 
+    /**
+     * 检查用户领券限制、原子增加已领数量后保存会员券，沿用公开领券入口的事务和缓存失效规则。
+     * 发行量更新或会员券写入失败时由入口事务回滚；直播来源信息随会员券保存。
+     *
+     * @param couponId 优惠券主键
+     * @param memberId 领券会员主键
+     * @param memberName 领券会员名称
+     * @param coupon 用于会员券快照的优惠券
+     * @param liveRoomId 来源直播间主键，非直播领券时为null
+     * @param liveRoomName 来源直播间名称，非直播领券时为null
+     * @return 已保存的会员券
+     */
     private MemberCoupon receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon,
                                           String liveRoomId, String liveRoomName) {
         this.checkCouponLimit(couponId, memberId);
-        // 先行原子扣减优惠券发行量库存，不足时直接抛出异常中断并回滚，避免无效写入
-        couponService.receiveCoupon(couponId, 1);
+        // 先原子增加已领数量，由发行量上限约束防止超发；不足时抛错，由入口事务回滚。
+        couponReceive.receiveCoupon(couponId, 1);
         MemberCoupon memberCoupon = new MemberCoupon(coupon);
         memberCoupon.setMemberId(memberId);
         memberCoupon.setMemberName(memberName);
