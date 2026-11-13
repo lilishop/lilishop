@@ -7,13 +7,17 @@ import cn.lili.modules.distribution.entity.dos.DistributionGrade;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.dos.DistributionWalletLog;
 import cn.lili.modules.distribution.entity.enums.DistributionGoodsAuthEnum;
+import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionWalletLogTypeEnum;
 import cn.lili.modules.distribution.mapper.DistributionWalletLogMapper;
+import cn.lili.modules.distribution.support.DistributionOrderPersistSupport;
+import cn.lili.modules.distribution.support.DistributionRewardContextSupport;
+import cn.lili.modules.distribution.support.DistributionRewardWalletSupport;
 import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionGradeService;
-import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.distribution.service.DistributionWalletAccountService;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -40,7 +44,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -50,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 有佣金分销单入账：冻结余额、流水类型、佣金公式与双路径幂等。
+ * 分销奖励支付入账及结算退款测试，覆盖佣金金额、钱包流水和Mapper持久化，不连接真实数据库。
  *
  * @author Mike
  * @date 2026-09-07
@@ -68,7 +71,7 @@ class DistributionRewardServiceImplPaymentRewardsTest {
     private DistributionRewardServiceImpl rewardService;
     private OrderService orderService;
     private OrderItemService orderItemService;
-    private DistributionOrderService distributionOrderService;
+    private DistributionOrderMapper distributionOrderMapper;
     private DistributionGoodsService distributionGoodsService;
     private DistributionService distributionService;
     private DistributionGradeService distributionGradeService;
@@ -108,7 +111,7 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         ReflectionTestUtils.setField(rewardService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
         orderService = mock(OrderService.class);
         orderItemService = mock(OrderItemService.class);
-        distributionOrderService = mock(DistributionOrderService.class);
+        distributionOrderMapper = mock(DistributionOrderMapper.class);
         distributionGoodsService = mock(DistributionGoodsService.class);
         distributionService = mock(DistributionService.class);
         distributionGradeService = mock(DistributionGradeService.class);
@@ -120,24 +123,26 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         ReflectionTestUtils.setField(walletAccountService, "distributionService", distributionService);
         ReflectionTestUtils.setField(walletAccountService, "distributionWalletLogMapper", walletLogMapper);
 
-        ReflectionTestUtils.setField(rewardService, "orderService", orderService);
         ReflectionTestUtils.setField(rewardService, "orderItemService", orderItemService);
-        ReflectionTestUtils.setField(rewardService, "distributionOrderService", distributionOrderService);
-        ReflectionTestUtils.setField(rewardService, "distributionGoodsService", distributionGoodsService);
         ReflectionTestUtils.setField(rewardService, "distributionService", distributionService);
         ReflectionTestUtils.setField(rewardService, "distributionGradeService", distributionGradeService);
         ReflectionTestUtils.setField(rewardService, "customerRelationService", customerRelationService);
-        ReflectionTestUtils.setField(rewardService, "walletAccountService", walletAccountService);
-        ReflectionTestUtils.setField(rewardService, "settingService", settingService);
+        ReflectionTestUtils.setField(rewardService, "persistSupport",
+                new DistributionOrderPersistSupport(orderService, distributionOrderMapper));
+        ReflectionTestUtils.setField(rewardService, "contextSupport",
+                new DistributionRewardContextSupport(distributionGoodsService, distributionService,
+                        distributionGradeService, customerRelationService, settingService));
+        ReflectionTestUtils.setField(rewardService, "walletSupport",
+                new DistributionRewardWalletSupport(walletAccountService));
 
         when(settingService.get(anyString())).thenReturn(null);
-        when(distributionOrderService.list(org.mockito.ArgumentMatchers.<Wrapper<DistributionOrder>>any()))
+        when(distributionOrderMapper.selectList(org.mockito.ArgumentMatchers.<Wrapper<DistributionOrder>>any()))
                 .thenAnswer(invocation -> new ArrayList<>(storedOrders));
-        when(distributionOrderService.save(any(DistributionOrder.class))).thenAnswer(invocation -> {
+        when(distributionOrderMapper.insert(any(DistributionOrder.class))).thenAnswer(invocation -> {
             storedOrders.add(invocation.getArgument(0));
-            return true;
+            return 1;
         });
-        when(distributionOrderService.getOne(org.mockito.ArgumentMatchers.<Wrapper<DistributionOrder>>any(), anyBoolean()))
+        when(distributionOrderMapper.selectOne(org.mockito.ArgumentMatchers.<Wrapper<DistributionOrder>>any()))
                 .thenAnswer(invocation -> storedOrders.stream().findFirst().orElse(null));
         when(walletLogMapper.selectCount(any())).thenAnswer(invocation -> countLogs(invocation.getArgument(0)));
         when(walletLogMapper.insert(any(DistributionWalletLog.class))).thenAnswer(invocation -> {
@@ -233,7 +238,7 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         rewardService.handlePaymentRewards(ORDER_SN);
         rewardService.handlePaymentRewards(ORDER_SN);
 
-        verify(distributionOrderService, times(1)).save(any(DistributionOrder.class));
+        verify(distributionOrderMapper, times(1)).insert(any(DistributionOrder.class));
         assertThat(storedOrders).hasSize(1);
         assertThat(walletLogs).hasSize(2);
         assertThat(BigDecimal.valueOf(direct.getCommissionFrozen())).isEqualByComparingTo("2.00");
@@ -250,7 +255,7 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         // 无分销商品，不应写单、不应冻结
         rewardService.handlePaymentRewards(ORDER_SN);
 
-        verify(distributionOrderService, never()).save(any(DistributionOrder.class));
+        verify(distributionOrderMapper, never()).insert(any(DistributionOrder.class));
         verify(walletLogMapper, never()).insert(any(DistributionWalletLog.class));
         assertThat(direct.getCommissionFrozen()).isEqualTo(0D);
         verify(distributionGradeService, never()).refreshGrade(anyString());
@@ -269,8 +274,44 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         rewardService.handlePaymentRewards(ORDER_SN);
 
         verify(customerRelationService, never()).bindPermanentOnPaid(anyString(), anyString());
-        verify(distributionOrderService, never()).save(any(DistributionOrder.class));
+        verify(distributionOrderMapper, never()).insert(any(DistributionOrder.class));
         verify(walletLogMapper, never()).insert(any(DistributionWalletLog.class));
+    }
+
+    /** 验证切换为Mapper后，结算仍解冻直推与邀请佣金并持久化结算时间。 */
+    @Test
+    void settleRewardsPersistsSettlementAndUnfreezesCommission() {
+        stubPaidDistributionOrder();
+        rewardService.handlePaymentRewards(ORDER_SN);
+
+        rewardService.settleRewardsByOrderItem(ORDER_ITEM_SN);
+
+        DistributionOrder stored = storedOrders.get(0);
+        assertThat(stored.getSettleTime()).isNotNull();
+        assertThat(direct.getCommissionFrozen()).isZero();
+        assertThat(invite.getCommissionFrozen()).isZero();
+        assertThat(direct.getCanRebate()).isEqualTo(2D);
+        assertThat(invite.getCanRebate()).isEqualTo(4D);
+        verify(distributionOrderMapper).updateById(stored);
+    }
+
+    /** 验证退款状态和退回金额通过Mapper保存，重复退款不重复冲回钱包或更新记录。 */
+    @Test
+    void refundRewardsPersistsRefundAndSkipsRepeatedRequest() {
+        stubPaidDistributionOrder();
+        rewardService.handlePaymentRewards(ORDER_SN);
+
+        rewardService.refundRewardsByOrderItem(ORDER_ITEM_SN);
+        rewardService.refundRewardsByOrderItem(ORDER_ITEM_SN);
+
+        DistributionOrder stored = storedOrders.get(0);
+        assertThat(stored.getDistributionOrderStatus()).isEqualTo(DistributionOrderStatusEnum.REFUND.name());
+        assertThat(stored.getSellBackRebate()).isEqualTo(2D);
+        assertThat(stored.getInviteSellBackRebate()).isEqualTo(4D);
+        assertThat(direct.getCommissionFrozen()).isZero();
+        assertThat(invite.getCommissionFrozen()).isZero();
+        assertThat(walletLogs).hasSize(4);
+        verify(distributionOrderMapper).updateById(stored);
     }
 
     /**

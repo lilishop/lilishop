@@ -66,6 +66,9 @@ class MemberBenefitDependencyTest {
             context.registerBean(OrderItemMapper.class, () -> mock(OrderItemMapper.class));
             context.registerBean(AfterSaleMapper.class, () -> mock(AfterSaleMapper.class));
             context.register(TransactionConfiguration.class,MemberOrderPointServiceImpl.class);
+            context.register(cn.lili.modules.member.support.MemberBenefitConfigSupport.class,
+                    cn.lili.modules.member.support.MemberBenefitCouponDisplaySupport.class,
+                    cn.lili.modules.member.support.MemberBenefitGrantSupport.class);
             context.register(MemberBenefitServiceImpl.class,MemberBenefitQueryServiceImpl.class,
                     PaidMemberServiceImpl.class,MemberBenefitDeliveryServiceImpl.class,PaidMemberBenefitListener.class);
             context.refresh();

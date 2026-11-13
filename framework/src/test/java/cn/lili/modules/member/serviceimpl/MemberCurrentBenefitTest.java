@@ -29,6 +29,8 @@ class MemberCurrentBenefitTest {
      * 模拟绑定等级、经验回退等级及升级候选查询。
      */
     private final MemberGradeService grades = mock(MemberGradeService.class);
+    /** 模拟按当前等级配置查询已开启权益。 */
+    private final MemberBenefitQueryService queries = mock(MemberBenefitQueryService.class);
     /**
      * 被测试的客户权益服务，成长进度使用真实实现。
      */
@@ -43,7 +45,7 @@ class MemberCurrentBenefitTest {
      */
     @BeforeEach void setup() {
         ReflectionTestUtils.setField(service, "memberService", members);
-        ReflectionTestUtils.setField(service, "benefitQueries", mock(MemberBenefitQueryService.class));
+        ReflectionTestUtils.setField(service, "benefitQueries", queries);
         ReflectionTestUtils.setField(service, "memberGradeService", grades);
         member.setId("member"); member.setGradeId("silver");
         when(members.getById("member")).thenReturn(member);
@@ -159,5 +161,13 @@ class MemberCurrentBenefitTest {
         assertThat(result.getNextGrade()).isNull();
         assertThat(result.getHighestGrade()).isFalse();
         assertThat(result.getUpgradeProgress()).isZero();
+    }
+
+    /** 验证等级权益关联去除空白条目和首尾空格，查询时仍限定仅返回开启权益。 */
+    @Test void trimsBenefitIdsAndIgnoresBlankEntries() {
+        var silver = grade("silver", 1000, false, "OPEN");
+        silver.setBenefitIds(" first , , second , ");
+        current(silver, 1000L);
+        verify(queries).listByIdList(List.of("first", "second"), true);
     }
 }
