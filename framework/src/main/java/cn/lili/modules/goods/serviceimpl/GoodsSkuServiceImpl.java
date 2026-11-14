@@ -590,12 +590,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
     }
 
+    /**
+     * 优先使用SKU规格图片，单规格未生成规格JSON或未配置规格图片时回退到商品主图。
+     *
+     * @param goodsSku 待填充图片的SKU
+     * @param goodsImages 商品主图列表，无图片时保持原值
+     */
     void renderImages(GoodsSku goodsSku, List<String> goodsImages) {
         if (goodsImages == null || goodsImages.isEmpty()) {
             return;
         }
         JSONObject jsonObject = JSON.parseObject(goodsSku.getSpecs());
-        List<String> images = jsonObject.getJSONArray("images").toJavaList(String.class);
+        JSONArray imageArray = jsonObject == null ? null : jsonObject.getJSONArray("images");
+        List<String> images = imageArray == null ? null : imageArray.toJavaList(String.class);
         GoodsGallery goodsGallery;
         if (images != null && !images.isEmpty()) {
             goodsGallery = goodsGalleryService.getGoodsGallery(images.get(0));
