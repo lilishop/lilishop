@@ -47,6 +47,10 @@ public class StockFlow extends BaseIdEntity {
     @Schema(description = "商品名称")
     private String goodsName;
 
+    @TableField(exist = false)
+    @Schema(description = "当前 li_goods_sku 对应 SKU 的缩略图 URL，仅查询时补充，不作为历史图片快照存储；SKU 不存在时为空")
+    private String thumbnail;
+
     @Schema(description = "规格快照")
     private String specs;
 

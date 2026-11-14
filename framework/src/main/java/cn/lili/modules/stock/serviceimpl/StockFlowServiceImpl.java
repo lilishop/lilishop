@@ -2,6 +2,8 @@ package cn.lili.modules.stock.serviceimpl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.stock.entity.dos.StockFlow;
 import cn.lili.modules.stock.entity.dto.StockFlowMessage;
 import cn.lili.modules.stock.entity.params.StockFlowSearchParams;
@@ -13,10 +15,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 库存流水业务实现类
@@ -27,6 +35,9 @@ import java.util.Date;
 @Slf4j
 @Service
 public class StockFlowServiceImpl extends ServiceImpl<StockFlowMapper, StockFlow> implements StockFlowService {
+
+    @Autowired
+    private GoodsSkuMapper goodsSkuMapper;
 
     @Override
     public IPage<StockFlow> page(StockFlowSearchParams params) {
@@ -58,7 +69,36 @@ public class StockFlowServiceImpl extends ServiceImpl<StockFlowMapper, StockFlow
             queryWrapper.le(StockFlow::getCreateTime, end);
         }
         queryWrapper.orderByDesc(StockFlow::getCreateTime);
-        return this.page(PageUtil.initPage(params), queryWrapper);
+        IPage<StockFlow> result = this.page(PageUtil.initPage(params), queryWrapper);
+        fillCurrentThumbnails(result.getRecords(), params.getStoreId());
+        return result;
+    }
+
+    /**
+     * 按当前页 SKU 批量补充当前缩略图，避免逐行查库；不覆盖流水的商品名称和规格快照。
+     * SKU 删除或归属与流水店铺不符时不展示图片，历史流水仍正常返回。
+     *
+     * @param records 当前页库存流水
+     * @param storeId 查询限定的店铺 ID，为空时按每条流水的店铺归属校验图片
+     */
+    private void fillCurrentThumbnails(List<StockFlow> records, String storeId) {
+        List<String> skuIds = records.stream().map(StockFlow::getSkuId)
+                .filter(CharSequenceUtil::isNotEmpty).distinct().collect(Collectors.toList());
+        if (skuIds.isEmpty()) {
+            return;
+        }
+        List<GoodsSku> skus = goodsSkuMapper.selectList(new LambdaQueryWrapper<GoodsSku>()
+                .select(GoodsSku::getId, GoodsSku::getStoreId, GoodsSku::getThumbnail)
+                .in(GoodsSku::getId, skuIds)
+                .eq(CharSequenceUtil.isNotEmpty(storeId), GoodsSku::getStoreId, storeId));
+        Map<String, GoodsSku> skuMap = skus.stream()
+                .collect(Collectors.toMap(GoodsSku::getId, Function.identity()));
+        for (StockFlow record : records) {
+            GoodsSku sku = skuMap.get(record.getSkuId());
+            if (sku != null && Objects.equals(record.getStoreId(), sku.getStoreId())) {
+                record.setThumbnail(sku.getThumbnail());
+            }
+        }
     }
 
     @Override
