@@ -33,6 +33,7 @@ import cn.lili.modules.goods.support.GoodsVOAssembler;
 import cn.lili.modules.goods.support.GoodsSkuReadSupport;
 import cn.lili.modules.goods.support.GoodsSkuStatusSupport;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.sku.GoodsSkuBuilder;
 import cn.lili.modules.goods.support.GoodsSkuSpecAssembler;
 import cn.lili.modules.goods.support.GoodsSkuStockExcelSupport;
 import cn.lili.modules.goods.support.GoodsSkuStockManager;
@@ -138,11 +139,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void add(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        List<GoodsSku> skuList = goodsOperationDTO.getSkuList().stream().map(map -> {
-            GoodsSku sku = JSON.parseObject(JSON.toJSONString(map), GoodsSku.class);
-            sku.setGoodsId(goods.getId());
-            return sku;
-        }).collect(Collectors.toList());
+        // 统一继承SPU的店铺、类型、推荐及审核信息，并由构建器生成规格JSON。
+        List<GoodsSku> skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
         this.renderGoodsSkuList(skuList, goodsOperationDTO);
         for (GoodsSku sku : skuList) {
             this.applyECouponQuantityOnSave(sku);
@@ -154,11 +152,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        List<GoodsSku> skuList = goodsOperationDTO.getSkuList().stream().map(map -> {
-            GoodsSku sku = JSON.parseObject(JSON.toJSONString(map), GoodsSku.class);
-            sku.setGoodsId(goods.getId());
-            return sku;
-        }).collect(Collectors.toList());
+        // 编辑与新增使用同一构建规则，避免新增规格缺少公共字段或信任前端传入的归属信息。
+        List<GoodsSku> skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
         List<GoodsSku> list = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
         List<GoodsSku> newSku = new ArrayList<>();
         List<GoodsSku> oldSku = new ArrayList<>();
