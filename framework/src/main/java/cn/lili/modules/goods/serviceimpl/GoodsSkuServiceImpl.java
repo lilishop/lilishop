@@ -141,6 +141,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void add(Goods goods, GoodsOperationDTO goodsOperationDTO) {
         // 统一继承SPU的店铺、类型、推荐及审核信息，并由构建器生成规格JSON。
         List<GoodsSku> skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
+        // 新建商品始终生成新的SKU主键，复制商品携带的来源SKU ID不得用于新增或继承来源库存。
+        skuList.forEach(sku -> sku.setId(null));
         this.renderGoodsSkuList(skuList, goodsOperationDTO);
         for (GoodsSku sku : skuList) {
             this.applyECouponQuantityOnSave(sku);
@@ -573,7 +575,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     private void extendOldSkuValue(GoodsSku goodsSku) {
-        if (CharSequenceUtil.isNotEmpty(goodsSku.getGoodsId())) {
+        if (CharSequenceUtil.isNotEmpty(goodsSku.getGoodsId()) && CharSequenceUtil.isNotEmpty(goodsSku.getId())) {
             GoodsSku oldSku = this.getGoodsSkuByIdFromCache(goodsSku.getId());
             if (oldSku != null) {
                 goodsSku.setCommentNum(oldSku.getCommentNum());
