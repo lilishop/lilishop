@@ -22,11 +22,10 @@ import cn.lili.modules.appointment.mapper.AppointmentVerificationCodeMapper;
 import cn.lili.modules.appointment.mapper.AppointmentWorkOrderMapper;
 import cn.lili.modules.appointment.util.AppointmentSnUtil;
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.mapper.OrderMapper;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.support.OrderLifecycleSupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class AppointmentVerificationSupport {
     private OrderMapper orderMapper;
 
     @Autowired
-    private OrderService orderService;
+    private OrderLifecycleSupport orderLifecycleSupport;
 
     @Autowired
     private AppointmentStaffSupport appointmentStaffSupport;
@@ -298,7 +297,7 @@ public class AppointmentVerificationSupport {
                 workOrder.setStaffId(staffId);
             }
             workOrderMapper.updateById(workOrder);
-            orderService.complete(order.getSn());
+            orderLifecycleSupport.complete(order.getSn());
             result.setOrderCompleted(true);
             result.setWorkOrderStatus(AppointmentWorkOrderStatusEnum.SERVICE_ENDED.name());
         }
@@ -330,17 +329,7 @@ public class AppointmentVerificationSupport {
      * @param orderSn 订单编号
      */
     public void transitionOrderToTake(String orderSn) {
-        boolean updated = orderService.update(new LambdaUpdateWrapper<Order>()
-                .eq(Order::getSn, orderSn)
-                .eq(Order::getOrderType, OrderTypeEnum.APPOINTMENT.name())
-                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
-                .set(Order::getOrderStatus, OrderStatusEnum.TAKE.name()));
-        if (updated) {
-            OrderMessage orderMessage = new OrderMessage();
-            orderMessage.setOrderSn(orderSn);
-            orderMessage.setNewStatus(OrderStatusEnum.TAKE);
-            orderService.sendUpdateStatusMessage(orderMessage);
-        }
+        orderLifecycleSupport.transitionAppointmentToTake(orderSn);
     }
 
     /**

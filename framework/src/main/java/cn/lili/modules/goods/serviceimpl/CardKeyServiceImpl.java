@@ -1,6 +1,8 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.modules.goods.support.CardKeyPoolSupport;
+import cn.lili.modules.goods.support.CardKeyAllocationSupport;
+import cn.lili.modules.order.order.serviceimpl.ECouponFulfillmentService;
 import cn.lili.modules.goods.support.CardKeyImportSupport;
 import cn.lili.modules.goods.support.CardKeyTradeSupport;
 import cn.hutool.core.collection.CollUtil;
@@ -25,7 +27,6 @@ import cn.lili.modules.goods.entity.vo.CardKeyStatsVO;
 import cn.lili.modules.goods.entity.vo.CardKeyVO;
 import cn.lili.modules.goods.mapper.CardKeyMapper;
 import cn.lili.modules.goods.service.CardKeyService;
-import cn.lili.modules.goods.service.GiftFulfillmentAlertPublisher;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.util.CardKeySecretUtil;
@@ -34,8 +35,6 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
@@ -60,8 +59,8 @@ import java.util.stream.Collectors;
 /**
  * 电子卡券卡密服务实现。
  * <p>
- * 卡密库内明文存储。支付履约由 {@link #fulfillAfterPayment} 统一入口，
- * 勿与 VIRTUAL 核销链（TAKE）混用。
+ * 卡密库内明文存储。{@link #fulfillAfterPayment} 保留支付履约兼容入口，
+ * 普通购买、拼团与满赠均委托独立履约编排，不反向调用完整订单服务；勿与 VIRTUAL 核销链（TAKE）混用。
  *
  * @author Mike
  * @date 2026-07-31
@@ -69,6 +68,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> implements CardKeyService {
+
+    @Autowired
+    private CardKeyAllocationSupport cardKeyAllocationSupport;
+
+    @Autowired
+    private ECouponFulfillmentService eCouponFulfillmentService;
 
     @Autowired
     private CardKeyPoolSupport cardKeyPoolSupport;
@@ -91,23 +96,10 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Autowired
     private OrderItemService orderItemService;
 
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private GiftFulfillmentAlertPublisher giftFulfillmentAlertPublisher;
-
-    @Autowired
-    private OrderLogService orderLogService;
-
-    GoodsSkuService getGoodsSkuService() {
-        return goodsSkuService;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void fulfillAfterPayment(String orderSn) {
-        CardKeyFulfillExecutor.fulfillAfterPayment(this, orderMapper, orderService, orderItemService, orderLogService, giftFulfillmentAlertPublisher, orderSn);
+        eCouponFulfillmentService.fulfillAfterPayment(orderSn);
     }
 
     @Override
@@ -270,31 +262,31 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void allocateByOrder(String orderSn) {
-        CardKeyFulfillExecutor.allocateByOrder(this, baseMapper, orderMapper, orderItemService, goodsSkuService, orderSn);
+        cardKeyAllocationSupport.allocateByOrder(orderSn);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void reserveByOrder(String orderSn) {
-        CardKeyFulfillExecutor.reserveByOrder(this, baseMapper, orderMapper, orderItemService, goodsSkuService, orderSn);
+        eCouponFulfillmentService.reserveByOrder(orderSn);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void confirmReservationAndComplete(String orderSn) {
-        CardKeyFulfillExecutor.confirmReservationAndComplete(this, baseMapper, orderMapper, orderService, orderSn);
+        eCouponFulfillmentService.confirmReservationAndComplete(orderSn);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void releaseReservation(String orderSn) {
-        CardKeyFulfillExecutor.releaseReservation(this, baseMapper, orderMapper, orderSn);
+        eCouponFulfillmentService.releaseReservation(orderSn);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void voidOnSystemFailure(String orderSn) {
-        CardKeyFulfillExecutor.voidOnSystemFailure(this, orderSn);
+        cardKeyAllocationSupport.voidOnSystemFailure(orderSn);
     }
 
     @Override

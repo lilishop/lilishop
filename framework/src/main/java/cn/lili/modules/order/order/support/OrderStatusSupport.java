@@ -22,6 +22,8 @@ import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.event.OrderCancelledEvent;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.mapper.OrderMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import cn.lili.modules.order.order.service.ReceiptService;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
@@ -47,7 +49,7 @@ import java.util.List;
 /**
  * 订单状态流转与生命周期支撑组件
  * <p>
- * 负责订单买家与系统取消、订单确认、完成收尾与商品销量上报、电子卡券状态流转、备注与地址修改以及状态变更消息广播。
+ * 负责订单买家与系统取消、订单确认、完成收尾与商品销量上报、备注与地址修改以及状态变更消息广播。
  *
  * @author Bulbasaur
  * @since 2026-11-12
@@ -57,6 +59,9 @@ import java.util.List;
 public class OrderStatusSupport {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
+
+    @Autowired
+    private OrderMapper orderMapper;
 
     @Autowired
     private OrderItemService orderItemService;
@@ -179,10 +184,9 @@ public class OrderStatusSupport {
      * @param orderSn      订单编号
      * @param reason       取消原因
      * @param refundMoney  是否退款
-     * @param orderService 订单服务接口
      */
-    public void systemCancel(String orderSn, String reason, Boolean refundMoney, OrderService orderService) {
-        Order order = orderService.getBySn(orderSn);
+    public void systemCancel(String orderSn, String reason, Boolean refundMoney) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
         if (order == null) {
             log.warn("系统自动关单失败，订单[{}]不存在", orderSn);
             return;
@@ -197,12 +201,12 @@ public class OrderStatusSupport {
                 log.warn("系统自动关单拒绝：订单[{}]非待支付状态，拒绝执行不退款关单，当前状态：{}", orderSn, order.getOrderStatus());
                 return;
             }
-            boolean updated = orderService.update(new LambdaUpdateWrapper<Order>()
+            int updated = orderMapper.update(null, new LambdaUpdateWrapper<Order>()
                     .eq(Order::getSn, orderSn)
                     .eq(Order::getOrderStatus, OrderStatusEnum.UNPAID.name())
                     .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
                     .set(Order::getCancelReason, reason));
-            if (!updated) {
+            if (updated == 0) {
                 log.warn("系统自动关单冲突：订单[{}]状态已被改变，取消终止", orderSn);
                 return;
             }
@@ -211,7 +215,7 @@ public class OrderStatusSupport {
                 log.warn("系统自动关单拒绝：订单[{}]已完成，禁止系统取消", orderSn);
                 return;
             }
-            boolean updated = orderService.update(new LambdaUpdateWrapper<Order>()
+            int updated = orderMapper.update(null, new LambdaUpdateWrapper<Order>()
                     .eq(Order::getSn, orderSn)
                     .in(Order::getOrderStatus, Arrays.asList(
                             OrderStatusEnum.UNPAID.name(),
@@ -221,7 +225,7 @@ public class OrderStatusSupport {
                     ))
                     .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
                     .set(Order::getCancelReason, reason));
-            if (!updated) {
+            if (updated == 0) {
                 log.warn("系统自动关单冲突：订单[{}]状态已被改变，取消终止", orderSn);
                 return;
             }
@@ -245,7 +249,10 @@ public class OrderStatusSupport {
         if (PayStatusEnum.PAID.name().equals(order.getPayStatus()) || pickupCardOrderService.isPickupOrder(order.getSn())) {
             applicationEventPublisher.publishEvent(new OrderCancelledEvent(this, order, reason));
         }
-        orderStatusMessage(order, orderService);
+        OrderMessage message = new OrderMessage();
+        message.setOrderSn(orderSn);
+        message.setNewStatus(OrderStatusEnum.CANCELLED);
+        sendUpdateStatusMessage(message);
     }
 
     /**
@@ -301,20 +308,19 @@ public class OrderStatusSupport {
      *
      * @param order        订单实体
      * @param orderSn      订单编号
-     * @param orderService 订单服务接口
      */
-    public void complete(Order order, String orderSn, OrderService orderService) {
-        updateStatus(orderSn, OrderStatusEnum.COMPLETED, orderService);
+    public void complete(Order order, String orderSn) {
+        orderMapper.update(null, new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getOrderStatus, OrderStatusEnum.COMPLETED.name()));
         orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                 .set("comment_status", CommentStatusEnum.UNFINISHED));
-        orderService.update(new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getCompleteTime, new Date()));
+        orderMapper.update(null, new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getCompleteTime, new Date()));
 
         updateOrderComplainStatus(orderSn);
 
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
         orderMessage.setOrderSn(order.getSn());
-        orderService.sendUpdateStatusMessage(orderMessage);
+        sendUpdateStatusMessage(orderMessage);
 
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
@@ -329,124 +335,6 @@ public class OrderStatusSupport {
         if (!goodsCompleteMessageList.isEmpty()) {
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.BUY_GOODS_COMPLETE.name();
             liliMessageTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsCompleteMessageList), MessageSendCallbackBuilder.commonCallback());
-        }
-    }
-
-    /**
-     * 判定是否为电子卡券订单
-     *
-     * @param order 订单实体
-     * @return 是否为电子卡券订单
-     */
-    public boolean isECouponOrder(Order order) {
-        return order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType());
-    }
-
-    /**
-     * 电子卡券订单系统完成
-     *
-     * @param orderSn      订单编号
-     * @param orderService 订单服务接口
-     * @return 是否完成成功
-     */
-    public boolean systemCompleteECoupon(String orderSn, OrderService orderService) {
-        Order order = orderService.getBySn(orderSn);
-        if (!isECouponOrder(order)) {
-            return false;
-        }
-        if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
-            return true;
-        }
-        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
-            return false;
-        }
-        boolean updated = orderService.update(new LambdaUpdateWrapper<Order>()
-                .eq(Order::getSn, orderSn)
-                .eq(Order::getOrderType, OrderTypeEnum.E_COUPON.name())
-                .eq(Order::getPayStatus, PayStatusEnum.PAID.name())
-                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
-                .set(Order::getOrderStatus, OrderStatusEnum.COMPLETED.name()));
-        if (!updated) {
-            return false;
-        }
-        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
-        completeECouponSideEffects(order, orderSn, orderService);
-        return true;
-    }
-
-    /**
-     * 电子卡券订单系统取消
-     *
-     * @param orderSn      订单编号
-     * @param reason       取消原因
-     * @param refundMoney  是否退款
-     * @param orderService 订单服务接口
-     * @return 是否取消成功
-     */
-    public boolean systemCancelECoupon(String orderSn, String reason, Boolean refundMoney, OrderService orderService) {
-        Order order = orderService.getBySn(orderSn);
-        if (!isECouponOrder(order)) {
-            return false;
-        }
-        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
-            return true;
-        }
-        if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
-            return false;
-        }
-        boolean updated = orderService.update(new LambdaUpdateWrapper<Order>()
-                .eq(Order::getSn, orderSn)
-                .eq(Order::getOrderType, OrderTypeEnum.E_COUPON.name())
-                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
-                .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
-                .set(Order::getCancelReason, reason));
-        if (!updated) {
-            return false;
-        }
-        order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
-        order.setCancelReason(reason);
-        orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn, orderSn)
-                .set(OrderItem::getIsRefund, RefundStatusEnum.ALL_REFUND.name()));
-        if (Boolean.TRUE.equals(refundMoney)) {
-            getOrderPaymentSupport().refundCanceledOrderBySplit(order, reason);
-            applicationEventPublisher.publishEvent(new OrderCancelledEvent(this, order, reason));
-            orderStatusMessage(order, orderService);
-        }
-        return true;
-    }
-
-    /**
-     * 电子卡券完成后的副作用处理（评价状态、投诉状态、MQ与商品销量上报）
-     *
-     * @param order        订单实体
-     * @param orderSn      订单编号
-     * @param orderService 订单服务接口
-     */
-    public void completeECouponSideEffects(Order order, String orderSn, OrderService orderService) {
-        orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
-                .set("comment_status", CommentStatusEnum.UNFINISHED));
-        orderService.update(new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getCompleteTime, new Date()));
-        updateOrderComplainStatus(orderSn);
-
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
-        orderMessage.setOrderSn(order.getSn());
-        orderService.sendUpdateStatusMessage(orderMessage);
-
-        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
-        List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
-        for (OrderItem orderItem : orderItems) {
-            GoodsCompleteMessage goodsCompleteMessage = new GoodsCompleteMessage();
-            goodsCompleteMessage.setGoodsId(orderItem.getGoodsId());
-            goodsCompleteMessage.setSkuId(orderItem.getSkuId());
-            goodsCompleteMessage.setBuyNum(orderItem.getNum());
-            goodsCompleteMessage.setMemberId(order.getMemberId());
-            goodsCompleteMessageList.add(goodsCompleteMessage);
-        }
-        if (!goodsCompleteMessageList.isEmpty()) {
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.BUY_GOODS_COMPLETE.name();
-            liliMessageTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsCompleteMessageList),
-                    MessageSendCallbackBuilder.commonCallback());
         }
     }
 

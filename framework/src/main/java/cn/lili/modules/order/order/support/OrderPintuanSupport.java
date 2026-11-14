@@ -5,17 +5,15 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.common.utils.SpringContextUtil;
+import cn.lili.modules.order.order.serviceimpl.ECouponFulfillmentService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.mapper.PintuanMapper;
-import org.springframework.beans.factory.ObjectProvider;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.trigger.message.PintuanOrderMessage;
@@ -24,7 +22,6 @@ import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -42,17 +39,12 @@ import java.util.stream.Collectors;
 @Component
 public class OrderPintuanSupport {
 
-    @Autowired
-    private PintuanMapper pintuanMapper;
-    @Autowired
-    private TimeTrigger timeTrigger;
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-    @Autowired
-    private ObjectProvider<CardKeyService> cardKeyServiceProvider;
-    private CardKeyService cardKeyService;
-    @Autowired
-    private OrderStatusSupport orderStatusSupport;
+    private final PintuanMapper pintuanMapper;
+    private final TimeTrigger timeTrigger;
+    private final RocketmqCustomProperties rocketmqCustomProperties;
+    private final ECouponFulfillmentService eCouponFulfillmentService;
+    private final ECouponOrderLifecycleSupport eCouponOrderLifecycleSupport;
+    private final OrderStatusSupport orderStatusSupport;
 
     /**
      * 按主键查询拼团配置，统一通过必需的Mapper读取，避免Service与Mapper备用路径。
@@ -64,43 +56,28 @@ public class OrderPintuanSupport {
         return pintuanMapper.selectById(pintuanId);
     }
 
-    private CardKeyService getCardKeyService() {
-        if (this.cardKeyService != null) {
-            return this.cardKeyService;
-        }
-        if (this.cardKeyServiceProvider != null) {
-            return this.cardKeyServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(CardKeyService.class);
-    }
-
-    /** Spring按必需字段注入拼团存储及订单协作依赖。 */
-    public OrderPintuanSupport() {
-    }
-
     /**
-     * 显式装配拼团存储和订单协作能力，供独立测试使用，不查询全局Spring上下文。
+     * 注入必需的拼团存储、调度及订单协作组件，卡券履约不经过完整卡密服务。
      *
      * @param pintuanMapper 拼团配置Mapper
      * @param timeTrigger 延时任务调度器
      * @param rocketmqCustomProperties 消息主题配置
-     * @param cardKeyService 电子卡券履约服务
+     * @param eCouponFulfillmentService 电子卡券履约编排服务
+     * @param eCouponOrderLifecycleSupport 电子卡券订单生命周期组件
      * @param orderStatusSupport 订单状态流转支持类
      */
     public OrderPintuanSupport(PintuanMapper pintuanMapper,
                                TimeTrigger timeTrigger,
                                RocketmqCustomProperties rocketmqCustomProperties,
-                               CardKeyService cardKeyService,
+                               ECouponFulfillmentService eCouponFulfillmentService,
+                               ECouponOrderLifecycleSupport eCouponOrderLifecycleSupport,
                                OrderStatusSupport orderStatusSupport) {
         this.pintuanMapper = pintuanMapper;
         this.timeTrigger = timeTrigger;
         this.rocketmqCustomProperties = rocketmqCustomProperties;
-        this.cardKeyService = cardKeyService;
+        this.eCouponFulfillmentService = eCouponFulfillmentService;
+        this.eCouponOrderLifecycleSupport = eCouponOrderLifecycleSupport;
         this.orderStatusSupport = orderStatusSupport;
-    }
-
-    private OrderStatusSupport getOrderStatusSupport() {
-        return orderStatusSupport;
     }
 
     /**
@@ -180,15 +157,11 @@ public class OrderPintuanSupport {
     public void pintuanOrderSuccess(List<Order> orderList, OrderService orderService) {
         for (Order order : orderList) {
             if (OrderTypeEnum.VIRTUAL.name().equals(order.getOrderType())) {
-                if (getOrderStatusSupport() != null) {
-                    getOrderStatusSupport().virtualOrderConfirm(order.getSn(), orderService);
-                }
+                orderStatusSupport.virtualOrderConfirm(order.getSn(), orderService);
             } else if (OrderTypeEnum.NORMAL.name().equals(order.getOrderType())) {
-                if (getOrderStatusSupport() != null) {
-                    getOrderStatusSupport().normalOrderConfirm(order.getSn(), orderService);
-                }
+                orderStatusSupport.normalOrderConfirm(order.getSn(), orderService);
             } else if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-                getCardKeyService().confirmReservationAndComplete(order.getSn());
+                eCouponFulfillmentService.confirmReservationAndComplete(order.getSn());
             }
         }
     }
@@ -205,8 +178,8 @@ public class OrderPintuanSupport {
         for (Order order : list) {
             try {
                 if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-                    getCardKeyService().releaseReservation(order.getSn());
-                    orderService.systemCancelECoupon(order.getSn(), "拼团人数不足，拼团失败！", true);
+                    eCouponFulfillmentService.releaseReservation(order.getSn());
+                    eCouponOrderLifecycleSupport.cancel(order.getSn(), "拼团人数不足，拼团失败！", true);
                 } else {
                     orderService.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
                 }
@@ -234,8 +207,8 @@ public class OrderPintuanSupport {
             } else {
                 for (Order order : entry.getValue()) {
                     if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-                        getCardKeyService().releaseReservation(order.getSn());
-                        orderService.systemCancelECoupon(order.getSn(), "拼团人数不足，拼团失败！", true);
+                        eCouponFulfillmentService.releaseReservation(order.getSn());
+                        eCouponOrderLifecycleSupport.cancel(order.getSn(), "拼团人数不足，拼团失败！", true);
                     } else {
                         orderService.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
                     }
@@ -283,9 +256,7 @@ public class OrderPintuanSupport {
                         paidOrder.setOrderStatus(OrderStatusEnum.TAKE.name());
                     }
                     orderService.updateById(paidOrder);
-                    if (getOrderStatusSupport() != null) {
-                        getOrderStatusSupport().orderStatusMessage(paidOrder, orderService);
-                    }
+                    orderStatusSupport.orderStatusMessage(paidOrder, orderService);
                 }
             }
         }

@@ -25,7 +25,7 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.support.OrderLifecycleSupport;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +78,7 @@ public class AppointmentCheckoutSupport {
     private OrderItemService orderItemService;
 
     @Autowired
-    private OrderService orderService;
+    private OrderLifecycleSupport orderLifecycleSupport;
 
     @Autowired
     private AppointmentSlotStockSupport appointmentSlotStockSupport;
@@ -354,7 +354,8 @@ public class AppointmentCheckoutSupport {
     }
 
     /**
-     * 支付成功后的核心履约流程（锁订单、扣减时段库存、生成工单与核销码、推进订单状态）
+     * 支付成功后的核心履约流程（锁订单、扣减时段库存、生成工单与核销码、推进订单状态）。
+     * 仅已支付且订单状态为PAID时允许履约；取消后迟到或重复的支付消息不得重新扣库存、生成工单。
      *
      * @param orderSn 订单编号
      */
@@ -368,9 +369,8 @@ public class AppointmentCheckoutSupport {
             log.warn("预约履约跳过，订单未支付，orderSn={}", orderSn);
             return;
         }
-        if (OrderStatusEnum.TAKE.name().equals(order.getOrderStatus())
-                || OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
-            log.info("预约履约跳过，订单已履约，orderSn={}", orderSn);
+        if (!OrderStatusEnum.PAID.name().equals(order.getOrderStatus())) {
+            log.info("预约履约跳过，订单状态不允许履约，orderSn={}，orderStatus={}", orderSn, order.getOrderStatus());
             return;
         }
         try {
@@ -473,6 +473,6 @@ public class AppointmentCheckoutSupport {
         if (CharSequenceUtil.isNotBlank(slotStockId) && quantity > 0) {
             appointmentSlotStockSupport.restoreSlotStock(slotStockId, quantity);
         }
-        orderService.systemCancel(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
+        orderLifecycleSupport.systemCancel(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
     }
 }

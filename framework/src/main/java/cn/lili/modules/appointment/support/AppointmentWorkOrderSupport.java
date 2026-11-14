@@ -15,7 +15,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.mapper.OrderMapper;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.support.OrderLifecycleSupport;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -46,7 +46,7 @@ public class AppointmentWorkOrderSupport {
     private OrderMapper orderMapper;
 
     @Autowired
-    private OrderService orderService;
+    private OrderLifecycleSupport orderLifecycleSupport;
 
     @Autowired
     private StoreService storeService;
@@ -132,7 +132,7 @@ public class AppointmentWorkOrderSupport {
         }
         workOrder.setServiceStatus(AppointmentWorkOrderStatusEnum.SERVICE_ENDED.name());
         workOrderMapper.updateById(workOrder);
-        orderService.complete(order.getSn());
+        orderLifecycleSupport.complete(order.getSn());
     }
 
     /**

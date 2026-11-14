@@ -1,12 +1,11 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.message.LiliMessageTemplate;
-import cn.lili.modules.appointment.service.AppointmentService;
-import cn.lili.modules.goods.service.CardKeyService;
+import cn.lili.modules.appointment.support.AppointmentCheckoutSupport;
+import cn.lili.modules.goods.support.CardKeyTradeSupport;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -38,8 +37,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import cn.lili.common.utils.SpringContextUtil;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,14 +49,19 @@ import java.util.Map;
 /**
  * 子订单业务实现
  * <p>
- * 采用门面模式（Facade Pattern）提供统一的订单业务入口，内部按单一职责解耦委托给对应的 Support 业务组件：
+ * 提供兼容的订单业务入口，内部委托履约编排服务及各职责组件：
  * <ul>
  *     <li>{@link OrderCreateSupport}：购物车交易单落库、实物赠品随单关联与结算暂存</li>
  *     <li>{@link OrderQuerySupport}：买家/管理端订单查询、统计、详情装配与 Excel 导出</li>
  *     <li>{@link OrderDeliverySupport}：整单/拆包发货、物流跟踪与批量发货导入导出</li>
  *     <li>{@link OrderVerificationSupport}：自提与虚拟商品核销、预览与台账分页</li>
  *     <li>{@link OrderPintuanSupport}：拼团聚合判定、模拟成团调度与成团/失败流转</li>
- *     <li>{@link OrderStatusSupport}：支付流水记账、买家与系统关单退款分摊及状态 MQ 广播</li>
+ *     <li>{@link OrderStatusSupport}：通用订单状态流转及状态 MQ 广播</li>
+ *     <li>{@link OrderPaymentSupport}：支付记账与关单退款分摊</li>
+ *     <li>{@link OrderLifecycleSupport}：通用订单完成、系统关单及对应操作日志</li>
+ *     <li>{@link AppointmentCheckoutSupport}：预约支付后履约，避免依赖完整预约服务</li>
+ *     <li>{@link ECouponFulfillmentService}：普通购买、满赠与拼团电子卡券的履约编排</li>
+ *     <li>{@link ECouponOrderLifecycleSupport}：电子卡券完成、取消及收尾，统一记录对应操作日志</li>
  * </ul>
  *
  * @author Chopper
@@ -68,6 +70,18 @@ import java.util.Map;
 @Service
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
+
+    @Autowired
+    private ECouponFulfillmentService eCouponFulfillmentService;
+
+    @Autowired
+    private ECouponOrderLifecycleSupport eCouponOrderLifecycleSupport;
+
+    @Autowired
+    private OrderLifecycleSupport orderLifecycleSupport;
+
+    @Autowired
+    private AppointmentCheckoutSupport appointmentCheckoutSupport;
 
     @Autowired
     private PickupCardOrderService pickupCardOrderService;
@@ -98,12 +112,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private GiftCardCashService giftCardCashService;
     @Autowired
-    private ObjectProvider<CardKeyService> cardKeyServiceProvider;
-    private CardKeyService cardKeyService;
-    @Autowired
-    private ObjectProvider<AppointmentService> appointmentServiceProvider;
-    private AppointmentService appointmentService;
-    @Autowired
     private GoodsSkuService goodsSkuService;
     @Autowired
     private OrderCreateSupport orderCreateSupport;
@@ -119,26 +127,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private OrderStatusSupport orderStatusSupport;
     @Autowired
     private OrderPaymentSupport orderPaymentSupport;
-
-    private CardKeyService getCardKeyService() {
-        if (this.cardKeyService != null) {
-            return this.cardKeyService;
-        }
-        if (this.cardKeyServiceProvider != null) {
-            return this.cardKeyServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(CardKeyService.class);
-    }
-
-    private AppointmentService getAppointmentService() {
-        if (this.appointmentService != null) {
-            return this.appointmentService;
-        }
-        if (this.appointmentServiceProvider != null) {
-            return this.appointmentServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(AppointmentService.class);
-    }
 
     public OrderPaymentSupport getOrderPaymentSupport() {
         if (orderPaymentSupport == null) {
@@ -259,10 +247,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public void systemCancel(String orderSn, String reason, Boolean refundMoney) {
-        getOrderStatusSupport().systemCancel(orderSn, reason, refundMoney, this);
+        orderLifecycleSupport.systemCancel(orderSn, reason, refundMoney);
     }
 
     @SuppressWarnings("unused")
@@ -303,20 +290,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
             String parentOrderSn = cn.hutool.core.text.CharSequenceUtil.isEmpty(order.getParentOrderSn()) ? orderSn : order.getParentOrderSn();
             if (cn.lili.modules.order.order.entity.enums.OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
-                    && getCardKeyService().isECouponFulfillmentEligible(order)) {
-                getCardKeyService().reserveByOrder(orderSn);
+                    && CardKeyTradeSupport.isECouponFulfillmentEligible(order)) {
+                eCouponFulfillmentService.reserveByOrder(orderSn);
             }
             this.checkPintuanOrder(order.getPromotionId(), parentOrderSn);
             return;
         }
         if (cn.lili.modules.order.order.entity.enums.OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-            if (getCardKeyService().isECouponFulfillmentEligible(order)) {
-                getCardKeyService().fulfillAfterPayment(orderSn);
+            if (CardKeyTradeSupport.isECouponFulfillmentEligible(order)) {
+                eCouponFulfillmentService.fulfillAfterPayment(orderSn);
             }
             return;
         }
         if (cn.lili.modules.order.order.entity.enums.OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
-            getAppointmentService().fulfillAfterPayment(orderSn);
+            appointmentCheckoutSupport.fulfillAfterPayment(orderSn);
             return;
         }
         if (cn.lili.modules.order.order.entity.enums.OrderTypeEnum.NORMAL.name().equals(order.getOrderType())) {
@@ -395,38 +382,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public void complete(String orderSn) {
-        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        complete(order, orderSn);
+        orderLifecycleSupport.complete(orderSn);
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public void systemComplete(String orderSn) {
-        Order order = this.getBySn(orderSn);
-        complete(order, orderSn);
+        orderLifecycleSupport.systemComplete(orderSn);
     }
 
     @Override
-    @OrderLogPoint(description = "'电子卡券订单['+#orderSn+']系统完成'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public boolean systemCompleteECoupon(String orderSn) {
-        return getOrderStatusSupport().systemCompleteECoupon(orderSn, this);
+        return eCouponOrderLifecycleSupport.complete(orderSn);
     }
 
     @Override
-    @OrderLogPoint(description = "'电子卡券订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public boolean systemCancelECoupon(String orderSn, String reason, Boolean refundMoney) {
-        return getOrderStatusSupport().systemCancelECoupon(orderSn, reason, refundMoney, this);
+        return eCouponOrderLifecycleSupport.cancel(orderSn, reason, refundMoney);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void complete(Order order, String orderSn) {
-        getOrderStatusSupport().complete(order, orderSn, this);
+        getOrderStatusSupport().complete(order, orderSn);
     }
 
     @Override

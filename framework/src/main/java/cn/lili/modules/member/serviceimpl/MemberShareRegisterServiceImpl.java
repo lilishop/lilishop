@@ -18,6 +18,7 @@ import cn.lili.modules.member.mapper.MemberShareCodeMapper;
 import cn.lili.modules.member.mapper.MemberShareRegisterLogMapper;
 import cn.lili.modules.member.service.MemberExperienceService;
 import cn.lili.modules.member.service.MemberShareRegisterService;
+import cn.lili.modules.member.support.MemberShareSourceSupport;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -33,6 +34,9 @@ import java.util.Date;
  */
 @Service
 public class MemberShareRegisterServiceImpl implements MemberShareRegisterService {
+
+    @Autowired
+    private MemberShareSourceSupport memberShareSourceSupport;
 
     private static final String OPEN_STATE = "OPEN";
     private static final String SUCCESS_STATUS = "SUCCESS";
@@ -71,18 +75,7 @@ public class MemberShareRegisterServiceImpl implements MemberShareRegisterServic
 
     @Override
     public void bindRegisterSource(String inviteeId, String shareCode) {
-        if (CharSequenceUtil.isBlank(inviteeId) || CharSequenceUtil.isBlank(shareCode)) {
-            return;
-        }
-        MemberShareCode memberShareCode = memberShareCodeMapper.findByShareCode(shareCode);
-        if (memberShareCode == null || CharSequenceUtil.isBlank(memberShareCode.getMemberId())) {
-            return;
-        }
-        if (CharSequenceUtil.equals(inviteeId, memberShareCode.getMemberId())) {
-            return;
-        }
-        cache.put(CachePrefix.INVITER.getPrefix() + inviteeId, memberShareCode.getMemberId());
-        cache.put(CachePrefix.INVITER_SHARE_CODE.getPrefix() + inviteeId, shareCode);
+        memberShareSourceSupport.bindRegisterSource(inviteeId, shareCode);
     }
 
     @Override

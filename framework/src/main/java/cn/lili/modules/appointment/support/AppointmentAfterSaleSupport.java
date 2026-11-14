@@ -29,7 +29,7 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.enums.RefundStatusEnum;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.support.OrderLifecycleSupport;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.Payment;
@@ -67,7 +67,7 @@ public class AppointmentAfterSaleSupport {
     private OrderMapper orderMapper;
 
     @Autowired
-    private OrderService orderService;
+    private OrderLifecycleSupport orderLifecycleSupport;
 
     @Autowired
     private OrderItemService orderItemService;
@@ -129,7 +129,7 @@ public class AppointmentAfterSaleSupport {
      * @return 是否允许发起
      */
     public boolean canApplyBuyerAfterSale(String orderSn) {
-        Order order = orderService.getBySn(orderSn);
+        Order order = getOrderBySn(orderSn);
         if (!isAppointmentOrder(order) || !PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
             return false;
         }
@@ -146,7 +146,7 @@ public class AppointmentAfterSaleSupport {
      * @return 剩余可退金额
      */
     public double getRemainingRefundableAmount(String orderSn) {
-        Order order = orderService.getBySn(orderSn);
+        Order order = getOrderBySn(orderSn);
         if (order == null) {
             return 0D;
         }
@@ -290,7 +290,7 @@ public class AppointmentAfterSaleSupport {
             if (isServiceComplete(ext.getOrderSn())) {
                 continue;
             }
-            Order order = orderService.getBySn(ext.getOrderSn());
+            Order order = getOrderBySn(ext.getOrderSn());
             if (order == null || !PayStatusEnum.PAID.name().equals(order.getPayStatus())
                     || OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
                 continue;
@@ -315,7 +315,7 @@ public class AppointmentAfterSaleSupport {
      * @param orderSn 订单编号
      */
     public void notifyBookingSuccess(String orderSn) {
-        Order order = orderService.getBySn(orderSn);
+        Order order = getOrderBySn(orderSn);
         if (order == null) {
             return;
         }
@@ -349,9 +349,9 @@ public class AppointmentAfterSaleSupport {
         workOrder.setServiceStatus(AppointmentWorkOrderStatusEnum.NO_SHOW.name());
         workOrderMapper.updateById(workOrder);
         appointmentVerificationSupport.voidVerificationCodes(workOrder.getOrderSn());
-        Order order = orderService.getBySn(workOrder.getOrderSn());
+        Order order = getOrderBySn(workOrder.getOrderSn());
         if (order != null && !OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
-            orderService.systemComplete(workOrder.getOrderSn());
+            orderLifecycleSupport.systemComplete(workOrder.getOrderSn());
         }
     }
 
@@ -359,7 +359,7 @@ public class AppointmentAfterSaleSupport {
      * 确保为已付款预约订单
      */
     public Order requirePaidAppointmentOrder(String orderSn) {
-        Order order = orderService.getBySn(orderSn);
+        Order order = getOrderBySn(orderSn);
         if (!isAppointmentOrder(order)) {
             throw new ServiceException(ResultCode.APPOINTMENT_ORDER_NOT_FOUND);
         }
@@ -424,5 +424,15 @@ public class AppointmentAfterSaleSupport {
     public String getGoodsName(String orderSn) {
         List<OrderItem> items = orderItemService.getByOrderSn(orderSn);
         return CollUtil.isEmpty(items) ? "" : items.get(0).getGoodsName();
+    }
+
+    /**
+     * 按订单号读取预约业务所需的订单数据，避免为简单读取引入完整订单服务。
+     *
+     * @param orderSn 订单编号
+     * @return 订单，不存在时为null
+     */
+    private Order getOrderBySn(String orderSn) {
+        return orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
     }
 }

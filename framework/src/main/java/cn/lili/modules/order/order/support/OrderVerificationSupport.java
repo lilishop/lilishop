@@ -5,11 +5,10 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.appointment.entity.dos.AppointmentVerificationCode;
 import cn.lili.modules.appointment.entity.enums.AppointmentVerificationCodeStatusEnum;
 import cn.lili.modules.appointment.entity.vo.AppointmentVerificationResultVO;
-import cn.lili.modules.appointment.service.AppointmentService;
+import cn.lili.modules.appointment.support.AppointmentVerificationSupport;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderVerificationRecordSearchParams;
@@ -24,8 +23,6 @@ import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -45,43 +42,23 @@ import java.util.stream.Collectors;
 @Component
 public class OrderVerificationSupport {
 
-    @Autowired
-    private OrderItemService orderItemService;
-
-    @Autowired
-    private OrderPickupSupport orderPickupSupport;
-
-    @Autowired
-    private ObjectProvider<AppointmentService> appointmentServiceProvider;
-
-    private AppointmentService appointmentService;
-
-    public OrderVerificationSupport() {
-    }
+    private final OrderItemService orderItemService;
+    private final OrderPickupSupport orderPickupSupport;
+    private final AppointmentVerificationSupport appointmentVerificationSupport;
 
     /**
      * 注入订单明细、预约协作和带事务及日志代理的提货组件。
      *
      * @param orderItemService 订单明细查询
-     * @param appointmentService 预约核销协作
+     * @param appointmentVerificationSupport 预约核销组件，不经过完整预约服务
      * @param orderPickupSupport 自提及虚拟订单核销组件
      */
     public OrderVerificationSupport(OrderItemService orderItemService,
-                                   AppointmentService appointmentService,
+                                   AppointmentVerificationSupport appointmentVerificationSupport,
                                    OrderPickupSupport orderPickupSupport) {
         this.orderItemService = orderItemService;
-        this.appointmentService = appointmentService;
+        this.appointmentVerificationSupport = appointmentVerificationSupport;
         this.orderPickupSupport = orderPickupSupport;
-    }
-
-    private AppointmentService getAppointmentService() {
-        if (this.appointmentService != null) {
-            return this.appointmentService;
-        }
-        if (this.appointmentServiceProvider != null) {
-            return this.appointmentServiceProvider.getIfAvailable();
-        }
-        return SpringContextUtil.getBean(AppointmentService.class);
     }
 
     /**
@@ -140,9 +117,8 @@ public class OrderVerificationSupport {
         String verificationCode = code.trim();
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         String userId = UserContext.getCurrentUser().getId();
-        AppointmentService appService = getAppointmentService();
-        if (appService != null && appService.hasVerificationCode(storeId, verificationCode)) {
-            AppointmentVerificationResultVO result = appService.verifyCodeByOperator(storeId, userId, verificationCode);
+        if (appointmentVerificationSupport.hasVerificationCode(storeId, verificationCode)) {
+            AppointmentVerificationResultVO result = appointmentVerificationSupport.verifyCodeByOperator(storeId, userId, verificationCode);
             if (Boolean.TRUE.equals(result.getAllVerified())) {
                 return Boolean.TRUE.equals(result.getOrderCompleted())
                         ? "核销全部完成，订单已完结"
@@ -178,8 +154,7 @@ public class OrderVerificationSupport {
         }
         String verificationCode = code.trim();
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        AppointmentService appService = getAppointmentService();
-        AppointmentVerificationCode appointmentCode = appService != null ? appService.findVerificationCode(storeId, verificationCode) : null;
+        AppointmentVerificationCode appointmentCode = appointmentVerificationSupport.findVerificationCode(storeId, verificationCode);
         if (appointmentCode != null) {
             if (!AppointmentVerificationCodeStatusEnum.UNUSED.name().equals(appointmentCode.getStatus())) {
                 throw new ServiceException(ResultCode.APPOINTMENT_CODE_ALREADY_USED);
