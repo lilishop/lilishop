@@ -2,7 +2,7 @@ package cn.lili.modules.member.support;
 
 import cn.lili.cache.Cache;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
-import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.connect.support.ConnectBindingSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,15 +23,18 @@ import static org.mockito.Mockito.mock;
  */
 class MemberConnectSupportTest {
 
-    private ConnectService connectService;
+    private ConnectBindingSupport connectBindings;
     private Cache cache;
     private MemberConnectSupport connectSupport;
 
+    /**
+     * 按当前构造器注入联合登录绑定组件及其他模拟依赖。
+     */
     @BeforeEach
     void setUp() {
-        connectService = mock(ConnectService.class);
+        connectBindings = mock(ConnectBindingSupport.class);
         cache = mock(Cache.class);
-        connectSupport = new MemberConnectSupport(connectService, cache);
+        connectSupport = new MemberConnectSupport(connectBindings, cache);
     }
 
     @Test

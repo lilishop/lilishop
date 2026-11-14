@@ -5,7 +5,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.support.LoginFailLimitSupport;
-import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.connect.support.ConnectBindingSupport;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
@@ -32,18 +32,21 @@ class MemberSecuritySupportTest {
 
     private Cache cache;
     private LoginFailLimitSupport loginFailLimitSupport;
-    private ConnectService connectService;
+    private ConnectBindingSupport connectBindings;
     private MemberService memberService;
     private MemberSecuritySupport securitySupport;
     private MockedStatic<UserContext> userContextMockedStatic;
 
+    /**
+     * 按当前构造器注入联合登录绑定组件及其他模拟依赖。
+     */
     @BeforeEach
     void setUp() {
         cache = mock(Cache.class);
         loginFailLimitSupport = mock(LoginFailLimitSupport.class);
-        connectService = mock(ConnectService.class);
+        connectBindings = mock(ConnectBindingSupport.class);
         memberService = mock(MemberService.class);
-        securitySupport = new MemberSecuritySupport(cache, loginFailLimitSupport, connectService);
+        securitySupport = new MemberSecuritySupport(cache, loginFailLimitSupport, connectBindings);
         userContextMockedStatic = Mockito.mockStatic(UserContext.class);
     }
 

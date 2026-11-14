@@ -1,12 +1,15 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.lili.modules.goods.service.CardKeyService;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.mapper.PintuanMapper;
 import cn.lili.modules.order.order.support.OrderPintuanSupport;
+import cn.lili.modules.order.order.support.ECouponOrderLifecycleSupport;
+import cn.lili.modules.order.order.support.OrderStatusSupport;
+import cn.lili.trigger.interfaces.TimeTrigger;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +34,8 @@ import static org.mockito.Mockito.when;
 class OrderServiceImplPintuanECouponTest {
 
     private OrderServiceImpl orderService;
-    private CardKeyService cardKeyService;
+    private ECouponFulfillmentService eCouponFulfillmentService;
+    private ECouponOrderLifecycleSupport eCouponOrderLifecycleSupport;
     private PintuanMapper pintuanMapper;
 
     /**
@@ -41,11 +45,12 @@ class OrderServiceImplPintuanECouponTest {
     void setUp() {
         orderService = spy(new OrderServiceImpl());
         ReflectionTestUtils.setField(orderService, "pickupCardOrderService", org.mockito.Mockito.mock(cn.lili.modules.promotion.service.PickupCardOrderService.class));
-        cardKeyService = mock(CardKeyService.class);
+        eCouponFulfillmentService = mock(ECouponFulfillmentService.class);
+        eCouponOrderLifecycleSupport = mock(ECouponOrderLifecycleSupport.class);
         pintuanMapper = mock(PintuanMapper.class);
-        ReflectionTestUtils.setField(orderService, "cardKeyService", cardKeyService);
         ReflectionTestUtils.setField(orderService, "orderPintuanSupport",
-                new OrderPintuanSupport(pintuanMapper, null, null, cardKeyService, null));
+                new OrderPintuanSupport(pintuanMapper, mock(TimeTrigger.class), mock(RocketmqCustomProperties.class),
+                        eCouponFulfillmentService, eCouponOrderLifecycleSupport, mock(OrderStatusSupport.class)));
     }
 
     /**
@@ -59,7 +64,7 @@ class OrderServiceImplPintuanECouponTest {
 
         orderService.pintuanOrderSuccess(List.of(order));
 
-        verify(cardKeyService).confirmReservationAndComplete("PT-E001");
+        verify(eCouponFulfillmentService).confirmReservationAndComplete("PT-E001");
     }
 
     /**
@@ -74,13 +79,13 @@ class OrderServiceImplPintuanECouponTest {
 
         Order order = pintuanECouponOrder("PT-F001", "PT-PARENT");
         doReturn(List.of(order)).when(orderService).list(any(LambdaQueryWrapper.class));
-        doReturn(true).when(orderService).systemCancelECoupon(
+        doReturn(true).when(eCouponOrderLifecycleSupport).cancel(
                 eq("PT-F001"), eq("拼团人数不足，拼团失败！"), eq(true));
 
         orderService.agglomeratePintuanOrder("p1", "PT-PARENT");
 
-        verify(cardKeyService).releaseReservation("PT-F001");
-        verify(orderService).systemCancelECoupon("PT-F001", "拼团人数不足，拼团失败！", true);
+        verify(eCouponFulfillmentService).releaseReservation("PT-F001");
+        verify(eCouponOrderLifecycleSupport).cancel("PT-F001", "拼团人数不足，拼团失败！", true);
     }
 
     /**

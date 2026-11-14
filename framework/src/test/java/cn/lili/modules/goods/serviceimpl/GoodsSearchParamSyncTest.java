@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -30,7 +32,7 @@ class GoodsSearchParamSyncTest {
      */
     @Test
     void syncByGoodsIdDeletesThenInsertsParsedIndexedRows() {
-        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());
+        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl(mock(PlatformTransactionManager.class)));
         doReturn(true).when(service).remove(any(Wrapper.class));
         doReturn(true).when(service).saveBatch(anyCollection());
 
@@ -57,7 +59,7 @@ class GoodsSearchParamSyncTest {
      */
     @Test
     void syncByGoodsIdOnlyDeletesWhenParseResultIsEmpty() {
-        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());
+        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl(mock(PlatformTransactionManager.class)));
         doReturn(true).when(service).remove(any(Wrapper.class));
 
         service.syncByGoodsId("goods-empty", "[]");
@@ -71,7 +73,7 @@ class GoodsSearchParamSyncTest {
      */
     @Test
     void syncByGoodsIdOnlyDeletesWhenIndexedFilterDropsAll() {
-        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());
+        GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl(mock(PlatformTransactionManager.class)));
         doReturn(true).when(service).remove(any(Wrapper.class));
 
         String json = """

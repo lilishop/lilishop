@@ -5,7 +5,6 @@ import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSearchParam;
 import cn.lili.modules.goods.entity.dto.RebuildStatus;
 import cn.lili.modules.goods.mapper.GoodsMapper;
-import cn.lili.modules.goods.service.GoodsSearchParamService;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -19,6 +18,8 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -57,7 +59,6 @@ class GoodsSearchParamRebuildTest {
     private RLock lock;
     private Cache<RebuildStatus> cache;
     private ThreadPoolTaskExecutor rebuildExecutor;
-    private GoodsSearchParamService self;
 
     /**
      * 初始化商品参数重建所需的实体表元数据。
@@ -74,19 +75,19 @@ class GoodsSearchParamRebuildTest {
      */
     @BeforeEach
     void setUp() {
-        service = spy(new GoodsSearchParamServiceImpl());
+        PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        service = spy(new GoodsSearchParamServiceImpl(transactionManager));
         goodsMapper = mock(GoodsMapper.class);
         redissonClient = mock(RedissonClient.class);
         lock = mock(RLock.class);
         cache = mock(Cache.class);
         rebuildExecutor = mock(ThreadPoolTaskExecutor.class);
-        self = mock(GoodsSearchParamService.class);
 
         ReflectionTestUtils.setField(service, "goodsMapper", goodsMapper);
         ReflectionTestUtils.setField(service, "redissonClient", redissonClient);
         ReflectionTestUtils.setField(service, "cache", cache);
         ReflectionTestUtils.setField(service, "rebuildExecutor", rebuildExecutor);
-        ReflectionTestUtils.setField(service, "self", self);
 
         when(redissonClient.getLock(REBUILD_LOCK_KEY)).thenReturn(lock);
     }
@@ -171,7 +172,7 @@ class GoodsSearchParamRebuildTest {
 
         ReflectionTestUtils.invokeMethod(service, "runRebuildAllWorker");
 
-        verify(self, never()).rebuildByGoodsId(any());
+        verify(service, never()).rebuildByGoodsId(any());
         verify(lock, never()).unlock();
         ArgumentCaptor<RebuildStatus> statusCaptor = ArgumentCaptor.forClass(RebuildStatus.class);
         verify(cache).put(eq(REBUILD_STATUS_KEY), statusCaptor.capture(), eq(REBUILD_STATUS_TTL_SECONDS));
@@ -187,8 +188,8 @@ class GoodsSearchParamRebuildTest {
     void workerRebuildsByIdCursorAndRecordsIllegalJsonAsFailed() throws InterruptedException {
         when(lock.tryLock(0, -1, TimeUnit.SECONDS)).thenReturn(true);
         when(lock.isHeldByCurrentThread()).thenReturn(true);
-        when(self.rebuildByGoodsId("g1")).thenReturn(2);
-        when(self.rebuildByGoodsId("g2")).thenThrow(new IllegalStateException("illegal goods params json, goodsId=g2"));
+        doReturn(2).when(service).rebuildByGoodsId("g1");
+        doThrow(new IllegalStateException("illegal goods params json, goodsId=g2")).when(service).rebuildByGoodsId("g2");
 
         AtomicInteger calls = new AtomicInteger();
         List<QueryWrapper<Goods>> wrappers = new ArrayList<>();
@@ -213,8 +214,8 @@ class GoodsSearchParamRebuildTest {
         assertThat(REBUILD_BATCH_SIZE).isEqualTo(500);
         assertThat(wrappers.get(1).getSqlSegment()).contains("id");
 
-        verify(self).rebuildByGoodsId("g1");
-        verify(self).rebuildByGoodsId("g2");
+        verify(service).rebuildByGoodsId("g1");
+        verify(service).rebuildByGoodsId("g2");
         verify(lock).unlock();
 
         ArgumentCaptor<RebuildStatus> statusCaptor = ArgumentCaptor.forClass(RebuildStatus.class);
@@ -282,7 +283,7 @@ class GoodsSearchParamRebuildTest {
     void eachProgressWriteResetsTtl() throws InterruptedException {
         when(lock.tryLock(0, -1, TimeUnit.SECONDS)).thenReturn(true);
         when(lock.isHeldByCurrentThread()).thenReturn(true);
-        when(self.rebuildByGoodsId("g1")).thenReturn(1);
+        doReturn(1).when(service).rebuildByGoodsId("g1");
         when(goodsMapper.selectList(any())).thenReturn(List.of(goods("g1")), List.of());
 
         ReflectionTestUtils.invokeMethod(service, "runRebuildAllWorker");

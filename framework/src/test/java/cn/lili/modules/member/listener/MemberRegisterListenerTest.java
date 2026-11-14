@@ -2,11 +2,10 @@ package cn.lili.modules.member.listener;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.event.MemberRegisterEvent;
-import cn.lili.modules.member.service.MemberShareRegisterService;
+import cn.lili.modules.member.support.MemberShareSourceSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -20,17 +19,16 @@ import static org.mockito.Mockito.*;
  */
 class MemberRegisterListenerTest {
 
-    private MemberShareRegisterService memberShareRegisterService;
-    private ObjectProvider<MemberShareRegisterService> provider;
+    private MemberShareSourceSupport memberShareSourceSupport;
     private MemberRegisterListener listener;
 
+    /**
+     * 注入邀请来源组件的模拟对象，按当前必需依赖构造监听器。
+     */
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
-        memberShareRegisterService = mock(MemberShareRegisterService.class);
-        provider = mock(ObjectProvider.class);
-        when(provider.getIfAvailable()).thenReturn(memberShareRegisterService);
-        listener = new MemberRegisterListener(provider);
+        memberShareSourceSupport = mock(MemberShareSourceSupport.class);
+        listener = new MemberRegisterListener(memberShareSourceSupport);
     }
 
     /**
@@ -45,7 +43,7 @@ class MemberRegisterListenerTest {
         Member memberWithoutId = new Member();
         listener.onMemberRegister(new MemberRegisterEvent(this, memberWithoutId, "SHARE123"));
 
-        verifyNoInteractions(memberShareRegisterService);
+        verifyNoInteractions(memberShareSourceSupport);
     }
 
     /**
@@ -60,7 +58,7 @@ class MemberRegisterListenerTest {
         listener.onMemberRegister(new MemberRegisterEvent(this, member, null));
         listener.onMemberRegister(new MemberRegisterEvent(this, member, "   "));
 
-        verifyNoInteractions(memberShareRegisterService);
+        verifyNoInteractions(memberShareSourceSupport);
     }
 
     /**
@@ -74,7 +72,7 @@ class MemberRegisterListenerTest {
 
         listener.onMemberRegister(new MemberRegisterEvent(this, member, "SHARE888"));
 
-        verify(memberShareRegisterService, times(1)).bindRegisterSource("M1001", "SHARE888");
+        verify(memberShareSourceSupport, times(1)).bindRegisterSource("M1001", "SHARE888");
     }
 
     /**
@@ -86,7 +84,7 @@ class MemberRegisterListenerTest {
         Member member = new Member();
         member.setId("M1001");
         doThrow(new RuntimeException("Redis connection failed"))
-                .when(memberShareRegisterService).bindRegisterSource("M1001", "SHARE888");
+                .when(memberShareSourceSupport).bindRegisterSource("M1001", "SHARE888");
 
         assertThatCode(() -> listener.onMemberRegister(new MemberRegisterEvent(this, member, "SHARE888")))
                 .doesNotThrowAnyException();
@@ -98,10 +96,10 @@ class MemberRegisterListenerTest {
     @Test
     @DisplayName("Spring应用上下文中发布注册事件可被监听器正确消费")
     void shouldReceiveEventThroughSpringContext() {
-        MemberShareRegisterService mockService = mock(MemberShareRegisterService.class);
+        MemberShareSourceSupport mockService = mock(MemberShareSourceSupport.class);
 
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
-            context.registerBean(MemberShareRegisterService.class, () -> mockService);
+            context.registerBean(MemberShareSourceSupport.class, () -> mockService);
             context.register(MemberRegisterListener.class);
             context.refresh();
 

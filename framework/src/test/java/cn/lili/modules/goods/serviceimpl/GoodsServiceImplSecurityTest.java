@@ -1,6 +1,8 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.cache.Cache;
+import cn.lili.modules.goods.support.GoodsStoreMarketSupport;
+import cn.lili.modules.goods.support.GoodsSkuStatusSupport;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -106,7 +108,8 @@ class GoodsServiceImplSecurityTest {
         ReflectionTestUtils.setField(goodsService, "goodsVOAssembler",
                 new cn.lili.modules.goods.support.GoodsVOAssembler(goodsMapper, null, skuReads, null, null, (Cache) cache));
         ReflectionTestUtils.setField(goodsService, "goodsMarketAuditManager",
-                new cn.lili.modules.goods.support.GoodsMarketAuditManager(goodsMapper, goodsSkuService,
+                new cn.lili.modules.goods.support.GoodsMarketAuditManager(goodsMapper,
+                        new GoodsStoreMarketSupport(goodsMapper, mock(GoodsSkuStatusSupport.class)), goodsSkuService,
                         (Cache) cache, null, null, null, null));
     }
 
