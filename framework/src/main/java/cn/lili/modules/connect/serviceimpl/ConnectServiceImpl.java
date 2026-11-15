@@ -2,6 +2,7 @@ package cn.lili.modules.connect.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
@@ -154,7 +155,6 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 "js_code=" + code + "&" +
                 "grant_type=authorization_code";
         String content = HttpUtils.doGet(url, "UTF-8", 100, 1000);
-        log.error(content);
         return JSON.parseObject(content);
     }
 
@@ -166,6 +166,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * @param openId     微信openid
      * @param unionId    微信unionid
      * @return token
+     * @throws RuntimeException 授权或登录失败时向外抛出，避免返回空 token 并确保事务回滚
      */
     @Transactional(rollbackFor = Exception.class)
     public Token phoneMpBindAndLogin(String sessionKey, WechatMPLoginParams params, String openId, String unionId) {
@@ -173,7 +174,6 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             String encryptedData = params.getEncryptedData();
             String iv = params.getIv();
             JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
-            log.info("联合登录返回：{}", userInfo.toString());
 
 
             ConnectAuthUser connectAuthUser = new ConnectAuthUser();
@@ -197,8 +197,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             return this.unionLoginCallback(connectAuthUser, true);
         } catch (Exception e) {
             log.error("手机号绑定自动登录异常", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -344,23 +344,22 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
 
     /**
-     * 解密，获取微信信息
+     * 解密，获取微信信息。仅在密文解码边界恢复 XSS 清洗产生的 HTML 实体，
+     * 恢复后立即执行严格 Base64 解码，不将反转义后的内容用于 HTML 展示。
      *
      * @param encryptedData 加密信息
      * @param sessionKey    微信sessionKey
-     * @param iv            微信揭秘参数
+     * @param iv            微信解密向量
      * @return 用户信息
+     * @throws ServiceException 参数编码非法或解密失败
      */
     public JSONObject getUserInfo(String encryptedData, String sessionKey, String iv) {
 
-        log.info("encryptedData:{},sessionKey:{},iv:{}", encryptedData, sessionKey, iv);
-        //被加密的数据
-        byte[] dataByte = Base64.getDecoder().decode(encryptedData);
-        //加密秘钥
-        byte[] keyByte = Base64.getDecoder().decode(sessionKey);
-        //偏移量
-        byte[] ivByte = Base64.getDecoder().decode(iv);
         try {
+            // 客户端参数经过 XSS 清洗；服务端取得的 sessionKey 保持原样，禁止记录密钥和手机号明文。
+            byte[] dataByte = Base64.getDecoder().decode(HtmlUtil.unescape(encryptedData));
+            byte[] keyByte = Base64.getDecoder().decode(sessionKey);
+            byte[] ivByte = Base64.getDecoder().decode(HtmlUtil.unescape(iv));
             //如果密钥不足16位，那么就补足.  这个if 中的内容很重要
             int base = 16;
             if (keyByte.length % base != 0) {
