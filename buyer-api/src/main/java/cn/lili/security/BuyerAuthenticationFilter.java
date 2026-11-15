@@ -43,6 +43,8 @@ import java.util.List;
 @Slf4j
 public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
 
+    private static final org.springframework.util.AntPathMatcher PUBLIC_PATH_MATCHER = new org.springframework.util.AntPathMatcher();
+
     private final Cache cache;
 
     private final IgnoredUrlsProperties ignoredUrlsProperties;
@@ -65,6 +67,13 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
+        // 礼包GET详情允许游客及失效Token浏览；仅匹配单个ID，领取接口仍进入认证流程。
+        if ("GET".equals(request.getMethod())
+                && PUBLIC_PATH_MATCHER.match(BuyerSecurityConfig.COUPON_PACKAGE_DETAIL_PATH, request.getRequestURI())) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // 忽略无需鉴权的路径，直接放行（与管理端保持一致）
         String requestUri = request.getRequestURI();

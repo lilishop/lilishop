@@ -76,7 +76,7 @@ public class CouponActivityManagerController {
 
 
 
-    @Operation(description = "获取优惠券礼包H5推广二维码及访问路径")
+    @Operation(description = "获取优惠券礼包H5二维码、链接及微信小程序葵花码")
     @Parameter(name = "id", description = "优惠券活动ID", required = true)
     @Parameter(name = "h5BaseUrl", description = "H5基础站点域名(可选)")
     @GetMapping("/package/qrcode/{id}")

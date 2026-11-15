@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,6 +26,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @RequiredArgsConstructor
 public class BuyerSecurityConfig {
 
+    // 仅公开单个礼包的GET详情；领取路径多一层receive，仍须登录。
+    static final String COUPON_PACKAGE_DETAIL_PATH = "/buyer/promotion/coupon/package/{id}";
+
     private final IgnoredUrlsProperties ignoredUrlsProperties;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final Cache<String> cache;
@@ -42,6 +46,7 @@ public class BuyerSecurityConfig {
         String[] ignored = ignoredUrlsProperties.getUrls().toArray(new String[0]);
         http.securityMatcher("/buyer/**")
             .authorizeHttpRequests(a -> a
+                .requestMatchers(HttpMethod.GET, COUPON_PACKAGE_DETAIL_PATH).permitAll()
                 .requestMatchers(ignored).permitAll()
                 .anyRequest().authenticated())
             .headers(h -> h.frameOptions(f -> f.disable()))

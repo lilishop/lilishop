@@ -2,6 +2,8 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.core.img.ImgUtil;
+import cn.lili.modules.wechat.util.WechatMpCodeUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -53,6 +55,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
 
 /**
  * 优惠券活动业务层实现
@@ -79,6 +84,9 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
     private MemberService memberService;
     @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private WechatMpCodeUtil wechatMpCodeUtil;
 
 
     @Autowired
@@ -577,17 +585,17 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
     }
 
     /**
-     * 获取优惠券礼包的H5推广二维码及访问路径
-     * 根据H5前缀及券包ID生成标准QR Code，无需等待微信小程序审核即可快速在H5环境真机实测
+     * 获取券礼包H5二维码及微信小程序葵花码。
+     * 葵花码复用短链接保存礼包参数，微信调用或图片校验失败时仍返回H5二维码及失败提示。
      *
      * @param couponActivityId 优惠券活动ID
      * @param h5BaseUrl        H5基础域名链接
-     * @return 二维码Base64及落地页链接VO
+     * @return 图片Data URI、落地页链接及小程序码生成结果
      */
     @Override
     public CouponPackageQrCodeVO getCouponPackageQrCode(String couponActivityId, String h5BaseUrl) {
         CouponActivity couponActivity = this.getById(couponActivityId);
-        if (couponActivity == null) {
+        if (couponActivity == null || !CouponActivityTypeEnum.COUPON_PACKAGE.name().equals(couponActivity.getCouponActivityType())) {
             throw new ServiceException(ResultCode.PROMOTION_ACTIVITY_ERROR);
         }
 
@@ -612,12 +620,26 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         }
 
         String h5Url = h5BaseUrl + "/pages/promotion/coupon-pack?id=" + couponActivityId;
+        // Hutool 已返回完整的图片 Data URI，不能再次拼接前缀，否则浏览器无法解码。
         String qrCodeBase64 = QrCodeUtil.generateAsBase64(h5Url, new QrConfig(300, 300), "png");
 
-        return CouponPackageQrCodeVO.builder()
+        CouponPackageQrCodeVO result = CouponPackageQrCodeVO.builder()
                 .activityId(couponActivityId)
                 .h5Url(h5Url)
-                .qrCodeBase64("data:image/png;base64," + qrCodeBase64)
+                .qrCodeBase64(qrCodeBase64)
                 .build();
+        try {
+            String code = wechatMpCodeUtil.createCode("pages/promotion/coupon-pack", "pack_" + couponActivityId);
+            // 微信可能返回错误JSON的Base64；确认是可读取图片后再转换为浏览器可用的PNG Data URI。
+            var image = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(code)));
+            if (image == null) {
+                throw new ServiceException(ResultCode.WECHAT_QRCODE_ERROR);
+            }
+            result.setMiniProgramCodeBase64(ImgUtil.toBase64DataUri(image, "png"));
+        } catch (Exception e) {
+            log.warn("券礼包小程序码生成失败，活动ID：{}", couponActivityId);
+            result.setMiniProgramCodeError("葵花码生成失败，请检查微信小程序配置及已发布的礼包页面后重试");
+        }
+        return result;
     }
 }

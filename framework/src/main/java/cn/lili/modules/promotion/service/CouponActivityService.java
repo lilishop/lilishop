@@ -78,7 +78,7 @@ public interface CouponActivityService extends AbstractPromotionsService<CouponA
     List<MemberCoupon> receiveCouponPackage(String couponActivityId);
 
     /**
-     * 获取优惠券礼包的H5推广二维码及访问路径
+     * 获取优惠券礼包H5推广二维码、链接及微信小程序葵花码，微信失败时保留H5结果。
      *
      * @param couponActivityId 优惠券活动ID
      * @param h5BaseUrl H5站点前缀域名（若为空则使用默认配置）
