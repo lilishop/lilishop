@@ -22,6 +22,15 @@ import java.util.List;
 public interface MemberMapper extends BaseMapper<Member> {
 
     /**
+     * 积分变动前读取并锁定会员行，锁随调用方事务释放，避免并发积分变动覆盖余额。
+     *
+     * @param id li_member主键
+     * @return 当前会员，不存在时为null
+     */
+    @Select("SELECT * FROM li_member WHERE id=#{id} AND delete_flag=0 FOR UPDATE")
+    Member lockPointMember(@Param("id") String id);
+
+    /**
      * 分页查询客户信息，关联钱包余额和等级名称，缺少钱包时余额按 0 返回。
      *
      * @param page 分页参数

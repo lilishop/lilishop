@@ -383,7 +383,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @PointLogPoint
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateMemberPoint(Long point, String type, String memberId, String content, String pointSource) {
-        Member member = this.getById(memberId);
+        // 积分变动复用抽奖事务持有的会员行锁，避免并发增减覆盖余额。
+        Member member = this.baseMapper.lockPointMember(memberId);
         if (member != null) {
             long currentPoint;
             long totalPoint = member.getTotalPoint();

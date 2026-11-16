@@ -4,6 +4,7 @@ import cn.lili.modules.promotion.entity.dos.Coupon;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 优惠券数据处理层
@@ -12,6 +13,15 @@ import org.apache.ibatis.annotations.Update;
  * @since 2020-08-21 11:46
  */
 public interface CouponMapper extends BaseMapper<Coupon> {
+
+    /**
+     * 在发奖事务内锁定券模板，保护归属、有效期及发行库存的当前读取。
+     *
+     * @param id 券模板ID
+     * @return 未删除的当前券模板
+     */
+    @Select("SELECT * FROM li_coupon WHERE id=#{id} AND delete_flag=0 FOR UPDATE")
+    Coupon lockCoupon(@Param("id") String id);
 
     /**
      * 原子增加已领取数量，带发行量超发保护。

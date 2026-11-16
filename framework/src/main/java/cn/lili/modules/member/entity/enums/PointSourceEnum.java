@@ -17,6 +17,10 @@ public enum PointSourceEnum {
     REFUND_BACK("退款回退"),
     ADMIN("后台调整"),
     ORDER_PAY("订单积分扣减"),
+    /**
+     * 免费抽奖积分奖励；发奖和记录共同提交，失败整体回滚。
+     */
+    LOTTERY("抽奖奖励"),
     UNKNOWN("未知");
 
     private final String description;
